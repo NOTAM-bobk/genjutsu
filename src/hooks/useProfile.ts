@@ -9,6 +9,7 @@ export interface Profile {
   display_name: string;
   bio: string;
   avatar_url: string;
+  banner_url: string;
   created_at: string;
 }
 
@@ -38,7 +39,7 @@ export function useProfile() {
     fetchProfile();
   }, [user]);
 
-  const updateProfile = async (updates: Partial<Pick<Profile, "display_name" | "bio" | "avatar_url">>) => {
+  const updateProfile = async (updates: Partial<Pick<Profile, "display_name" | "bio" | "avatar_url" | "banner_url">>) => {
     if (!user) return { error: "Not authenticated" };
     const { error } = await supabase
       .from("profiles")

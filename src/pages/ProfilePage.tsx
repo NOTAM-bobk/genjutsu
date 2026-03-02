@@ -5,7 +5,7 @@ import { PostWithProfile } from "@/hooks/usePosts";
 import Navbar from "@/components/Navbar";
 import PostCard from "@/components/PostCard";
 import Sidebar from "@/components/Sidebar";
-import { Edit3, Loader2, ArrowLeft, Calendar, Link as LinkIcon, UserPlus, UserCheck, Trash2, LogOut, MoreHorizontal } from "lucide-react";
+import { Edit3, Loader2, ArrowLeft, Calendar, Link as LinkIcon, UserPlus, UserCheck, Trash2, LogOut, MoreHorizontal, ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import EditProfileDialog from "@/components/EditProfileDialog";
 import FollowsList from "@/components/FollowsList";
+import { PostSkeleton } from "@/components/ui/skeleton";
 import {
     Dialog,
     DialogContent,
@@ -28,6 +29,7 @@ interface ProfileData {
     display_name: string;
     bio: string;
     avatar_url: string;
+    banner_url: string;
     created_at: string;
 }
 
@@ -66,7 +68,7 @@ const ProfilePage = () => {
             const { data: postsData } = await supabase
                 .from("posts")
                 .select(`
-                  id, content, code, tags, created_at, user_id,
+                  id, content, code, media_url, tags, created_at, user_id,
                   profiles ( username, display_name, avatar_url )
                 `)
                 .gt("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
@@ -190,11 +192,20 @@ const ProfilePage = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background">
+            <div className="min-h-screen bg-background text-foreground">
                 <Navbar />
-                <div className="flex justify-center py-20">
-                    <Loader2 className="animate-spin" size={32} />
-                </div>
+                <main className="max-w-6xl mx-auto px-4 py-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
+                        <div className="space-y-6">
+                            <PostSkeleton />
+                            <PostSkeleton />
+                            <PostSkeleton />
+                        </div>
+                        <div className="hidden lg:block">
+                            <Sidebar />
+                        </div>
+                    </div>
+                </main>
             </div>
         );
     }
@@ -226,7 +237,20 @@ const ProfilePage = () => {
                             Back to Home
                         </Link>
                         <div className="gum-card overflow-hidden mb-8">
-                            <div className="h-32 bg-secondary" />
+                            <div className="h-48 bg-secondary relative overflow-hidden flex items-center justify-center">
+                                {profile.banner_url ? (
+                                    <img
+                                        src={profile.banner_url}
+                                        alt="Banner"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex flex-col items-center gap-2 opacity-20">
+                                        <ImageIcon size={48} />
+                                        <span className="text-xs font-bold uppercase tracking-widest">Genjutsu Illusion</span>
+                                    </div>
+                                )}
+                            </div>
                             <div className="px-6 pb-6 relative">
                                 <div className="absolute -top-12 left-6">
                                     <Dialog>
@@ -261,7 +285,8 @@ const ProfilePage = () => {
                                             currentProfile={{
                                                 display_name: profile.display_name,
                                                 bio: profile.bio,
-                                                avatar_url: profile.avatar_url
+                                                avatar_url: profile.avatar_url,
+                                                banner_url: profile.banner_url
                                             }}
                                             onUpdate={fetchData}
                                         />

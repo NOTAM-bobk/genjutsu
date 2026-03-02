@@ -108,6 +108,17 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
 
           <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
 
+          {post.media_url && (
+            <div className="mt-3 rounded-lg gum-border overflow-hidden bg-muted">
+              <img
+                src={post.media_url}
+                alt="Post content"
+                className="w-full h-auto max-h-[500px] object-contain mx-auto"
+                loading="lazy"
+              />
+            </div>
+          )}
+
           {post.code && (
             <div className="mt-3 gum-border rounded-lg bg-muted p-4 overflow-x-auto">
               <pre className="text-xs font-mono text-foreground">

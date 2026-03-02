@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { Code, ImageIcon, Smile, Send } from "lucide-react";
-import { motion } from "framer-motion";
+import { useState, useRef } from "react";
+import { Code, ImageIcon, Smile, Send, X, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface ComposePostProps {
-  onPost: (content: string, code: string, tags: string[]) => Promise<{ error: any }>;
+  onPost: (content: string, code: string, tags: string[], media_url?: string) => Promise<void>;
 }
 
 const ComposePost = ({ onPost }: ComposePostProps) => {
@@ -14,6 +15,9 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
   const [showCode, setShowCode] = useState(false);
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { profile } = useProfile();
 
   const extractTags = (text: string): string[] => {
@@ -21,26 +25,65 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
     return matches ? matches.map((t) => t.slice(1).toLowerCase()) : [];
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size must be less than 5MB");
+        return;
+      }
+      setMediaFile(file);
+      setMediaPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadMedia = async (): Promise<string | null> => {
+    if (!mediaFile) return null;
+
+    try {
+      const fileExt = mediaFile.name.split(".").pop();
+      const filePath = `${Math.random()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("post-media")
+        .upload(filePath, mediaFile);
+
+      if (uploadError) {
+        // If bucket doesn't exist, this might fail. We should ideally check first.
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage.from("post-media").getPublicUrl(filePath);
+      return data.publicUrl;
+    } catch (err) {
+      console.error("Upload error:", err);
+      toast.error("Failed to upload image. Make sure 'post-media' bucket exists.");
+      return null;
+    }
+  };
+
   const handleSubmit = async () => {
     if (!content.trim() || submitting) return;
     setSubmitting(true);
 
     try {
+      let mediaUrl = "";
+      if (mediaFile) {
+        const uploadedUrl = await uploadMedia();
+        if (uploadedUrl) mediaUrl = uploadedUrl;
+      }
+
       const tags = extractTags(content);
       const cleanContent = content.replace(/#\w+/g, "").trim();
-      const { error } = await onPost(cleanContent || content, code, tags);
 
-      if (error) {
-        toast.error("Failed to post: " + (error.message || "Unknown error"));
-        return;
-      }
+      await onPost(cleanContent || content, code, tags, mediaUrl);
 
       setContent("");
       setCode("");
       setShowCode(false);
-      toast.success("Post shared!");
+      setMediaFile(null);
+      setMediaPreview(null);
     } catch (err: any) {
-      toast.error("Something went wrong");
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -66,7 +109,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
             <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
           ) : initials}
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -75,13 +118,32 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
             rows={2}
           />
 
+          <AnimatePresence>
+            {mediaPreview && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="relative mt-3 rounded-lg gum-border overflow-hidden max-h-[300px]"
+              >
+                <img src={mediaPreview} alt="Preview" className="w-full h-full object-cover" />
+                <button
+                  onClick={() => { setMediaFile(null); setMediaPreview(null); }}
+                  className="absolute top-2 right-2 p-1 bg-background/80 hover:bg-background rounded-full gum-border transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {showCode && (
             <div className="mt-3">
               <textarea
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="// Paste your code here..."
-                className="w-full bg-muted text-foreground font-mono text-xs p-3 rounded-lg gum-border resize-none outline-none min-h-[80px]"
+                className="w-full bg-muted text-foreground font-mono text-xs p-3 rounded-lg gum-border resize-none outline-none min-h-[120px]"
                 rows={4}
               />
             </div>
@@ -89,10 +151,25 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
 
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-secondary">
             <div className="flex items-center gap-1">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
+                title="Upload Image"
+              >
+                <ImageIcon size={16} />
+              </button>
               <button
                 onClick={() => setShowCode(!showCode)}
                 className={`p-2 rounded-lg transition-colors ${showCode ? "bg-primary text-primary-foreground" : "hover:bg-secondary text-muted-foreground"
                   }`}
+                title="Add Code"
               >
                 <Code size={16} />
               </button>
@@ -102,7 +179,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
               disabled={!content.trim() || submitting}
               className="gum-btn bg-primary text-primary-foreground text-sm disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              <Send size={14} />
+              {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
               {submitting ? "Posting..." : "Post"}
             </button>
           </div>

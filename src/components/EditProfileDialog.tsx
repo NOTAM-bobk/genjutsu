@@ -18,7 +18,8 @@ interface EditProfileDialogProps {
     currentProfile: {
         display_name: string;
         bio: string;
-        avatar_url: string;
+        avatar_url: string | null;
+        banner_url: string | null;
     };
     onUpdate: () => void;
 }
@@ -27,6 +28,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
     const [displayName, setDisplayName] = useState(currentProfile.display_name);
     const [bio, setBio] = useState(currentProfile.bio || "");
     const [avatarUrl, setAvatarUrl] = useState(currentProfile.avatar_url || "");
+    const [bannerUrl, setBannerUrl] = useState(currentProfile.banner_url || "");
     const [submitting, setSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
 
@@ -48,6 +50,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                     display_name: displayName,
                     bio: bio,
                     avatar_url: avatarUrl,
+                    banner_url: bannerUrl,
                     updated_at: new Date().toISOString(),
                 })
                 .eq("user_id", user.id);
@@ -78,7 +81,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                         <Edit3 size={20} /> Edit Profile
                     </DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                     <div className="space-y-2">
                         <Label htmlFor="displayName" className="font-bold">Display Name</Label>
                         <Input
@@ -95,22 +98,34 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                             id="bio"
                             value={bio}
                             onChange={(e) => setBio(e.target.value)}
-                            className="gum-border focus-visible:ring-primary min-h-[100px]"
+                            className="gum-border focus-visible:ring-primary min-h-[80px]"
                             placeholder="Tell us about yourself..."
                         />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="avatarUrl" className="font-bold">Avatar URL</Label>
-                        <Input
-                            id="avatarUrl"
-                            value={avatarUrl}
-                            onChange={(e) => setAvatarUrl(e.target.value)}
-                            className="gum-border focus-visible:ring-primary"
-                            placeholder="https://example.com/avatar.png"
-                        />
-                        <p className="text-[10px] text-muted-foreground mt-1">
-                            Provide a direct link to an image.
-                        </p>
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="avatarUrl" className="font-bold">Avatar URL</Label>
+                            <Input
+                                id="avatarUrl"
+                                value={avatarUrl}
+                                onChange={(e) => setAvatarUrl(e.target.value)}
+                                className="gum-border focus-visible:ring-primary"
+                                placeholder="https://example.com/avatar.png"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="bannerUrl" className="font-bold">Banner URL</Label>
+                            <Input
+                                id="bannerUrl"
+                                value={bannerUrl}
+                                onChange={(e) => setBannerUrl(e.target.value)}
+                                className="gum-border focus-visible:ring-primary"
+                                placeholder="https://example.com/banner.png"
+                            />
+                            <p className="text-[10px] text-muted-foreground mt-1">
+                                Provide direct links to images for avatar and banner.
+                            </p>
+                        </div>
                     </div>
                     <DialogFooter className="pt-4 gap-2">
                         <button

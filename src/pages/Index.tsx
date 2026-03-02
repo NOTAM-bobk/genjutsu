@@ -1,17 +1,49 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import ComposePost from "@/components/ComposePost";
 import PostCard from "@/components/PostCard";
 import Sidebar from "@/components/Sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { usePosts } from "@/hooks/usePosts";
-import { Code, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { PostSkeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
-  const { posts, loading: postsLoading, createPost, toggleLike, toggleBookmark, deletePost } = usePosts();
+  const {
+    posts,
+    loading: postsLoading,
+    createPost,
+    toggleLike,
+    toggleBookmark,
+    deletePost,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = usePosts();
   const navigate = useNavigate();
+  const observerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (authLoading) {
     return (
@@ -53,12 +85,13 @@ const Index = () => {
             )}
 
             {postsLoading ? (
-              <div className="flex justify-center py-12">
-                <Loader2 className="animate-spin" size={24} />
+              <div className="space-y-4">
+                {[1, 2, 3].map(i => <PostSkeleton key={i} />)}
               </div>
             ) : posts.length === 0 ? (
-              <div className="gum-card p-8 text-center">
-                <p className="text-muted-foreground text-sm">No posts yet. Be the first to share something!</p>
+              <div className="gum-card p-8 text-center border-dashed border-2">
+                <p className="text-muted-foreground text-sm font-medium">No illusions active in the world right now.</p>
+                <p className="text-xs text-muted-foreground mt-1">Be the first to cast a spell.</p>
               </div>
             ) : (
               <div className="space-y-6">
@@ -71,6 +104,10 @@ const Index = () => {
                     onDelete={deletePost}
                   />
                 ))}
+
+                <div ref={observerRef} className="h-10 flex justify-center items-center">
+                  {isFetchingNextPage && <Loader2 className="animate-spin text-muted-foreground" size={20} />}
+                </div>
               </div>
             )}
           </div>

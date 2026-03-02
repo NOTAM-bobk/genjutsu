@@ -25,7 +25,7 @@ const PostPage = () => {
             const { data: p, error } = await supabase
                 .from("posts")
                 .select(`
-          id, content, code, tags, created_at, user_id,
+          id, content, code, media_url, tags, created_at, user_id,
           profiles ( username, display_name, avatar_url )
         `)
                 .eq("id", postId)
