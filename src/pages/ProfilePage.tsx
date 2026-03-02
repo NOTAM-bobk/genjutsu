@@ -13,6 +13,11 @@ import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import EditProfileDialog from "@/components/EditProfileDialog";
 import FollowsList from "@/components/FollowsList";
+import {
+    Dialog,
+    DialogContent,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 
 import { useFollow } from "@/hooks/useFollow";
 
@@ -224,11 +229,30 @@ const ProfilePage = () => {
                             <div className="h-32 bg-secondary" />
                             <div className="px-6 pb-6 relative">
                                 <div className="absolute -top-12 left-6">
-                                    <div className="w-24 h-24 rounded-[3px] gum-border-4 border-background bg-primary text-primary-foreground flex items-center justify-center text-3xl font-bold shadow-xl overflow-hidden">
-                                        {profile.avatar_url ? (
-                                            <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
-                                        ) : initials}
-                                    </div>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <div className="w-24 h-24 rounded-[3px] gum-border bg-secondary flex items-center justify-center text-3xl font-bold gum-shadow overflow-hidden cursor-pointer hover:opacity-90 transition-opacity outline-none">
+                                                {profile.avatar_url ? (
+                                                    <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
+                                                ) : initials}
+                                            </div>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-[90vw] max-h-[90vh] p-8 border-none bg-transparent shadow-none flex items-center justify-center">
+                                            <div className="relative group">
+                                                {profile.avatar_url ? (
+                                                    <img
+                                                        src={profile.avatar_url}
+                                                        alt={profile.username}
+                                                        className="max-w-full max-h-[80vh] rounded-[px] gum-border gum-shadow object-contain"
+                                                    />
+                                                ) : (
+                                                    <div className="w-48 h-48 rounded-[3px] gum-border bg-secondary flex items-center justify-center text-6xl font-bold gum-shadow">
+                                                        {initials}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
                                 </div>
 
                                 <div className="flex justify-end pt-4">
@@ -292,7 +316,7 @@ const ProfilePage = () => {
                             </div>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             <h2 className="font-bold text-lg px-2">Posts</h2>
                             {posts.length === 0 ? (
                                 <div className="gum-card p-12 text-center text-muted-foreground text-sm">

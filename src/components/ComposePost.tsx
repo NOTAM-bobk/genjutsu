@@ -61,8 +61,10 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
       className="gum-card p-5 mb-6"
     >
       <div className="flex gap-3">
-        <div className="w-10 h-10 rounded-[3px] gum-border bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shrink-0">
-          {initials}
+        <div className="w-10 h-10 rounded-[3px] gum-border bg-secondary flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden">
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
+          ) : initials}
         </div>
         <div className="flex-1">
           <textarea
@@ -79,7 +81,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="// Paste your code here..."
-                className="w-full bg-primary text-primary-foreground font-mono text-xs p-3 rounded-lg gum-border resize-none outline-none min-h-[80px]"
+                className="w-full bg-muted text-foreground font-mono text-xs p-3 rounded-lg gum-border resize-none outline-none min-h-[80px]"
                 rows={4}
               />
             </div>

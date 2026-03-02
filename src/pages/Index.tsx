@@ -61,7 +61,7 @@ const Index = () => {
                 <p className="text-muted-foreground text-sm">No posts yet. Be the first to share something!</p>
               </div>
             ) : (
-              <div className="space-y-0">
+              <div className="space-y-6">
                 {posts.map((post) => (
                   <PostCard
                     key={post.id}
