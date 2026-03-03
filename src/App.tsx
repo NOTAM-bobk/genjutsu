@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,18 +8,19 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/theme-provider";
 import { syncTime } from "@/lib/utils";
-import Index from "./pages/Index";
-import AuthPage from "./pages/AuthPage";
-import PostPage from "./pages/PostPage";
-import ProfilePage from "./pages/ProfilePage";
-import SearchPage from "./pages/SearchPage";
-import AboutPage from "./pages/AboutPage";
-import TermsPage from "./pages/TermsPage";
-import PrivacyPage from "./pages/PrivacyPage";
-import WhispersPage from "./pages/WhispersPage";
-import ChatPage from "./pages/ChatPage";
-import PlayPage from "./pages/PlayPage";
-import NotFound from "./pages/NotFound";
+
+import Index from "@/pages/Index";
+const AuthPage = lazy(() => import("@/pages/AuthPage"));
+const PostPage = lazy(() => import("@/pages/PostPage"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const SearchPage = lazy(() => import("@/pages/SearchPage"));
+const AboutPage = lazy(() => import("@/pages/AboutPage"));
+const TermsPage = lazy(() => import("@/pages/TermsPage"));
+const PrivacyPage = lazy(() => import("@/pages/PrivacyPage"));
+const WhispersPage = lazy(() => import("@/pages/WhispersPage"));
+const ChatPage = lazy(() => import("@/pages/ChatPage"));
+const PlayPage = lazy(() => import("@/pages/PlayPage"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -44,20 +45,28 @@ const App = () => {
               }}
             >
               <AuthProvider>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/terms" element={<TermsPage />} />
-                  <Route path="/privacy" element={<PrivacyPage />} />
-                  <Route path="/post/:postId" element={<PostPage />} />
-                  <Route path="/search" element={<SearchPage />} />
-                  <Route path="/whispers" element={<WhispersPage />} />
-                  <Route path="/whisper/:username" element={<ChatPage />} />
-                  <Route path="/play" element={<PlayPage />} />
-                  <Route path="/:username" element={<ProfilePage />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
+                <Suspense
+                  fallback={
+                    <div className="flex h-screen items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    </div>
+                  }
+                >
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/post/:postId" element={<PostPage />} />
+                    <Route path="/search" element={<SearchPage />} />
+                    <Route path="/whispers" element={<WhispersPage />} />
+                    <Route path="/whisper/:username" element={<ChatPage />} />
+                    <Route path="/play" element={<PlayPage />} />
+                    <Route path="/:username" element={<ProfilePage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
               </AuthProvider>
             </BrowserRouter>
           </TooltipProvider>
