@@ -48,6 +48,10 @@ const AuthPage = () => {
         if (error) {
           if (error.message?.includes("already registered")) {
             setError("This email is already registered. Try signing in instead.");
+          } else if (error.message === "this_username_is_taken" || error.message?.includes("profiles_username_key") || error.message?.includes("Database error saving new user")) {
+            setError("This username is already taken. Please choose another one.");
+          } else if (error.message?.toLowerCase().includes("rate limit") || error.message?.toLowerCase().includes("too many requests")) {
+            setError("Email signup limit reached. Please try again later or sign up with Google or GitHub.");
           } else {
             setError(error.message || "Sign up failed");
           }
@@ -62,6 +66,8 @@ const AuthPage = () => {
             setError("Invalid email or password.");
           } else if (error.message?.includes("Email not confirmed")) {
             setError("Please confirm your email before signing in.");
+          } else if (error.message?.toLowerCase().includes("rate limit") || error.message?.toLowerCase().includes("too many requests")) {
+            setError("Email limit reached. Please try again later or sign in with Google or GitHub.");
           } else {
             setError(error.message || "Sign in failed");
           }

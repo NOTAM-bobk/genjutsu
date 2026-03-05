@@ -125,7 +125,7 @@ export function usePosts() {
       toast.success("Post shared!");
     },
     onError: (error) => {
-      toast.error("Failed to post: " + error.message);
+      toast.error("Your thoughts couldn't be woven into the world. Please try again.");
     }
   });
 

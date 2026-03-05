@@ -39,6 +39,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, username: string, displayName: string) => {
+    // Check if username is already taken before attempting signup
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("username", username.toLowerCase())
+      .maybeSingle();
+
+    if (existingProfile) {
+      return { error: { message: "this_username_is_taken" } };
+    }
+
     const redirectUrl = `${window.location.origin}/`;
     const { error } = await supabase.auth.signUp({
       email,

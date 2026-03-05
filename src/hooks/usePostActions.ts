@@ -74,7 +74,7 @@ export function usePostActions() {
                     queryClient.setQueryData(queryKey, data);
                 });
             }
-            toast.error("Failed to update like");
+            toast.error("Couldn't resonate with this post. Try again!");
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ["posts"] });
@@ -129,7 +129,7 @@ export function usePostActions() {
                     queryClient.setQueryData(queryKey, data);
                 });
             }
-            toast.error("Failed to update bookmark");
+            toast.error("Couldn't preserve this memory. Try again!");
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ["posts"] });
@@ -188,9 +188,8 @@ export function usePostActions() {
             queryClient.invalidateQueries({ queryKey: ["posts"] });
             toast.success("Post deleted");
         },
-        onError: (error: any) => {
-            console.error("Delete error:", error);
-            toast.error(error.message || "Failed to delete post");
+        onError: () => {
+            toast.error("This post didn't want to vanish yet. Please try again.");
         }
     });
 

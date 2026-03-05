@@ -112,8 +112,8 @@ export function useWhispers(targetUserId?: string) {
             queryClient.invalidateQueries({ queryKey: ["whispers", user?.id, targetUserId] });
             queryClient.invalidateQueries({ queryKey: ["conversations", user?.id] });
         },
-        onError: (err: any) => {
-            toast.error("Failed to send whisper: " + err.message);
+        onError: () => {
+            toast.error("Your whisper disappeared before it could be heard. Please try again.");
         }
     });
 
@@ -165,7 +165,7 @@ export function useWhispers(targetUserId?: string) {
         loadingMessages,
         sendMessage: async (content: string) => {
             if (!user) {
-                toast.error("Please sign in to send message");
+                toast.error("You must be manifest to send a whisper. Please sign in.");
                 return;
             }
             return sendMessageMutation.mutateAsync(content);

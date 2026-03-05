@@ -30,7 +30,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("File size must be less than 5MB");
+        toast.error("That's a heavy memory! Please keep images under 5MB.");
         return;
       }
       if (mediaPreview) URL.revokeObjectURL(mediaPreview);
@@ -59,7 +59,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
       return data.publicUrl;
     } catch (err) {
       console.error("Upload error:", err);
-      toast.error("Failed to upload image. Make sure 'post-media' bucket exists.");
+      toast.error("We couldn't manifest your image. Please try again.");
       return null;
     }
   };

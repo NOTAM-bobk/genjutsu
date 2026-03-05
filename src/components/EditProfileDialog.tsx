@@ -83,7 +83,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
         if (!file) return;
 
         if (file.size > 2 * 1024 * 1024) {
-            toast.error("File size must be less than 2MB");
+            toast.error("That file is a bit too heavy! Please keep it under 2MB.");
             return;
         }
 
@@ -114,7 +114,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             toast.success(`${bucket.slice(0, -1).charAt(0).toUpperCase() + bucket.slice(1, -1)} uploaded!`);
         } catch (error: any) {
             console.error(`Error uploading ${bucket}:`, error);
-            toast.error(`Failed to upload ${bucket.slice(0, -1)}`);
+            toast.error(`We couldn't upload your ${bucket.slice(0, -1)}. Please check your connection and try again.`);
         } finally {
             if (isAvatar) setUploadingAvatar(false);
             else setUploadingBanner(false);
@@ -171,7 +171,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             onUpdate();
         } catch (error: any) {
             console.error("Error updating profile:", error);
-            toast.error(error.message || "Failed to update profile");
+            toast.error("Something went wrong while updating your identity. Please try again.");
         } finally {
             setSubmitting(false);
         }
