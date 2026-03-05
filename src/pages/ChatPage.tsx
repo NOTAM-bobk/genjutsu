@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
+import { linkify } from "@/lib/linkify";
 
 const ChatPage = () => {
     const { username } = useParams<{ username: string }>();
@@ -82,6 +83,7 @@ const ChatPage = () => {
 
     if (!targetProfile) return null;
 
+
     return (
         <div className="h-[100svh] bg-background text-foreground flex flex-col overflow-hidden">
             <Helmet>
@@ -136,8 +138,9 @@ const ChatPage = () => {
                                     ? "bg-primary text-primary-foreground border-primary"
                                     : "bg-secondary text-secondary-foreground border-border"
                                     }`}>
-                                    <p className="whitespace-pre-wrap break-words">{whisper.content}</p>
-                                    <span className={`text-[9px] mt-1.5 block font-mono opacity-60 ${isMe ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                                    <p className="whitespace-pre-wrap break-words">
+                                        {linkify(whisper.content)}
+                                    </p>                                    <span className={`text-[9px] mt-1.5 block font-mono opacity-60 ${isMe ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                                         {new Date(whisper.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                 </div>

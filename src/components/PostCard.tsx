@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { useNavigate, Link } from "react-router-dom";
 import { getNow, cn } from "@/lib/utils";
+import { linkify } from "@/lib/linkify";
 
 interface PostCardProps {
   post: PostWithProfile;
@@ -119,7 +120,9 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
             )}
           </div>
 
-          <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
+          <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap">
+            {linkify(post.content)}
+          </p>
 
           {post.media_url && (
             <div className="mt-3 rounded-lg gum-border overflow-hidden bg-muted">
