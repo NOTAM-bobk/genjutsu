@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
 import { formatDistanceToNow } from "date-fns";
 import { usePostActions } from "@/hooks/usePostActions";
+import { linkify } from "@/lib/linkify";
+
 
 const PostPage = () => {
     const { postId } = useParams<{ postId: string }>();
@@ -365,7 +367,8 @@ const PostPage = () => {
                                                                     </div>
                                                                 )}
                                                             </div>
-                                                            <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
+                                                            <p className="text-sm whitespace-pre-wrap">
+                                                                {linkify(comment.content)}                                                            </p>
                                                         </div>
                                                     </div>
                                                 </div>
