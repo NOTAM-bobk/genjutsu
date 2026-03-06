@@ -1,11 +1,13 @@
-import { Home, Search, User, LogOut, Settings, Hash, X, Send, Swords, LogIn } from "lucide-react";
+import { Home, Search, User, LogOut, Settings, Hash, X, Send, Swords, LogIn, Bell } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ModeToggle } from "@/components/ModeToggle";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Sidebar from "./Sidebar";
+import NotificationPanel from "./NotificationPanel";
+import { useNotifications } from "@/hooks/useNotifications";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +22,21 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  // Close notification panel on outside click
+  useEffect(() => {
+    if (!isNotifOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setIsNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [isNotifOpen]);
 
   const initials = profile?.display_name
     ?.split(" ")
@@ -103,6 +120,45 @@ const Navbar = () => {
             >
               <Hash size={16} />
             </button>
+
+            {/* Notification Bell */}
+            {user && (
+              <div className="relative" ref={notifRef}>
+                <button
+                  onClick={() => setIsNotifOpen(!isNotifOpen)}
+                  className={`relative p-1.5 sm:p-2 rounded-[3px] hover:bg-secondary transition-colors gum-border ${isNotifOpen ? "bg-secondary text-foreground" : "text-muted-foreground"
+                    }`}
+                  title="Notifications"
+                >
+                  <Bell size={16} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center leading-none">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                <AnimatePresence>
+                  {isNotifOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-2 z-[80] gum-card bg-background shadow-xl overflow-hidden"
+                    >
+                      <NotificationPanel
+                        notifications={notifications}
+                        unreadCount={unreadCount}
+                        onMarkAsRead={markAsRead}
+                        onMarkAllAsRead={markAllAsRead}
+                        onClose={() => setIsNotifOpen(false)}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
             {user ? (
               <DropdownMenu>
