@@ -100,5 +100,33 @@ export function useProfile() {
     return { error: null };
   };
 
-  return { profile: profile ?? null, loading, updateProfile, changeUsername, getNextUsernameChangeDate };
+  const deleteAccount = async (): Promise<{ error: string | null }> => {
+    if (!user) return { error: "Not authenticated" };
+
+    const { data, error } = await supabase.rpc("delete_user_account" as any);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    const result = data as any;
+    if (result?.error) {
+      return { error: result.message || result.error };
+    }
+
+    // On success, sign out locally
+    await supabase.auth.signOut();
+    queryClient.clear();
+
+    return { error: null };
+  };
+
+  return {
+    profile: profile ?? null,
+    loading,
+    updateProfile,
+    changeUsername,
+    deleteAccount,
+    getNextUsernameChangeDate
+  };
 }

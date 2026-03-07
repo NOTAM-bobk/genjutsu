@@ -877,3 +877,76 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 CREATE TRIGGER on_follow_notify
   AFTER INSERT ON public.follows
   FOR EACH ROW EXECUTE FUNCTION public.notify_on_follow();
+
+
+-- =============================================================================
+-- ACCOUNT MANAGEMENT
+-- =============================================================================
+
+-- Delete user account and all associated data (including storage cleanup)
+CREATE OR REPLACE FUNCTION public.delete_user_account()
+RETURNS jsonb AS $$
+DECLARE
+    v_user_id UUID;
+    v_project_id TEXT := 'scvikrxfxijqoedfryvx';
+    v_service_key TEXT;
+    v_record RECORD;
+    v_file_path TEXT;
+BEGIN
+    v_user_id := auth.uid();
+    IF v_user_id IS NULL THEN
+        RETURN jsonb_build_object('error', 'unauthorized', 'message', 'You must be logged in');
+    END IF;
+
+    -- Get service role key for storage cleanup
+    SELECT decrypted_secret INTO v_service_key
+    FROM vault.decrypted_secrets
+    WHERE name = 'supabase_service_role_key'
+    LIMIT 1;
+
+    -- Cleanup Storage
+    IF v_service_key IS NOT NULL THEN
+        -- Post Media
+        FOR v_record IN SELECT media_url FROM public.posts WHERE user_id = v_user_id AND media_url IS NOT NULL AND media_url <> '' LOOP
+            v_file_path := split_part(v_record.media_url, 'post-media/', 2);
+            IF v_file_path IS NOT NULL AND v_file_path <> '' THEN
+                PERFORM net.http_delete(
+                    url := 'https://' || v_project_id || '.supabase.co/storage/v1/object/post-media/' || v_file_path,
+                    headers := jsonb_build_object('Authorization', 'Bearer ' || v_service_key)
+                );
+            END IF;
+        END LOOP;
+
+        -- Avatar & Banner
+        FOR v_record IN SELECT avatar_url, banner_url FROM public.profiles WHERE user_id = v_user_id LOOP
+            -- Avatar
+            IF v_record.avatar_url IS NOT NULL AND v_record.avatar_url <> '' THEN
+                v_file_path := split_part(v_record.avatar_url, 'avatars/', 2);
+                IF v_file_path IS NOT NULL AND v_file_path <> '' THEN
+                    PERFORM net.http_delete(
+                        url := 'https://' || v_project_id || '.supabase.co/storage/v1/object/avatars/' || v_file_path,
+                        headers := jsonb_build_object('Authorization', 'Bearer ' || v_service_key)
+                    );
+                END IF;
+            END IF;
+            -- Banner
+            IF v_record.banner_url IS NOT NULL AND v_record.banner_url <> '' THEN
+                v_file_path := split_part(v_record.banner_url, 'banners/', 2);
+                IF v_file_path IS NOT NULL AND v_file_path <> '' THEN
+                    PERFORM net.http_delete(
+                        url := 'https://' || v_project_id || '.supabase.co/storage/v1/object/banners/' || v_file_path,
+                        headers := jsonb_build_object('Authorization', 'Bearer ' || v_service_key)
+                    );
+                END IF;
+            END IF;
+        END LOOP;
+    END IF;
+
+    DELETE FROM auth.users WHERE id = v_user_id;
+
+    RETURN jsonb_build_object('success', true, 'message', 'Account and data wiped');
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN jsonb_build_object('error', 'internal_error', 'message', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, auth, extensions, vault, net;

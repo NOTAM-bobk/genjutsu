@@ -168,16 +168,6 @@ const Navbar = () => {
               </div>
             )}
 
-            {/* Settings Button */}
-            {user && (
-              <button
-                onClick={() => navigate("/settings")}
-                className={`hidden md:flex p-1.5 sm:p-2 rounded-[3px] hover:bg-secondary transition-colors gum-border ${location.pathname === "/settings" ? "bg-secondary text-foreground" : "text-muted-foreground"}`}
-                title="Settings"
-              >
-                <Settings size={16} />
-              </button>
-            )}
 
             {user ? (
               <DropdownMenu>
