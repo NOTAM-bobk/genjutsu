@@ -84,6 +84,8 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
   const isOwner = user?.id === post.user_id;
 
 
+
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 10 }}
@@ -208,12 +210,18 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
             </div>
           )}
 
+          {/* Hashtags Section */}
           {post.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
               {post.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 text-xs font-mono font-medium bg-secondary px-2.5 py-1 rounded-[3px] gum-border gum-shadow-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Navigate to search route
+                    navigate(`/search?q=${encodeURIComponent(tag.startsWith('#') ? tag : '#' + tag)}`);
+                  }}
+                  className="inline-flex items-center gap-1 text-xs font-mono font-medium bg-secondary px-2.5 py-1 rounded-[3px] gum-border gum-shadow-sm cursor-pointer hover:bg-primary/10 hover:border-primary/50 transition-all active:scale-95"
                 >
                   <Hash size={10} />
                   {tag}
@@ -221,6 +229,7 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
               ))}
             </div>
           )}
+
 
           <div className="flex items-center gap-6 mt-4 pt-3 border-t border-secondary">
             <button
