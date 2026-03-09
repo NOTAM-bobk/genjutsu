@@ -23,7 +23,7 @@
             "destination": "/api/og?username=:username"
         },
         {
-            "source": "/(.*)",
+            "source": "/((?!assets/|.*\\..*).*)",
             "destination": "/index.html"
         }
     ]
