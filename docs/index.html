@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Genjutsu</title>
+    <link rel="icon" href="../public/fav.jpg">
+    <meta name="theme-color" content="#070708">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Remix Icon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        background: '#070708',
+                        foreground: '#fafafa',
+                        card: '#0e0e10',
+                        border: '#2b2b30',
+                        muted: '#1d1d20',
+                        'muted-foreground': '#8f8f99',
+                        brand: '#fafafa',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #070708;
+            color: #fafafa;
+            font-family: 'Space Grotesk', sans-serif;
+            background-image: radial-gradient(#2b2b30 1px, transparent 1px);
+            background-size: 20px 20px;
+            min-height: 100vh;
+        }
+
+        .gum-border {
+            border: 2px solid #2b2b30;
+        }
+
+        .gum-card {
+            background-color: #0e0e10;
+            border: 2px solid #2b2b30;
+            border-radius: 3px;
+            box-shadow: 4px 4px 0px #2b2b30;
+        }
+
+        .gum-btn {
+            background-color: #fafafa;
+            color: #070708;
+            border: 2px solid #fafafa;
+            border-radius: 3px;
+            box-shadow: 4px 4px 0px #2b2b30;
+            transition: all 0.15s ease;
+        }
+
+        .gum-btn:hover {
+            box-shadow: 2px 2px 0px #2b2b30;
+            transform: translate(2px, 2px);
+            background-color: #e5e5e5;
+        }
+
+        .gum-btn:active {
+            box-shadow: 0px 0px 0px #2b2b30;
+            transform: translate(4px, 4px);
+        }
+
+        .halftone-bg {
+            background-image:
+                radial-gradient(#2b2b30 15%, transparent 16%),
+                radial-gradient(#2b2b30 15%, transparent 16%);
+            background-size: 8px 8px;
+            background-position: 0 0, 4px 4px;
+        }
+    </style>
+</head>
+
+<body
+    class="antialiased selection:bg-brand selection:text-black flex flex-col items-center justify-center relative overflow-x-hidden">
+
+    <!-- Navbar -->
+    <nav
+        class="w-full fixed top-0 z-50 bg-[#070708] border-b-2 border-[#2b2b30] px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <img src="../public/fav.jpg" alt="Genjutsu Logo" class="h-8 w-8 gum-border rounded-[3px]">
+            <span class="text-xl font-bold tracking-tight uppercase">genjutsu</span>
+        </div>
+        <a href="https://genjutsu-social.vercel.app/" target="_blank"
+            class="text-sm text-foreground hover:underline uppercase tracking-wide font-semibold">Web App / Enter</a>
+    </nav>
+
+    <!-- Main Hero -->
+    <main class="flex-1 flex flex-col items-center justify-center w-full max-w-5xl px-6 pt-32 pb-24 text-center z-10">
+
+        <!-- App Icon -->
+        <div class="relative w-32 h-32 mb-8">
+            <div class="absolute inset-0 bg-[#2b2b30] rounded-[3px] translate-x-3 translate-y-3"></div>
+            <img src="../public/fav.jpg" alt="App Icon"
+                class="relative w-full h-full object-cover rounded-[3px] gum-border z-10 bg-card">
+        </div>
+
+        <div
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-[3px] bg-card gum-border text-xs text-foreground font-bold tracking-widest uppercase mb-6">
+            Release v.1.0.0.0
+        </div>
+
+        <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6 uppercase">
+            Everything vanishes.<br>
+            <span class="text-[#070708] bg-foreground px-2 rounded-[3px] inline-block mt-2">Forever.</span>
+        </h1>
+
+        <p class="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 font-medium leading-relaxed">
+            The 24-hour ephemeral social network built for developers.
+            Experience pure chronological connection.
+            What you build today is gone tomorrow.
+        </p>
+
+        <!-- Download Action -->
+        <div class="flex flex-col sm:flex-row items-center gap-4 w-full justify-center mt-4">
+            <a href="https://github.com/iamovi/genjutsu/releases/download/v.1.0.0.0/genjutsu.apk"
+                class="gum-btn inline-flex items-center justify-center gap-3 px-8 py-4 font-bold text-lg w-full sm:w-auto uppercase tracking-wide">
+
+                <div class="flex items-center gap-3">
+                    <i class="ri-android-fill text-3xl"></i>
+                    <div class="flex flex-col items-start leading-none">
+                        <span class="text-sm font-bold uppercase tracking-tighter opacity-70">Download</span>
+                        <span class="text-xl font-bold uppercase">APK (1.31 MB)</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://genjutsu-social.vercel.app/"
+                class="inline-flex items-center justify-center gap-3 px-8 py-4 font-bold text-lg w-full sm:w-auto uppercase tracking-wide bg-[#0e0e10] border-2 border-[#2b2b30] rounded-[3px] text-foreground hover:bg-[#1d1d20] transition-colors">
+                Open Web App
+            </a>
+        </div>
+
+        <p class="mt-8 text-sm text-muted-foreground font-mono">
+            > Requires Android 8.0+ // Native TWA
+        </p>
+
+    </main>
+
+    <!-- Features Grid -->
+    <section class="max-w-6xl w-full px-6 py-20 z-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="gum-card p-8">
+                <div class="w-12 h-12 bg-muted gum-border rounded-[3px] flex items-center justify-center mb-6">
+                    <span class="text-2xl font-mono">24</span>
+                </div>
+                <h3 class="text-xl font-bold uppercase mb-3">24-Hour Lifespan</h3>
+                <p class="text-muted-foreground leading-relaxed text-sm font-medium">Every post, thought, and image
+                    disappears permanently after 24 hours. No archives. No regret.</p>
+            </div>
+
+            <div class="gum-card p-8">
+                <div class="w-12 h-12 bg-muted gum-border rounded-[3px] flex items-center justify-center mb-6">
+                    <span class="text-2xl font-mono">APP</span>
+                </div>
+                <h3 class="text-xl font-bold uppercase mb-3">Native Feel</h3>
+                <p class="text-muted-foreground leading-relaxed text-sm font-medium">Installed locally via TWA. Smooth
+                    brutalist animations, and a fullscreen immersive experience.</p>
+            </div>
+
+            <div class="gum-card p-8">
+                <div class="w-12 h-12 bg-muted gum-border rounded-[3px] flex items-center justify-center mb-6">
+                    <span class="text-2xl font-mono">***</span>
+                </div>
+                <h3 class="text-xl font-bold uppercase mb-3">Secure Login</h3>
+                <p class="text-muted-foreground leading-relaxed text-sm font-medium">One-tap login via Google. Built on
+                    Supabase. Your data is secured and authenticated effortlessly.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="w-full border-t-2 border-[#2b2b30] py-8 mt-auto z-10 bg-[#070708]">
+        <div
+            class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 font-mono text-sm">
+            <p class="text-muted-foreground">© 2026 Genjutsu.</p>
+            <div class="flex items-center gap-6">
+                <a href="https://github.com/iamovi/genjutsu" target="_blank"
+                    class="text-foreground hover:underline font-bold">GITHUB_SOURCE</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

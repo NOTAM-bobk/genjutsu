@@ -2,6 +2,8 @@
 
 **Live App: https://genjutsu-social.vercel.app**
 
+**Download App: https://iamovi.github.io/genjutsu**
+
 `genjutsu` is a social network for developers where everything disappears after 24 hours.
 
 share code, post updates, connect with other builders. no permanent history, no follower counts, no clout chasing. just a daily feed that resets every morning.
