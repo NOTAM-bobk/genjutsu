@@ -7,6 +7,26 @@
     <title>Download Genjutsu</title>
     <link rel="icon" href="../public/fav.jpg">
     <meta name="theme-color" content="#070708">
+    <meta name="description"
+        content="Download Genjutsu — The 24-hour ephemeral social network built for developers. What you build today is gone tomorrow.">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://genjutsu-social.vercel.app/docs/">
+    <meta property="og:title" content="Download Genjutsu — everything vanishes">
+    <meta property="og:description"
+        content="The 24-hour ephemeral social network built for developers. Download the Android APK.">
+    <meta property="og:image"
+        content="https://raw.githubusercontent.com/iamovi/genjutsu/refs/heads/main/public/fav.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://genjutsu-social.vercel.app/docs/">
+    <meta property="twitter:title" content="Download Genjutsu — everything vanishes">
+    <meta property="twitter:description"
+        content="The 24-hour ephemeral social network for developers. Download the Android APK.">
+    <meta property="twitter:image"
+        content="https://raw.githubusercontent.com/iamovi/genjutsu/refs/heads/main/public/fav.jpg">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -153,7 +173,13 @@
             </a>
         </div>
 
-        <p class="mt-8 text-sm text-muted-foreground font-mono">
+        <p
+            class="mt-4 text-xs font-mono uppercase tracking-widest text-muted-foreground/60 flex items-center justify-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+            Downloads: <span id="download-count" class="text-foreground font-bold">...</span>
+        </p>
+
+        <p class="mt-4 text-xs text-muted-foreground font-mono">
             > Requires Android 8.0+ // Native TWA
         </p>
 
@@ -203,6 +229,29 @@
         </div>
     </footer>
 
+    <script>
+        const REPO = 'iamovi/genjutsu';
+        const TAG = 'v.1.0.0.0';
+        const ASSET_NAME = 'genjutsu.apk';
+
+        async function fetchDownloadCount() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${REPO}/releases/tags/${TAG}`);
+                const data = await response.json();
+                const asset = data.assets.find(a => a.name === ASSET_NAME);
+                if (asset) {
+                    document.getElementById('download-count').innerText = asset.download_count.toLocaleString();
+                } else {
+                    document.getElementById('download-count').innerText = '0';
+                }
+            } catch (error) {
+                console.error('Error fetching download count:', error);
+                document.getElementById('download-count').innerText = '100+';
+            }
+        }
+
+        fetchDownloadCount();
+    </script>
 </body>
 
 </html>
