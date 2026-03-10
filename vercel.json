@@ -2,24 +2,26 @@
     "rewrites": [
         {
             "source": "/post/:postId",
-            "has": [
-                {
-                    "type": "header",
-                    "key": "user-agent",
-                    "value": ".*(Twitterbot|facebookexternalhit|Instagram|WhatsApp|TelegramBot|Slackbot|LinkedInBot|Discordbot|SkypeUriPreview|iMessageBot|curl|python-requests).*"
-                }
-            ],
             "destination": "/api/og?postId=:postId"
         },
         {
+            "source": "/(auth|about|terms|privacy|search|play|admin|settings)",
+            "destination": "/index.html"
+        },
+        {
+            "source": "/whispers",
+            "destination": "/index.html"
+        },
+        {
+            "source": "/whispers/community",
+            "destination": "/index.html"
+        },
+        {
+            "source": "/whisper/:username",
+            "destination": "/index.html"
+        },
+        {
             "source": "/:username",
-            "has": [
-                {
-                    "type": "header",
-                    "key": "user-agent",
-                    "value": ".*(Twitterbot|facebookexternalhit|Instagram|WhatsApp|TelegramBot|Slackbot|LinkedInBot|Discordbot|SkypeUriPreview|iMessageBot|curl|python-requests).*"
-                }
-            ],
             "destination": "/api/og?username=:username"
         },
         {
