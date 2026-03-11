@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -15,11 +15,11 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 5%;
 
-    --primary: 0 0% 5%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 270 30% 63%;
+    --primary-foreground: 270 50% 10%;
 
-    --secondary: 0 0% 93%;
-    --secondary-foreground: 0 0% 5%;
+    --secondary: 270 20% 94%;
+    --secondary-foreground: 270 40% 15%;
 
     --muted: 0 0% 95%;
     --muted-foreground: 0 0% 40%;
@@ -41,8 +41,8 @@
     --shadow-gum-hover: 2px 2px 0px hsl(0 0% 5%);
     --shadow-gum-active: 0px 0px 0px hsl(0 0% 5%);
 
-    --font-sans: 'Space Grotesk', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --font-sans: 'Reddit Mono', monospace;
+    --font-mono: 'Reddit Mono', monospace;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 5%;
@@ -66,11 +66,11 @@
     --popover: 240 10% 6%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 10% 4%;
+    --primary: 270 40% 70%;
+    --primary-foreground: 270 50% 5%;
 
-    --secondary: 240 6% 12%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 270 15% 15%;
+    --secondary-foreground: 270 20% 95%;
 
     --muted: 240 6% 12%;
     --muted-foreground: 240 5% 60%;
@@ -98,7 +98,7 @@
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 240 6% 18%;
     --sidebar-ring: 240 5% 70%;
-    --glow: 0 0% 100%;
+    --glow: 270 50% 75%;
     --success: 142 71% 45%;
   }
 }
@@ -167,7 +167,7 @@
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--muted-foreground)));
+    background: linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--primary)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
