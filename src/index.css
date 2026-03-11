@@ -109,8 +109,29 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-family: var(--font-sans);
+    position: relative;
+  }
+
+  /* Fixed Background Layer for performance & visibility */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0; /* Sit behind content but above body color */
+    background-image: 
+      linear-gradient(hsl(var(--primary) / 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--primary) / 0.07) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* Ensure content is above the grid layer */
+  #root {
+    position: relative;
+    z-index: 1;
   }
 
   code,
@@ -270,11 +291,6 @@
   }
 
   .bg-background {
-    background-color: hsl(var(--background));
-    background-image: 
-      linear-gradient(hsl(var(--primary) / 0.07) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--primary) / 0.07) 1px, transparent 1px);
-    background-size: 40px 40px;
-    background-attachment: fixed;
+    background-color: transparent;
   }
 }
