@@ -232,10 +232,16 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
           )}
 
           {post.code && (
-            <div className="mt-3 gum-border rounded-[3px] bg-muted p-4 overflow-x-auto">
-              <pre className="text-xs font-mono text-foreground">
-                <code>{isLongCode && !isCodeExpanded ? truncatedCode : post.code}</code>
-              </pre>
+            <div className="mt-3 overflow-x-auto relative">
+              <SyntaxHighlighter
+                style={vscDarkPlus}
+                language={post.code_language || "javascript"}
+                PreTag="div"
+                className="rounded-[3px] !m-0 gum-border text-xs"
+                customStyle={{ padding: "16px", background: "hsl(var(--muted))" }}
+              >
+                {isLongCode && !isCodeExpanded ? truncatedCode : post.code}
+              </SyntaxHighlighter>
               {isLongCode && (
                 <button
                   onClick={() => setIsCodeExpanded(!isCodeExpanded)}

@@ -15,13 +15,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface ComposePostProps {
-  onPost: (content: string, code: string, tags: string[], media_url?: string, is_readme?: boolean) => Promise<void>;
+  onPost: (content: string, code: string, codeLanguage: string, tags: string[], media_url?: string, is_readme?: boolean) => Promise<void>;
 }
 
 const ComposePost = ({ onPost }: ComposePostProps) => {
   const [content, setContent] = useState("");
   const [showCode, setShowCode] = useState(false);
   const [code, setCode] = useState("");
+  const [codeLanguage, setCodeLanguage] = useState("javascript");
   const [isReadme, setIsReadme] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -205,10 +206,11 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
         ? content
         : content.replace(/#[\p{L}\p{N}_]+/gu, "").replace(/\s+/g, " ").trim();
 
-      await onPost(postContent || content, code, tags, mediaUrl, isReadme);
+      await onPost(postContent || content, code, codeLanguage, tags, mediaUrl, isReadme);
 
       setContent("");
       setCode("");
+      setCodeLanguage("javascript");
       setIsReadme(false);
       setShowPreview(false);
       if (mediaPreview) URL.revokeObjectURL(mediaPreview);
@@ -316,7 +318,30 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
           </AnimatePresence>
 
           {showCode && (
-            <div className="mt-3">
+            <div className="mt-3 relative">
+              <div className="flex items-center justify-between mb-2 px-1">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Code Snippet</span>
+                <select
+                  value={codeLanguage}
+                  onChange={(e) => setCodeLanguage(e.target.value)}
+                  className="bg-secondary text-secondary-foreground text-xs rounded-[3px] px-2 py-1 outline-none border border-border cursor-pointer"
+                >
+                  <option value="javascript">JavaScript</option>
+                  <option value="typescript">TypeScript</option>
+                  <option value="python">Python</option>
+                  <option value="html">HTML</option>
+                  <option value="css">CSS</option>
+                  <option value="json">JSON</option>
+                  <option value="bash">Bash / Shell</option>
+                  <option value="rust">Rust</option>
+                  <option value="go">Go</option>
+                  <option value="cpp">C++</option>
+                  <option value="java">Java</option>
+                  <option value="sql">SQL</option>
+                  <option value="markdown">Markdown</option>
+                  <option value="text">Plain Text</option>
+                </select>
+              </div>
               <textarea
                 value={code}
                 onChange={(e) => setCode(e.target.value)}

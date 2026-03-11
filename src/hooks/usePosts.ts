@@ -10,6 +10,7 @@ export interface PostWithProfile {
   id: string;
   content: string;
   code: string | null;
+  code_language: string | null;
   media_url: string | null;
   tags: string[];
   created_at: string;
@@ -40,7 +41,7 @@ export function usePosts() {
     const { data: postsData, error } = await (supabase
       .from("posts")
       .select(`
-        id, content, code, media_url, tags, created_at, user_id, is_readme,
+        id, content, code, code_language, media_url, tags, created_at, user_id, is_readme,
         profiles ( username, display_name, avatar_url )
       `) as any)
       .gt("created_at", new Date(getNow().getTime() - 24 * 60 * 60 * 1000).toISOString())
@@ -110,11 +111,12 @@ export function usePosts() {
   const posts = data?.pages.flat() ?? [];
 
   const createPostMutation = useMutation({
-    mutationFn: async ({ content, code, tags, media_url, is_readme, idempotency_key }: { content: string, code: string, tags: string[], media_url?: string, is_readme: boolean, idempotency_key: string }) => {
+    mutationFn: async ({ content, code, code_language, tags, media_url, is_readme, idempotency_key }: { content: string, code: string, code_language?: string, tags: string[], media_url?: string, is_readme: boolean, idempotency_key: string }) => {
       if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase.rpc("create_post", {
         p_content: content,
         p_code: code || "",
+        p_code_language: code_language || null,
         p_tags: tags,
         p_media_url: media_url || "",
         p_is_readme: is_readme,
@@ -162,13 +164,13 @@ export function usePosts() {
   return {
     posts,
     loading: status === "pending",
-    createPost: useCallback((content: string, code: string, tags: string[], media_url?: string, is_readme: boolean = false) => {
+    createPost: useCallback((content: string, code: string, code_language: string = "javascript", tags: string[], media_url?: string, is_readme: boolean = false) => {
       if (!user) {
         toast.error("Please sign in to share a post");
         return;
       }
       const idempotency_key = crypto.randomUUID();
-      return createPostMutation.mutateAsync({ content, code, tags, media_url, is_readme, idempotency_key });
+      return createPostMutation.mutateAsync({ content, code, code_language, tags, media_url, is_readme, idempotency_key });
     }, [user, createPostMutation]),
     toggleLike,
     toggleBookmark,

@@ -146,6 +146,7 @@ export type Database = {
           updated_at: string
           user_id: string
           is_readme: boolean
+          code_language: string | null
         }
         Insert: {
           code?: string | null
@@ -157,6 +158,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           is_readme?: boolean
+          code_language?: string | null
         }
         Update: {
           code?: string | null
@@ -168,6 +170,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           is_readme?: boolean
+          code_language?: string | null
         }
         Relationships: []
       }
@@ -354,6 +357,7 @@ export type Database = {
           p_media_url?: string
           p_is_readme?: boolean
           p_idempotency_key?: string
+          p_code_language?: string
         }
         Returns: Json
       }

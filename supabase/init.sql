@@ -72,6 +72,7 @@ CREATE TABLE public.posts (
   media_url TEXT DEFAULT '',
   tags TEXT[] DEFAULT '{}',
   is_readme BOOLEAN DEFAULT false,
+  code_language TEXT DEFAULT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
@@ -686,7 +687,8 @@ CREATE OR REPLACE FUNCTION public.create_post(
   p_tags TEXT[] DEFAULT '{}',
   p_media_url TEXT DEFAULT '',
   p_is_readme BOOLEAN DEFAULT false,
-  p_idempotency_key TEXT DEFAULT NULL
+  p_idempotency_key TEXT DEFAULT NULL,
+  p_code_language TEXT DEFAULT NULL
 )
 RETURNS JSONB AS $$
 DECLARE
@@ -743,8 +745,8 @@ BEGIN
     END IF;
   END IF;
 
-  INSERT INTO public.posts (user_id, content, code, tags, media_url, is_readme)
-  VALUES (v_user_id, p_content, p_code, p_tags, p_media_url, p_is_readme)
+  INSERT INTO public.posts (user_id, content, code, tags, media_url, is_readme, code_language)
+  VALUES (v_user_id, p_content, p_code, p_tags, p_media_url, p_is_readme, p_code_language)
   RETURNING id INTO v_new_post_id;
 
   INSERT INTO public.user_action_log (user_id, action_type, idempotency_key)
