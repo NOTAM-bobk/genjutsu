@@ -100,6 +100,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
           handleFiles(file);
           // Optional: Prevent pasting the image as text if the browser tries to do both
           e.preventDefault();
+          break; // Stop after finding the first image
         }
       }
     }
