@@ -13,6 +13,8 @@ import remarkGfm from "remark-gfm";
 import remarkGemoji from "remark-gemoji";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import vscDarkPlus from "react-syntax-highlighter/dist/esm/styles/prism/vsc-dark-plus";
+import oneLight from "react-syntax-highlighter/dist/esm/styles/prism/one-light";
+import { useTheme } from "@/components/theme-provider";
 import {
   Dialog,
   DialogContent,
@@ -80,6 +82,12 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
     .join("")
     .toUpperCase()
     .slice(0, 2) || "??";
+
+  const { theme } = useTheme();
+  const currentTheme = theme === "system" 
+    ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    : theme;
+  const highlighterTheme = currentTheme === "dark" ? vscDarkPlus : oneLight;
 
   const isOwner = user?.id === post.user_id;
 
@@ -157,7 +165,7 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
                     const match = /language-(\w+)/.exec(className || "");
                     return !inline && match ? (
                       <SyntaxHighlighter
-                        style={vscDarkPlus}
+                        style={highlighterTheme}
                         language={match[1]}
                         PreTag="div"
                         className="rounded-[3px] my-4"
@@ -234,7 +242,7 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
           {post.code && (
             <div className="mt-3 overflow-x-auto relative">
               <SyntaxHighlighter
-                style={vscDarkPlus}
+                style={highlighterTheme}
                 language={post.code_language || "javascript"}
                 PreTag="div"
                 className="rounded-[3px] !m-0 gum-border text-xs"

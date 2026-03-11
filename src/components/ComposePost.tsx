@@ -8,9 +8,11 @@ import remarkGfm from "remark-gfm";
 import remarkGemoji from "remark-gemoji";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import vscDarkPlus from "react-syntax-highlighter/dist/esm/styles/prism/vsc-dark-plus";
+import oneLight from "react-syntax-highlighter/dist/esm/styles/prism/one-light";
 import { FileText } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useTheme } from "./theme-provider";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -34,6 +36,12 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { profile } = useProfile();
   const { user } = useAuth();
+  const { theme } = useTheme();
+
+  const currentTheme = theme === "system" 
+    ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    : theme;
+  const highlighterTheme = currentTheme === "dark" ? vscDarkPlus : oneLight;
 
   // Cooldown countdown timer
   useEffect(() => {
@@ -271,7 +279,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
                     const match = /language-(\w+)/.exec(className || "");
                     return !inline && match ? (
                       <SyntaxHighlighter
-                        style={vscDarkPlus}
+                        style={highlighterTheme}
                         language={match[1]}
                         PreTag="div"
                         className="rounded-[3px] my-4"
