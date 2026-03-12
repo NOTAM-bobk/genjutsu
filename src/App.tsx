@@ -10,6 +10,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { syncTime } from "@/lib/utils";
 import ScrollToTop from "@/components/ScrollToTop";
 import RequireAdmin from "@/components/RequireAdmin";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import Index from "@/pages/Index";
 const AuthPage = lazy(() => import("@/pages/AuthPage"));
@@ -88,6 +90,8 @@ const App = () => {
           </TooltipProvider>
         </QueryClientProvider>
       </ThemeProvider>
+      <Analytics />
+      <SpeedInsights />
     </HelmetProvider>
   );
 };
