@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -41,8 +41,8 @@
     --shadow-gum-hover: 2px 2px 0px hsl(0 0% 5%);
     --shadow-gum-active: 0px 0px 0px hsl(0 0% 5%);
 
-    --font-sans: 'Noto Serif JP', serif;
-    --font-mono: 'Noto Serif JP', serif;
+    --font-sans: 'Reddit Mono', monospace;
+    --font-mono: 'Reddit Mono', monospace;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 5%;
