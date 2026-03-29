@@ -25,6 +25,7 @@ const CommunityChat = lazy(() => import("@/pages/CommunityChat"));
 const PlayPage = lazy(() => import("@/pages/PlayPage"));
 const AdminPage = lazy(() => import("@/pages/AdminPage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
+const StrangerPage = lazy(() => import("@/pages/StrangerPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -69,6 +70,7 @@ const App = () => {
                     <Route path="/whispers" element={<WhispersPage />} />
                     <Route path="/whispers/community" element={<CommunityChat />} />
                     <Route path="/whisper/:username" element={<ChatPage />} />
+                    <Route path="/stranger" element={<StrangerPage />} />
                     <Route path="/play" element={<PlayPage />} />
                     <Route
                       path="/admin"

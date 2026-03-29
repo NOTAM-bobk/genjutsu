@@ -1,0 +1,132 @@
+import { useState, useEffect, useRef } from 'react';
+import * as Ably from 'ably';
+
+export interface Message {
+  id: string;
+  text: string;
+  sender: 'me' | 'stranger' | 'system';
+  timestamp: number;
+}
+
+const ABLY_KEY = import.meta.env.VITE_ABLY_KEY;
+
+export function useStrangerMatch(userName: string = "Anonymous") {
+  const [status, setStatus] = useState<'idle' | 'searching' | 'matched'>('idle');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [strangerName, setStrangerName] = useState<string>('Stranger');
+  
+  const ablyRef = useRef<Ably.Realtime | null>(null);
+  const lobbyChannelRef = useRef<Ably.RealtimeChannel | null>(null);
+  const chatChannelRef = useRef<Ably.RealtimeChannel | null>(null);
+
+  useEffect(() => {
+    if (!ABLY_KEY) {
+       console.error("VITE_ABLY_KEY is missing. Genjutsu Stranger cannot connect.");
+       return;
+    }
+    // Initialize Ably
+    const clientId = "user_" + Math.random().toString(36).substring(2, 10);
+    const client = new Ably.Realtime({ key: ABLY_KEY, clientId });
+    ablyRef.current = client;
+
+    return () => {
+      client.close();
+    };
+  }, []);
+
+  const startSearch = async () => {
+    if (!ablyRef.current) return;
+    setStatus('searching');
+    setMessages([]);
+    setStrangerName('Stranger');
+    
+    const ably = ablyRef.current;
+    
+    // Disconnect from previous chat if any
+    if (chatChannelRef.current) {
+       chatChannelRef.current.detach();
+    }
+
+    const lobby = ably.channels.get('genjutsu_stranger_lobby');
+    lobbyChannelRef.current = lobby;
+
+    // Listen for incoming match offers
+    lobby.subscribe('offer', (msg) => {
+       if (msg.data.target === ably.auth.clientId) {
+          // Accept offer
+          lobby.presence.leave();
+          lobby.detach();
+          joinChat(msg.data.channel, msg.data.strangerName || 'Stranger');
+       }
+    });
+
+    // Enter presence so others can see we are searching
+    await lobby.presence.enter({ searching: true, name: userName });
+    
+    // Check if anyone else is already waiting
+    const presenceSet = await lobby.presence.get();
+    const otherWaiters = presenceSet.filter(p => p.clientId !== ably.auth.clientId && p.data?.searching);
+    
+    if (otherWaiters.length > 0) {
+       // Pick the first random waiter
+       const target = otherWaiters[Math.floor(Math.random() * otherWaiters.length)];
+       const newChatChannelId = `chat_${Math.random().toString(36).substring(2)}`;
+       
+       // Send offer exclusively to them
+       lobby.publish('offer', { target: target.clientId, channel: newChatChannelId, strangerName: userName });
+       
+       // Clean up lobby and join the new private chat
+       lobby.presence.leave();
+       lobby.detach();
+       joinChat(newChatChannelId, target.data?.name || "Stranger");
+    }
+  };
+
+  const joinChat = async (channelId: string, name: string) => {
+     setStatus('matched');
+     setStrangerName(name);
+     const ably = ablyRef.current!;
+     const chatChannel = ably.channels.get(channelId);
+     chatChannelRef.current = chatChannel;
+
+     // Enter presence to track disconnects
+     await chatChannel.presence.enter();
+     
+     chatChannel.presence.subscribe('leave', (member) => {
+         if (member.clientId !== ably.auth.clientId) {
+            setStatus('idle');
+            setMessages(prev => [...prev, { id: Math.random().toString(), text: 'Stranger has disconnected.', sender: 'system', timestamp: Date.now() }]);
+            chatChannel.detach();
+         }
+     });
+
+     // Listen for incoming messages
+     chatChannel.subscribe('message', (msg) => {
+         if (msg.clientId !== ably.auth.clientId) {
+             setMessages(prev => [...prev, { id: msg.id, text: msg.data.text, sender: 'stranger', timestamp: Date.now() }]);
+         }
+     });
+  };
+
+  const sendMessage = (text: string) => {
+     if (chatChannelRef.current && status === 'matched') {
+         chatChannelRef.current.publish('message', { text });
+         setMessages(prev => [...prev, { id: Math.random().toString(), text, sender: 'me', timestamp: Date.now() }]);
+     }
+  };
+
+  const stopSearch = () => {
+     if (lobbyChannelRef.current) {
+         lobbyChannelRef.current.presence.leave();
+         lobbyChannelRef.current.detach();
+     }
+     if (chatChannelRef.current) {
+         chatChannelRef.current.presence.leave();
+         chatChannelRef.current.detach();
+     }
+     setStatus('idle');
+     setMessages(prev => [...prev, { id: Math.random().toString(), text: 'You disconnected.', sender: 'system', timestamp: Date.now() }]);
+  };
+
+  return { status, messages, sendMessage, startSearch, stopSearch, strangerName };
+}

@@ -1,4 +1,4 @@
-import { Home, Search, User, LogOut, Settings, Hash, X, Send, Swords, LogIn, Bell, Shield } from "lucide-react";
+import { Home, Search, User, LogOut, Settings, Hash, X, Send, Swords, UsersRound, LogIn, Bell, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -67,6 +67,7 @@ const Navbar = () => {
               { icon: Home, label: "Feed", path: "/" },
               { icon: Search, label: "Search", path: "/search" },
               { icon: Send, label: "Whispers", path: "/whispers" },
+              { icon: UsersRound, label: "Stranger", path: "/stranger" },
               { icon: Swords, label: "Play", path: "/play" },
             ].map(({ icon: Icon, label, path }) => (
               <button
@@ -110,6 +111,13 @@ const Navbar = () => {
               title="Play"
             >
               <Swords size={16} />
+            </button>
+            <button
+              onClick={() => navigate("/stranger")}
+              className="md:hidden p-1.5 sm:p-2 rounded-[3px] hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              title="Stranger"
+            >
+              <UsersRound size={16} />
             </button>
             <button
               onClick={() => navigate("/whispers")}
