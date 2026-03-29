@@ -10,7 +10,7 @@ let serverDrift = 0;
 export async function syncTime() {
   try {
     const start = Date.now();
-    const response = await fetch(import.meta.env.VITE_SUPABASE_URL + '/rest/v1/', {
+    const response = await fetch(import.meta.env.VITE_SUPABASE_URL + '/auth/v1/health', {
       method: 'HEAD',
       headers: { 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }
     });
