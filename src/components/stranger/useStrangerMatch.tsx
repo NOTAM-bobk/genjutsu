@@ -33,18 +33,13 @@ export function useStrangerMatch(userName: string = "Anonymous") {
   useEffect(() => {
     mountedRef.current = true;
 
-    // Initialize Ably with token authentication (secure) or fallback to key (local dev)
+    if (!ABLY_KEY) {
+       console.error("VITE_ABLY_KEY is missing. Genjutsu Stranger cannot connect.");
+       return;
+    }
+    // Initialize Ably
     const clientId = "user_" + Math.random().toString(36).substring(2, 10);
-    
-    const ablyOptions: Ably.ClientOptions = ABLY_KEY
-      ? { key: ABLY_KEY, clientId }  // Local dev: use key directly
-      : { 
-          authUrl: `${window.location.origin}/api/ably-token`, 
-          authParams: { clientId }, 
-          clientId 
-        }; // Production: use token endpoint
-
-    const client = new Ably.Realtime(ablyOptions);
+    const client = new Ably.Realtime({ key: ABLY_KEY, clientId });
     ablyRef.current = client;
 
     // Join global channel just to track active users on the page
