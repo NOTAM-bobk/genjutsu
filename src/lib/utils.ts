@@ -11,7 +11,7 @@ export async function syncTime() {
   try {
     const start = Date.now();
     const response = await fetch(import.meta.env.VITE_SUPABASE_URL + '/auth/v1/health', {
-      method: 'HEAD',
+      method: 'GET',
       headers: { 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }
     });
     const serverDate = response.headers.get('date');
