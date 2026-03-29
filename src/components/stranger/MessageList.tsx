@@ -2,12 +2,12 @@ import { Message } from "./useStrangerMatch";
 import { useEffect, useRef } from "react";
 import { format } from "date-fns";
 
-export const MessageList = ({ messages }: { messages: Message[] }) => {
+export const MessageList = ({ messages, isStrangerTyping }: { messages: Message[], isStrangerTyping?: boolean }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isStrangerTyping]);
 
   if (messages.length === 0) {
     return (
@@ -51,6 +51,18 @@ export const MessageList = ({ messages }: { messages: Message[] }) => {
           </div>
         );
       })}
+      {isStrangerTyping && (
+        <div className="flex flex-col items-start animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="flex items-end gap-2 max-w-[85%]">
+            <div className="bg-background gum-border text-foreground shadow-[2px_2px_0px_rgba(0,0,0,0.1)] dark:shadow-[2px_2px_0px_rgba(255,255,255,0.1)] p-3 rounded-[3px] text-sm leading-relaxed flex items-center gap-1.5 h-11 w-16 justify-center">
+              <span className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div ref={bottomRef} />
     </div>
   );

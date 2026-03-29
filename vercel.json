@@ -9,6 +9,10 @@
             "destination": "/index.html"
         },
         {
+            "source": "/stranger",
+            "destination": "/api/og?specialPage=stranger"
+        },
+        {
             "source": "/whispers",
             "destination": "/index.html"
         },

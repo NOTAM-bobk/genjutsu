@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import * as Ably from 'ably';
 
 export interface Message {
@@ -14,12 +14,25 @@ export function useStrangerMatch(userName: string = "Anonymous") {
   const [status, setStatus] = useState<'idle' | 'searching' | 'matched'>('idle');
   const [messages, setMessages] = useState<Message[]>([]);
   const [strangerName, setStrangerName] = useState<string>('Stranger');
+  const [onlineCount, setOnlineCount] = useState<number>(1);
+  const [isStrangerTyping, setIsStrangerTyping] = useState<boolean>(false);
   
   const ablyRef = useRef<Ably.Realtime | null>(null);
   const lobbyChannelRef = useRef<Ably.RealtimeChannel | null>(null);
   const chatChannelRef = useRef<Ably.RealtimeChannel | null>(null);
+  const mountedRef = useRef<boolean>(true);
+
+  // Safe setState wrappers — prevents "Should have a queue" React error
+  // by guarding against state updates after unmount
+  const safeSetStatus = useCallback((v: 'idle' | 'searching' | 'matched') => { if (mountedRef.current) setStatus(v); }, []);
+  const safeSetMessages = useCallback((v: Message[] | ((prev: Message[]) => Message[])) => { if (mountedRef.current) setMessages(v); }, []);
+  const safeSetStrangerName = useCallback((v: string) => { if (mountedRef.current) setStrangerName(v); }, []);
+  const safeSetOnlineCount = useCallback((v: number) => { if (mountedRef.current) setOnlineCount(v); }, []);
+  const safeSetIsStrangerTyping = useCallback((v: boolean) => { if (mountedRef.current) setIsStrangerTyping(v); }, []);
 
   useEffect(() => {
+    mountedRef.current = true;
+
     if (!ABLY_KEY) {
        console.error("VITE_ABLY_KEY is missing. Genjutsu Stranger cannot connect.");
        return;
@@ -29,16 +42,34 @@ export function useStrangerMatch(userName: string = "Anonymous") {
     const client = new Ably.Realtime({ key: ABLY_KEY, clientId });
     ablyRef.current = client;
 
+    // Join global channel just to track active users on the page
+    const globalChannel = client.channels.get('genjutsu_stranger_global');
+    globalChannel.presence.enter().catch(() => {});
+    
+    const updateCount = async () => {
+        try {
+            const presence = await globalChannel.presence.get();
+            safeSetOnlineCount(Math.max(1, presence.length));
+        } catch (e) {}
+    };
+
+    globalChannel.presence.subscribe(['enter', 'leave'], updateCount);
+    updateCount();
+
     return () => {
+      mountedRef.current = false;
+      globalChannel.presence.leave().catch(() => {});
+      globalChannel.presence.unsubscribe();
       client.close();
     };
   }, []);
 
   const startSearch = async () => {
     if (!ablyRef.current) return;
-    setStatus('searching');
-    setMessages([]);
-    setStrangerName('Stranger');
+    safeSetStatus('searching');
+    safeSetMessages([]);
+    safeSetStrangerName('Stranger');
+    safeSetIsStrangerTyping(false);
     
     const ably = ablyRef.current;
     
@@ -84,8 +115,8 @@ export function useStrangerMatch(userName: string = "Anonymous") {
   };
 
   const joinChat = async (channelId: string, name: string) => {
-     setStatus('matched');
-     setStrangerName(name);
+     safeSetStatus('matched');
+     safeSetStrangerName(name);
      const ably = ablyRef.current!;
      const chatChannel = ably.channels.get(channelId);
      chatChannelRef.current = chatChannel;
@@ -95,16 +126,23 @@ export function useStrangerMatch(userName: string = "Anonymous") {
      
      chatChannel.presence.subscribe('leave', (member) => {
          if (member.clientId !== ably.auth.clientId) {
-            setStatus('idle');
-            setMessages(prev => [...prev, { id: Math.random().toString(), text: 'Stranger has disconnected.', sender: 'system', timestamp: Date.now() }]);
-            chatChannel.detach();
+            safeSetStatus('idle');
+            safeSetMessages(prev => [...prev, { id: Math.random().toString(), text: 'Stranger has disconnected.', sender: 'system', timestamp: Date.now() }]);
+            try { chatChannel.detach(); } catch(e) {}
          }
      });
 
      // Listen for incoming messages
      chatChannel.subscribe('message', (msg) => {
-         if (msg.clientId !== ably.auth.clientId) {
-             setMessages(prev => [...prev, { id: msg.id, text: msg.data.text, sender: 'stranger', timestamp: Date.now() }]);
+         if (msg.connectionId !== ably.connection.id) {
+             safeSetMessages(prev => [...prev, { id: msg.id, text: msg.data.text, sender: 'stranger', timestamp: msg.timestamp }]);
+             safeSetIsStrangerTyping(false);
+         }
+     });
+
+     chatChannel.subscribe('typing', (msg) => {
+         if (msg.connectionId !== ably.connection.id) {
+             safeSetIsStrangerTyping(msg.data.isTyping);
          }
      });
   };
@@ -112,8 +150,14 @@ export function useStrangerMatch(userName: string = "Anonymous") {
   const sendMessage = (text: string) => {
      if (chatChannelRef.current && status === 'matched') {
          chatChannelRef.current.publish('message', { text });
-         setMessages(prev => [...prev, { id: Math.random().toString(), text, sender: 'me', timestamp: Date.now() }]);
+         safeSetMessages(prev => [...prev, { id: Math.random().toString(), text, sender: 'me', timestamp: Date.now() }]);
      }
+  };
+
+  const sendTypingIndicator = (isTyping: boolean) => {
+      if (status === 'matched' && chatChannelRef.current) {
+          chatChannelRef.current.publish('typing', { isTyping }).catch(() => {});
+      }
   };
 
   const stopSearch = () => {
@@ -125,9 +169,10 @@ export function useStrangerMatch(userName: string = "Anonymous") {
          chatChannelRef.current.presence.leave().catch(() => {});
          try { chatChannelRef.current.detach(); } catch(e) {}
      }
-     setStatus('idle');
-     setMessages(prev => [...prev, { id: Math.random().toString(), text: 'You disconnected.', sender: 'system', timestamp: Date.now() }]);
+     safeSetStatus('idle');
+     safeSetIsStrangerTyping(false);
+     safeSetMessages(prev => [...prev, { id: Math.random().toString(), text: 'You disconnected.', sender: 'system', timestamp: Date.now() }]);
   };
 
-  return { status, messages, sendMessage, startSearch, stopSearch, strangerName };
+  return { status, messages, sendMessage, startSearch, stopSearch, strangerName, onlineCount, isStrangerTyping, sendTypingIndicator };
 }
