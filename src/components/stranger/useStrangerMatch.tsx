@@ -10,7 +10,7 @@ export interface Message {
 
 const ABLY_KEY = import.meta.env.VITE_ABLY_KEY; // Fallback for local dev only
 
-export function useStrangerMatch(userName: string = "Anonymous") {
+export function useStrangerMatch() {
   const [status, setStatus] = useState<'idle' | 'searching' | 'matched'>('idle');
   const [messages, setMessages] = useState<Message[]>([]);
   const [strangerName, setStrangerName] = useState<string>('Stranger');
@@ -77,45 +77,58 @@ export function useStrangerMatch(userName: string = "Anonymous") {
     
     const ably = ablyRef.current;
     
-    // Disconnect from previous chat if any
+    // Fully clean up any previous chat channel
     if (chatChannelRef.current) {
+       chatChannelRef.current.unsubscribe();
+       chatChannelRef.current.presence.unsubscribe();
        chatChannelRef.current.presence.leave().catch(() => {});
        try { chatChannelRef.current.detach(); } catch(e) {}
+       chatChannelRef.current = null;
     }
 
     const lobby = ably.channels.get('genjutsu_stranger_lobby');
     lobbyChannelRef.current = lobby;
 
+    // Clear ALL previous lobby subscriptions before adding new ones
+    lobby.unsubscribe();
+
+    // Guard: prevents both users from double-matching when they see each other simultaneously
+    let alreadyMatched = false;
+
     // Listen for incoming match offers
     lobby.subscribe('offer', (msg) => {
+       if (alreadyMatched) return;
        if (msg.data.target === ably.auth.clientId) {
-          // Accept offer
+          alreadyMatched = true;
+          lobby.unsubscribe();
           lobby.presence.leave().catch(() => {});
           try { lobby.detach(); } catch(e) {}
-          joinChat(msg.data.channel, msg.data.strangerName || 'Stranger');
+          joinChat(msg.data.channel, 'Stranger');
        }
     });
 
     try {
         // Enter presence so others can see we are searching
-        await lobby.presence.enter({ searching: true, name: userName });
+        await lobby.presence.enter({ searching: true });
         
         // Check if anyone else is already waiting
         const presenceSet = await lobby.presence.get();
         const otherWaiters = presenceSet.filter(p => p.clientId !== ably.auth.clientId && p.data?.searching);
         
-        if (otherWaiters.length > 0) {
+        if (otherWaiters.length > 0 && !alreadyMatched) {
+           alreadyMatched = true;
            // Pick the first random waiter
            const target = otherWaiters[Math.floor(Math.random() * otherWaiters.length)];
            const newChatChannelId = `chat_${Math.random().toString(36).substring(2)}`;
            
            // Send offer exclusively to them
-           lobby.publish('offer', { target: target.clientId, channel: newChatChannelId, strangerName: userName });
+           lobby.publish('offer', { target: target.clientId, channel: newChatChannelId });
            
            // Clean up lobby and join the new private chat
+           lobby.unsubscribe();
            lobby.presence.leave().catch(() => {});
            try { lobby.detach(); } catch(e) {}
-           joinChat(newChatChannelId, target.data?.name || "Stranger");
+           joinChat(newChatChannelId, "Stranger");
         }
     } catch (e: any) {
         console.warn("Ably search logic interrupted:", e.message);
@@ -126,6 +139,15 @@ export function useStrangerMatch(userName: string = "Anonymous") {
      safeSetStatus('matched');
      safeSetStrangerName(name);
      const ably = ablyRef.current!;
+
+     // Fully clean up any previous chat channel before joining a new one
+     if (chatChannelRef.current) {
+         chatChannelRef.current.unsubscribe();
+         chatChannelRef.current.presence.unsubscribe();
+         chatChannelRef.current.presence.leave().catch(() => {});
+         try { chatChannelRef.current.detach(); } catch(e) {}
+     }
+
      const chatChannel = ably.channels.get(channelId);
      chatChannelRef.current = chatChannel;
 
@@ -140,6 +162,8 @@ export function useStrangerMatch(userName: string = "Anonymous") {
          if (member.clientId !== ably.auth.clientId) {
             safeSetStatus('idle');
             safeSetMessages(prev => [...prev, { id: Math.random().toString(), text: 'Stranger has disconnected.', sender: 'system', timestamp: Date.now() }]);
+            chatChannel.unsubscribe();
+            chatChannel.presence.unsubscribe();
             try { chatChannel.detach(); } catch(e) {}
          }
      });
@@ -174,12 +198,18 @@ export function useStrangerMatch(userName: string = "Anonymous") {
 
   const stopSearch = () => {
      if (lobbyChannelRef.current) {
+         lobbyChannelRef.current.unsubscribe();
+         lobbyChannelRef.current.presence.unsubscribe();
          lobbyChannelRef.current.presence.leave().catch(() => {});
          try { lobbyChannelRef.current.detach(); } catch(e) {}
+         lobbyChannelRef.current = null;
      }
      if (chatChannelRef.current) {
+         chatChannelRef.current.unsubscribe();
+         chatChannelRef.current.presence.unsubscribe();
          chatChannelRef.current.presence.leave().catch(() => {});
          try { chatChannelRef.current.detach(); } catch(e) {}
+         chatChannelRef.current = null;
      }
      safeSetStatus('idle');
      safeSetIsStrangerTyping(false);

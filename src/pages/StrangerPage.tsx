@@ -1,5 +1,4 @@
 import { StrangerChat } from "@/components/stranger/StrangerChat";
-import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { UsersRound, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +8,6 @@ import { Helmet } from "react-helmet-async";
 const StrangerPage = () => {
   const navigate = useNavigate();
   const { loading: authLoading } = useAuth();
-  const { profile } = useProfile();
 
   if (authLoading) {
     return (
@@ -18,8 +16,6 @@ const StrangerPage = () => {
       </div>
     );
   }
-
-  const screenName = profile?.display_name || "Anonymous Developer";
 
   return (
     <>
@@ -49,7 +45,7 @@ const StrangerPage = () => {
             </div>
           </div>
 
-          <StrangerChat currentUserName={screenName} />
+          <StrangerChat />
         </div>
       </div>
     </>
