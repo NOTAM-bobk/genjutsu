@@ -44,7 +44,8 @@ export function useStrangerMatch(userName: string = "Anonymous") {
     
     // Disconnect from previous chat if any
     if (chatChannelRef.current) {
-       chatChannelRef.current.detach();
+       chatChannelRef.current.presence.leave().catch(() => {});
+       try { chatChannelRef.current.detach(); } catch(e) {}
     }
 
     const lobby = ably.channels.get('genjutsu_stranger_lobby');
@@ -54,8 +55,8 @@ export function useStrangerMatch(userName: string = "Anonymous") {
     lobby.subscribe('offer', (msg) => {
        if (msg.data.target === ably.auth.clientId) {
           // Accept offer
-          lobby.presence.leave();
-          lobby.detach();
+          lobby.presence.leave().catch(() => {});
+          try { lobby.detach(); } catch(e) {}
           joinChat(msg.data.channel, msg.data.strangerName || 'Stranger');
        }
     });
@@ -76,8 +77,8 @@ export function useStrangerMatch(userName: string = "Anonymous") {
        lobby.publish('offer', { target: target.clientId, channel: newChatChannelId, strangerName: userName });
        
        // Clean up lobby and join the new private chat
-       lobby.presence.leave();
-       lobby.detach();
+       lobby.presence.leave().catch(() => {});
+       try { lobby.detach(); } catch(e) {}
        joinChat(newChatChannelId, target.data?.name || "Stranger");
     }
   };
@@ -117,12 +118,12 @@ export function useStrangerMatch(userName: string = "Anonymous") {
 
   const stopSearch = () => {
      if (lobbyChannelRef.current) {
-         lobbyChannelRef.current.presence.leave();
-         lobbyChannelRef.current.detach();
+         lobbyChannelRef.current.presence.leave().catch(() => {});
+         try { lobbyChannelRef.current.detach(); } catch(e) {}
      }
      if (chatChannelRef.current) {
-         chatChannelRef.current.presence.leave();
-         chatChannelRef.current.detach();
+         chatChannelRef.current.presence.leave().catch(() => {});
+         try { chatChannelRef.current.detach(); } catch(e) {}
      }
      setStatus('idle');
      setMessages(prev => [...prev, { id: Math.random().toString(), text: 'You disconnected.', sender: 'system', timestamp: Date.now() }]);
