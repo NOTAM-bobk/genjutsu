@@ -38,7 +38,11 @@ export function useStrangerMatch(userName: string = "Anonymous") {
     
     const ablyOptions: Ably.ClientOptions = ABLY_KEY
       ? { key: ABLY_KEY, clientId }  // Local dev: use key directly
-      : { authUrl: '/api/ably-token', authParams: { clientId }, clientId }; // Production: use token endpoint
+      : { 
+          authUrl: `${window.location.origin}/api/ably-token`, 
+          authParams: { clientId }, 
+          clientId 
+        }; // Production: use token endpoint
 
     const client = new Ably.Realtime(ablyOptions);
     ablyRef.current = client;
