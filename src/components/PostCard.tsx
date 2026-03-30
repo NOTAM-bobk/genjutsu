@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, memo } from "react";
+import { useState, useEffect, useRef, memo, useMemo } from "react";
 import { Hash, Heart, MessageSquare, Share, Bookmark, MoreHorizontal, Trash2, Send, Languages, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { PostWithProfile } from "@/hooks/usePosts";
@@ -99,6 +99,30 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
   const [isTextExpanded, setIsTextExpanded] = useState(false);
   const [isCodeExpanded, setIsCodeExpanded] = useState(false);
 
+  // Content Selection Logic
+  const isAlreadyEnglish = useMemo(() => {
+    const text = post.content.trim();
+    if (!text) return true;
+    
+    // If it contains characters from non-Latin scripts, it's definitely not English
+    const hasOtherScripts = /[\u0400-\u04FF\u0600-\u06FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF]/.test(text);
+    if (hasOtherScripts) return false;
+    
+    // Check for common English words (most effective heuristic for Latin-script text)
+    const commonEnglishWords = /\b(the|and|is|it|you|that|in|was|for|on|are|with|as|I|be|at|have|from|this|but|his|by|they|we|say|her|she|or|an|will|my|one|all|would|there|their|what|so|up|out|if|about|who|get|which|go|me)\b/i;
+    
+    // It's English if it has English words or it's very short and only ASCII
+    return commonEnglishWords.test(text) || (text.length < 30 && !/[^\x00-\x7F]/.test(text));
+  }, [post.content]);
+
+  const rawContent = isShowingTranslation && translatedContent ? translatedContent : post.content;
+  const isLongPost = rawContent.length > 300;
+  const displayContent = isLongPost && !isTextExpanded ? rawContent.slice(0, 300) + '…' : rawContent;
+
+  const codeLines = post.code?.split('\n') || [];
+  const isLongCode = codeLines.length > 10;
+  const truncatedCode = isLongCode ? codeLines.slice(0, 10).join('\n') + '\n…' : post.code;
+
   // Translation Logic
   const handleTranslate = async () => {
     if (isShowingTranslation) {
@@ -108,6 +132,12 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
 
     if (translatedContent) {
       setIsShowingTranslation(true);
+      return;
+    }
+
+    // If it's already English, don't perform translation
+    if (isAlreadyEnglish) {
+      toast.info("This post is already in English.");
       return;
     }
 
@@ -133,15 +163,6 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
       setIsTranslating(false);
     }
   };
-
-  // Content Selection Logic
-  const rawContent = isShowingTranslation && translatedContent ? translatedContent : post.content;
-  const isLongPost = rawContent.length > 300;
-  const displayContent = isLongPost && !isTextExpanded ? rawContent.slice(0, 300) + '…' : rawContent;
-
-  const codeLines = post.code?.split('\n') || [];
-  const isLongCode = codeLines.length > 10;
-  const truncatedCode = isLongCode ? codeLines.slice(0, 10).join('\n') + '\n…' : post.code;
 
 
   return (
@@ -360,21 +381,23 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
             </button>
 
             {/* Translation Button */}
-            <button
-              onClick={handleTranslate}
-              disabled={isTranslating}
-              className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${isShowingTranslation ? "text-primary font-bold" : "text-muted-foreground hover:text-foreground"}`}
-              title={isShowingTranslation ? "Show Original" : "Translate to English"}
-            >
-              {isTranslating ? (
-                <Loader2 size={15} className="animate-spin" />
-              ) : (
-                <Languages size={15} />
-              )}
-              <span className="hidden xs:inline">
-                {isShowingTranslation ? "Original" : "Translate"}
-              </span>
-            </button>
+            {!isAlreadyEnglish && (
+              <button
+                onClick={handleTranslate}
+                disabled={isTranslating}
+                className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${isShowingTranslation ? "text-primary font-bold" : "text-muted-foreground hover:text-foreground"}`}
+                title={isShowingTranslation ? "Show Original" : "Translate to English"}
+              >
+                {isTranslating ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <Languages size={15} />
+                )}
+                <span className="hidden xs:inline">
+                  {isShowingTranslation ? "Original" : "Translate"}
+                </span>
+              </button>
+            )}
 
             <button
               onClick={() => {
