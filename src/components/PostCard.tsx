@@ -104,8 +104,8 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
     const text = post.content.trim();
     if (!text) return true;
     
-    // If it contains characters from non-Latin scripts, it's definitely not English
-    const hasOtherScripts = /[\u0400-\u04FF\u0600-\u06FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF]/.test(text);
+    // If it contains characters from non-Latin scripts (Cyrillic, Arabic, CJK, Bengali, Hindi, Thai, Hebrew, Greek, etc), it's definitely not English
+    const hasOtherScripts = /[\u0400-\u04FF\u0600-\u06FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF\u0980-\u09FF\u0900-\u097F\u0E00-\u0E7F\u0370-\u03FF\u0590-\u05FF\u0B80-\u0BFF\u0A80-\u0AFF\u0C00-\u0C7F]/.test(text);
     if (hasOtherScripts) return false;
     
     // Check for common English words (most effective heuristic for Latin-script text)
