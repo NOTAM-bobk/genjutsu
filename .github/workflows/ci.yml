@@ -18,10 +18,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.19
+          # Updated to 22 because your dependencies require Node >= 22
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
+        # If npm ci still fails after pushing, you can temporarily 
+        # change this to "npm install" to force a sync.
         run: npm ci
 
       - name: Lint
