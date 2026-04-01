@@ -2,42 +2,84 @@ import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
-import { Eye, Code, Zap, Shield, ArrowLeft, MessageSquare, Swords, Ghost, Infinity as InfinityIcon } from "lucide-react";
+import { Code, Zap, Shield, ArrowLeft, Ghost, Github, Paintbrush, Trash2, Gamepad2, Share2, Smartphone, MessageCircle, Clock, UsersRound, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useQuery } from "@tanstack/react-query";
 
 const AboutPage = () => {
     const { user } = useAuth();
+
+    const { data: contributors, isLoading: isLoadingContributors } = useQuery({
+        queryKey: ['github-contributors'],
+        queryFn: async () => {
+            const res = await fetch('https://api.github.com/repos/iamovi/genjutsu/contributors');
+            if (!res.ok) throw new Error('Failed to fetch');
+            return res.json();
+        },
+        staleTime: 1000 * 60 * 60, // 1 hour
+    });
     const features = [
         {
-            icon: <Zap className="text-primary" size={20} />,
-            title: "24-Hour Existence",
-            description: "Every post, every whisper, and every interaction lives for exactly 24 hours. After that, they vanish into the void. No archives, no footprints, no regrets."
+            icon: <Clock className="text-primary" size={20} />,
+            title: "24-Hour Lifespan",
+            description: "Every post, comment, and interaction has a strictly enforced 24-hour timer. True deletes — not just hidden from UI."
         },
         {
             icon: <Code className="text-primary" size={20} />,
-            title: "Built for Builders",
-            description: "Share snippets with full syntax highlighting. Use README mode to give your thoughts the space they deserve. Genjutsu is a home for code first."
+            title: "Developer First",
+            description: "Optimized for sharing code snippets and technical insights. Post freely without worrying about your permanent record."
         },
         {
-            icon: <MessageSquare className="text-primary" size={20} />,
-            title: "Whispers",
-            description: "Direct messaging redefined. Chat in real-time with fellow developers. Your conversations are as temporary as your posts, ensuring total privacy."
+            icon: <Paintbrush className="text-primary" size={20} />,
+            title: "Manga Aesthetic",
+            description: "A clean, high-contrast visual style inspired by Japanese manga. Bold. Minimal. Animated with Framer Motion."
         },
         {
-            icon: <Swords className="text-primary" size={20} />,
-            title: "Real-time Play",
-            description: "Bored? Challenge other online developers to a quick game. Our P2P matchmaking system makes it easy to take a break and connect."
+            icon: <Zap className="text-primary" size={20} />,
+            title: "Real-time Feed",
+            description: "Instant engagement powered by Supabase. Pure chronological connection. The feed resets every morning."
         },
         {
             icon: <Shield className="text-primary" size={20} />,
-            title: "Safe & Sanitized",
-            description: "We use server-side rate limiting and idempotency controls to keep the community clean from bots and spam, focusing on human-to-human interaction."
+            title: "Secure Login",
+            description: "One-tap OAuth via Google or GitHub. Built on Supabase with Row Level Security. Authenticated effortlessly."
         },
         {
-            icon: <InfinityIcon className="text-primary" size={20} />,
-            title: "Transient Arts",
-            description: "The name 'Genjutsu' (幻術) means illusionary arts. We believe the internet should be as transient as conversation—powerful in the moment, but destined to fade."
+            icon: <Trash2 className="text-primary" size={20} />,
+            title: "Zero Clutter",
+            description: "No follower counts, no clout chasing, no permanent history. Start every day with a clean slate."
+        },
+        {
+            icon: <Gamepad2 className="text-primary" size={20} />,
+            title: "Genjutsu Play",
+            description: "Challenge friends to online multiplayer games — Chess, Tic-Tac-Toe, Rock Paper Scissors, and more. All live, all inside the platform."
+        },
+        {
+            icon: <Ghost className="text-primary" size={20} />,
+            title: "Whispers",
+            description: "Ephemeral direct messages that also vanish after 24 hours. Say what you mean. Leave no paper trail."
+        },
+        {
+            icon: <Share2 className="text-primary" size={20} />,
+            title: "Dynamic OG Images",
+            description: "Auto-generated open graph images for better social sharing across platforms."
+        },
+        {
+            icon: <Smartphone className="text-primary" size={20} />,
+            title: "TWA (Native Android)",
+            description: "Experience genjutsu as a native Android app. Fast, immersive, and built with Trusted Web Activity technology.",
+            downloadUrl: "https://github.com/iamovi/genjutsu/releases/download/version2/genjutsu.apk"
+        },
+        {
+            icon: <MessageCircle className="text-primary" size={20} />,
+            title: "Community Chat",
+            description: "A built-in space to report bugs, suggest features, talk about the app, or just connect. Admins are always there. Say anything, anytime."
+        },
+        {
+            icon: <UsersRound className="text-primary" size={20} />,
+            title: "Genjutsu Stranger",
+            description: "Meet fellow developers securely and entirely anonymously via real-time WebSockets. A judgment-free zone to converse."
         }
     ];
 
@@ -103,6 +145,17 @@ const AboutPage = () => {
                                         <p className="text-sm text-foreground/70 leading-relaxed">
                                             {feature.description}
                                         </p>
+                                        {'downloadUrl' in feature && (
+                                            <a 
+                                                href={feature.downloadUrl as string} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="gum-btn bg-primary text-primary-foreground text-[10px] px-3 py-1.5 flex items-center gap-1.5 w-fit mt-4 hover:opacity-90 transition-opacity"
+                                            >
+                                                <Download size={14} />
+                                                Download APK
+                                            </a>
+                                        )}
                                     </motion.div>
                                 ))}
                             </section>
@@ -120,6 +173,48 @@ const AboutPage = () => {
                                 >
                                     {user ? "Cast an illusion" : "Cast your first spell"}
                                 </Link>
+                            </section>
+
+                            {/* Open Source & Contributors Section */}
+                            <section className="mt-12 mb-4 text-foreground">
+                                <p className="text-xs font-mono uppercase tracking-widest text-primary/70 mb-6 border-l-2 border-primary/50 pl-3">// Open Source &amp; Contributors</p>
+                                <div className="gum-card p-6 md:p-8">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-8 border-b border-border">
+                                        <div>
+                                            <h3 className="text-2xl font-bold uppercase tracking-tight mb-2">Open Source</h3>
+                                            <p className="text-sm text-foreground/80 font-medium max-w-xl leading-relaxed">
+                                                Built for the developer community. Fix a bug, suggest a feature, or help with the manga-inspired design.
+                                                Every migration, RLS policy, and cron job is in the repo. Let's build something ephemeral together.
+                                            </p>
+                                        </div>
+                                        <a href="https://github.com/iamovi/genjutsu" target="_blank" rel="noopener noreferrer"
+                                            className="gum-btn bg-primary text-primary-foreground inline-flex items-center gap-2 px-6 py-3 font-bold uppercase tracking-wide text-sm whitespace-nowrap shrink-0 hover:opacity-90 transition-opacity">
+                                            <Github size={20} />
+                                            View on GitHub
+                                        </a>
+                                    </div>
+                                    
+                                    <p className="text-xs font-mono uppercase tracking-widest text-primary/70 mb-6 border-l-2 border-primary/50 pl-3">// Author &amp; Contributors</p>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                        {isLoadingContributors ? (
+                                            Array.from({ length: 6 }).map((_, i) => (
+                                                <div key={i} className="flex flex-col items-center gap-2 animate-pulse">
+                                                    <div className="w-14 h-14 rounded-[3px] bg-secondary"></div>
+                                                    <div className="h-2 w-12 rounded bg-secondary"></div>
+                                                </div>
+                                            ))
+                                        ) : contributors?.map((c: any, i: number) => (
+                                            <a key={c.id || c.login} href={c.html_url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 group p-2 rounded-[3px] hover:bg-secondary/50 transition-colors">
+                                                <div className="relative">
+                                                    {i === 0 && <div className="absolute -top-2 -right-3 z-10 bg-primary text-primary-foreground px-1 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider rounded-[2px] whitespace-nowrap">Author</div>}
+                                                    <img src={c.avatar_url} alt={c.login} className="w-14 h-14 rounded-[3px] gum-border object-cover group-hover:opacity-80 transition-opacity" />
+                                                </div>
+                                                <span className="text-xs font-mono font-bold uppercase tracking-tight text-center truncate w-full group-hover:text-primary transition-colors">{c.login}</span>
+                                                <span className="text-[10px] font-mono text-muted-foreground">{c.contributions} commit{c.contributions !== 1 ? 's' : ''}</span>
+                                            </a>
+                                        ))}
+                                    </div>
+                                </div>
                             </section>
 
                             <footer className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
