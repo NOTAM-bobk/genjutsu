@@ -99,7 +99,8 @@ export function useCommunityChat() {
         mutationFn: async (userMessage: string) => {
             setIsAiThinking(true);
             const { fetchGroqReply } = await import("@/lib/groq");
-            const replyContent = await fetchGroqReply(userMessage);
+            const userName = user?.user_metadata?.display_name || user?.user_metadata?.username || "a user";
+            const replyContent = await fetchGroqReply(userMessage, userName);
 
             if (!user) return;
 

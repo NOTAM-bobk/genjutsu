@@ -11,9 +11,11 @@ import ReactMarkdown from "react-markdown";
 
 const CommunityChat = () => {
     const [messageText, setMessageText] = useState("");
+    const [showAiMention, setShowAiMention] = useState(false);
     const { user } = useAuth();
     const navigate = useNavigate();
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const {
         messages,
@@ -33,8 +35,34 @@ const CommunityChat = () => {
         scrollToBottom();
     }, [messages, isAiThinking]);
 
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setMessageText(val);
+        
+        // Detect AI mention typing at the end of string
+        const lowerVal = val.toLowerCase();
+        if (lowerVal.endsWith("@") || lowerVal.endsWith("@a") || lowerVal.endsWith("@ai")) {
+            setShowAiMention(true);
+        } else {
+            setShowAiMention(false);
+        }
+    };
+
+    const handleAiMentionSelect = () => {
+        let newVal = messageText;
+        const lowerVal = newVal.toLowerCase();
+        if (lowerVal.endsWith("@ai")) newVal = newVal.slice(0, -3);
+        else if (lowerVal.endsWith("@a")) newVal = newVal.slice(0, -2);
+        else if (lowerVal.endsWith("@")) newVal = newVal.slice(0, -1);
+        
+        setMessageText(newVal + "@ai ");
+        setShowAiMention(false);
+        inputRef.current?.focus();
+    };
+
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
+        setShowAiMention(false);
         if (!messageText.trim() || isSending) return;
 
         try {
@@ -237,19 +265,46 @@ const CommunityChat = () => {
                 <div ref={messagesEndRef} className="h-4" />
             </main>
 
-            <footer className="shrink-0 bg-background/95 backdrop-blur-md border-t-2 border-border p-4 pb-safe">
+            <footer className="shrink-0 bg-background/95 backdrop-blur-md border-t-2 border-border p-4 pb-safe relative">
+                <AnimatePresence>
+                    {showAiMention && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            className="absolute bottom-full left-4 mb-2 z-50 min-w-[200px]"
+                        >
+                            <div className="bg-popover text-popover-foreground gum-border gum-shadow rounded-[3px] overflow-hidden flex flex-col p-1">
+                                <span className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider">Agents</span>
+                                <button
+                                    type="button"
+                                    onClick={handleAiMentionSelect}
+                                    className="flex items-center gap-2 p-2 hover:bg-secondary transition-colors text-left rounded-sm w-full"
+                                >
+                                    <div className="w-7 h-7 rounded-[3px] border-2 border-primary/20 bg-primary/10 flex items-center justify-center shrink-0">
+                                        <Ghost size={14} className="text-primary animate-pulse" />
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="font-bold text-sm leading-none text-primary">Genjutsu AI</span>
+                                        <span className="text-[10px] text-muted-foreground leading-none mt-1">@ai</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 {user ? (
                     <form onSubmit={handleSend} className="max-w-4xl mx-auto flex gap-3">
                         <input
                             type="text"
-                            id="community-chat-input"
-                            name="community-message"
+                            ref={inputRef}
                             value={messageText}
-                            onChange={(e) => setMessageText(e.target.value)}
+                            onChange={handleInputChange}
                             placeholder="Say something to the community..."
                             maxLength={500}
                             className="flex-1 bg-secondary/50 gum-border py-2.5 px-4 outline-none focus:border-primary transition-colors text-sm"
-                            autoFocus
+                            autoComplete="new-password"
                         />
                         <button
                             type="submit"

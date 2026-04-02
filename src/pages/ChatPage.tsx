@@ -213,7 +213,7 @@ const ChatPage = () => {
                         onChange={handleInputChange}
                         placeholder="Type a whisper... they vanish in 24h"
                         className="flex-1 bg-secondary/50 gum-border py-2.5 px-4 outline-none focus:border-primary transition-colors text-sm"
-                        autoFocus
+                        autoComplete="off"
                     />
                     <button
                         type="submit"
