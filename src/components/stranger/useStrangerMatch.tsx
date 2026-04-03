@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import * as Ably from 'ably';
+import { getConfig } from "@/lib/config";
 
 export interface Message {
   id: string;
@@ -8,9 +9,8 @@ export interface Message {
   timestamp: number;
 }
 
-const ABLY_KEY = import.meta.env.VITE_ABLY_KEY; // Fallback for local dev only
-
 export function useStrangerMatch() {
+  const ABLY_KEY = getConfig().VITE_ABLY_KEY; // Fallback for local dev only
   const [status, setStatus] = useState<'idle' | 'searching' | 'matched'>('idle');
   const [messages, setMessages] = useState<Message[]>([]);
   const [strangerName, setStrangerName] = useState<string>('Stranger');
