@@ -11,7 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Edit3, Loader2, Upload, Camera, Link as LinkIcon, ChevronDown, ChevronUp, Music, Search, Play, Pause, X } from "lucide-react";
+import { Edit3, Upload, Camera, Link as LinkIcon, ChevronDown, ChevronUp, Music, Search, Play, Pause, X } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getNow } from "@/lib/utils";
@@ -254,7 +255,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                             disabled={submitting}
                             className="bg-primary text-primary-foreground px-4 sm:px-8 py-2 rounded-[3px] font-bold border-2 border-foreground hover:bg-primary/90 transition-all flex items-center gap-2"
                         >
-                            {submitting ? <Loader2 className="animate-spin" size={16} /> : "Save"}
+                            {submitting ? <FrogLoader className="" size={16} /> : "Save"}
                         </button>
                     </div>
 
@@ -280,7 +281,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                                 disabled={uploadingBanner}
                                                 className="p-5 bg-background shadow-xl rounded-full hover:bg-secondary gum-border transition-all transform scale-90 group-hover:scale-100"
                                             >
-                                                {uploadingBanner ? <Loader2 className="animate-spin" size={28} /> : <Camera size={28} />}
+                                                {uploadingBanner ? <FrogLoader className="" size={28} /> : <Camera size={28} />}
                                             </button>
                                         </div>
                                         <input
@@ -311,7 +312,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                                         disabled={uploadingAvatar}
                                                         className="p-2 bg-background shadow-xl rounded-full hover:bg-secondary gum-border transition-all"
                                                     >
-                                                        {uploadingAvatar ? <Loader2 className="animate-spin" size={18} /> : <Camera size={18} />}
+                                                        {uploadingAvatar ? <FrogLoader className="" size={18} /> : <Camera size={18} />}
                                                     </button>
                                                 </div>
                                                 <input
@@ -341,7 +342,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                                             disabled={uploadingAvatar}
                                                             className="p-3 bg-background shadow-xl rounded-full hover:bg-secondary gum-border transition-all transform scale-90 group-hover:scale-100"
                                                         >
-                                                            {uploadingAvatar ? <Loader2 className="animate-spin" size={24} /> : <Camera size={24} />}
+                                                            {uploadingAvatar ? <FrogLoader className="" size={24} /> : <Camera size={24} />}
                                                         </button>
                                                     </div>
                                                     <input
@@ -469,7 +470,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                                     disabled={searching}
                                                     className="bg-secondary p-3 rounded-[3px] border-2 border-foreground hover:opacity-80 disabled:opacity-50"
                                                 >
-                                                    {searching ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
+                                                    {searching ? <FrogLoader className="" size={18} /> : <Search size={18} />}
                                                 </button>
                                             </div>
 

@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useWhispers, Whisper } from "@/hooks/useWhispers";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
-import { Loader2, ArrowLeft, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, Trash2 } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -97,7 +98,7 @@ const ChatPage = () => {
     if (loadingProfile || loadingMessages) {
         return (
             <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center">
-                <Loader2 className="animate-spin text-primary" size={32} />
+                <FrogLoader className=" text-primary" size={32} />
                 <p className="mt-4 text-sm text-muted-foreground animate-pulse">Whispering to the abyss...</p>
             </div>
         );
@@ -220,7 +221,7 @@ const ChatPage = () => {
                         disabled={!messageText.trim() || isSending}
                         className="gum-btn bg-primary text-primary-foreground px-5 h-10 flex items-center gap-2"
                     >
-                        {isSending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                        {isSending ? <FrogLoader size={16} className="" /> : <Send size={16} />}
                         <span className="hidden sm:inline">Whisper</span>
                     </button>
                 </form>

@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2 } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 
 interface RequireAdminProps {
   children: ReactNode;
@@ -14,7 +14,7 @@ const RequireAdmin = ({ children }: RequireAdminProps) => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="animate-spin" size={24} />
+        <FrogLoader className="" size={24} />
       </div>
     );
   }

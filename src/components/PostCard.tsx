@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, memo, useMemo } from "react";
-import { Hash, Heart, MessageSquare, Share, Bookmark, MoreHorizontal, Trash2, Send, Languages, Loader2 } from "lucide-react";
+import { Hash, Heart, MessageSquare, Share, Bookmark, MoreHorizontal, Trash2, Send, Languages } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { motion } from "framer-motion";
 import { PostWithProfile } from "@/hooks/usePosts";
 import { useAuth } from "@/hooks/useAuth";
@@ -392,7 +393,7 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
                 title={isShowingTranslation ? "Show Original" : "Translate to English"}
               >
                 {isTranslating ? (
-                  <Loader2 size={15} className="animate-spin" />
+                  <FrogLoader size={15} className="" />
                 ) : (
                   <Languages size={15} />
                 )}

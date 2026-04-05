@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
-import { Send, Loader2, ArrowLeft, LogIn, Users } from "lucide-react";
+import { Send, ArrowLeft, LogIn, Users } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { Helmet } from "react-helmet-async";
 
 const WhispersPage = () => {
@@ -40,7 +41,7 @@ const WhispersPage = () => {
 
                         {loadingConversations ? (
                             <div className="flex justify-center py-20">
-                                <Loader2 className="animate-spin text-primary" size={32} />
+                                <FrogLoader className=" text-primary" size={32} />
                             </div>
                         ) : !user ? (
                             <div className="gum-card p-12 text-center flex flex-col items-center gap-4 bg-secondary/20 border-dashed">

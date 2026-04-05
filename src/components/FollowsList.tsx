@@ -7,7 +7,8 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, UserPlus, UserCheck, Send } from "lucide-react";
+import { UserPlus, UserCheck, Send } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -161,7 +162,7 @@ const FollowsList = ({ userId, type, isOpen, onOpenChange, onAction }: FollowsLi
                 <div className="flex-1 overflow-y-auto p-2">
                     {loading ? (
                         <div className="flex justify-center py-8">
-                            <Loader2 className="animate-spin text-muted-foreground" size={24} />
+                            <FrogLoader className=" text-muted-foreground" size={24} />
                         </div>
                     ) : users.length === 0 ? (
                         <div className="text-center py-8 text-muted-foreground text-sm">

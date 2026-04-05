@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Search as SearchIcon, User, Hash, Loader2, ArrowLeft, Send } from "lucide-react";
+import { Search as SearchIcon, User, Hash, ArrowLeft, Send } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
@@ -230,7 +231,7 @@ const SearchPage = () => {
 
                         {loading ? (
                             <div className="flex flex-col items-center justify-center py-20 gap-3">
-                                <Loader2 className="animate-spin text-primary" size={32} />
+                                <FrogLoader className=" text-primary" size={32} />
                                 <p className="text-sm text-muted-foreground font-medium">Searching the abyss...</p>
                             </div>
                         ) : query ? (

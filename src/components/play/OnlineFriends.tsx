@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Swords, Users, Loader2 } from 'lucide-react';
+import { Swords, Users } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { OnlinePlayer } from '@/hooks/usePlayPresence';
 
 interface OnlineFriendsProps {
@@ -125,7 +126,7 @@ const PlayerRow = ({ player, onChallenge, isChallenging }: PlayerRowProps) => (
         >
             {isChallenging ? (
                 <>
-                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <FrogLoader className="h-3 w-3 " />
                     <span>Waiting...</span>
                 </>
             ) : (

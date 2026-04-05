@@ -5,7 +5,8 @@ import { PostWithProfile } from "@/hooks/usePosts";
 import Navbar from "@/components/Navbar";
 import PostCard from "@/components/PostCard";
 import Sidebar from "@/components/Sidebar";
-import { Loader2, ArrowLeft, Send, MessageSquare, MoreHorizontal, Trash2, Languages } from "lucide-react";
+import { ArrowLeft, Send, MessageSquare, MoreHorizontal, Trash2, Languages } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
@@ -115,7 +116,7 @@ const CommentItem = ({
                                     className={`px-1.5 py-0.5 rounded-[3px] transition-colors flex items-center gap-1.5 border border-transparent ${isShowingTranslation ? "text-primary bg-primary/10 border-primary/20" : "text-muted-foreground hover:bg-secondary hover:text-foreground hover:border-border"}`}
                                     title={isShowingTranslation ? "Show Original" : "Translate"}
                                 >
-                                    {isTranslating ? <Loader2 size={12} className="animate-spin" /> : <Languages size={12} />}
+                                    {isTranslating ? <FrogLoader size={12} className="" /> : <Languages size={12} />}
                                     <span className="text-[10px] font-medium hidden xs:inline">{isShowingTranslation ? "Original" : "Translate"}</span>
                                 </button>
                             )}
@@ -150,7 +151,7 @@ const CommentItem = ({
                                                 >
                                                     {deletingCommentId === comment.id ? (
                                                         <span className="flex items-center gap-2">
-                                                            <Loader2 size={10} className="animate-spin" /> Deleting...
+                                                            <FrogLoader size={10} className="" /> Deleting...
                                                         </span>
                                                     ) : (
                                                         <>
@@ -460,7 +461,7 @@ const PostPage = () => {
 
                         {loading ? (
                             <div className="flex justify-center py-12">
-                                <Loader2 className="animate-spin" size={24} />
+                                <FrogLoader className="" size={24} />
                             </div>
                         ) : !post ? (
                             <div className="gum-card p-8 text-center">
@@ -515,7 +516,7 @@ const PostPage = () => {
                                                             disabled={!commentText.trim() || submittingComment}
                                                             className="gum-btn bg-primary text-primary-foreground text-xs flex items-center gap-2 disabled:opacity-50"
                                                         >
-                                                            {submittingComment ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
+                                                            {submittingComment ? <FrogLoader size={12} className="" /> : <Send size={12} />}
                                                             Echo
                                                         </button>
                                                     </div>

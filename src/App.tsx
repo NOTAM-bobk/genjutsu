@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -55,7 +56,7 @@ const App = () => {
                 <Suspense
                   fallback={
                     <div className="flex h-screen items-center justify-center">
-                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      <FrogLoader size={32} />
                     </div>
                   }
                 >

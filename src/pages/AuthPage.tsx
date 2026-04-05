@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Eye, EyeOff, Sparkles, ArrowLeft, Mail } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import { z } from "zod";
 import { Helmet } from "react-helmet-async";
@@ -431,7 +432,7 @@ const AuthPage = () => {
                       >
                         {submitting ? (
                           <span className="flex items-center justify-center gap-2">
-                            <Sparkles className="animate-spin" size={16} />
+                            <FrogLoader size={16} />
                             Processing...
                           </span>
                         ) : isSignUp ? "Create Account" : "Sign In"}

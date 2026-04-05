@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Copy, LogOut, MessageCircle, X, Loader2, Volume2, VolumeX, AlertTriangle } from 'lucide-react';
+import { Copy, LogOut, MessageCircle, X, Volume2, VolumeX, AlertTriangle } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { ConnectionStatus, GameId, ChatMessage } from '@/types/game';
 import ChatPanel from './ChatPanel';
 import GameSelector from './GameSelector';
@@ -142,7 +143,7 @@ const RoomView = (props: RoomViewProps) => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4">
           <div className="relative">
             <div className="absolute inset-0 bg-foreground/10 rounded-full blur-xl animate-pulse" />
-            <Loader2 className="relative h-8 w-8 animate-spin text-muted-foreground" />
+            <FrogLoader className="relative h-8 w-8  text-muted-foreground" />
           </div>
           <span className="text-sm text-muted-foreground">Connecting...</span>
         </motion.div>
@@ -286,7 +287,7 @@ const RoomView = (props: RoomViewProps) => {
         {pendingInvite && isInviter && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-b border-border bg-secondary/50 overflow-hidden shrink-0">
             <div className="flex items-center justify-center gap-2 px-4 py-3">
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <FrogLoader className="h-4 w-4 " />
               <span className="text-sm">Waiting for {peerName} to accept {GAME_NAMES[pendingInvite]}...</span>
             </div>
           </motion.div>

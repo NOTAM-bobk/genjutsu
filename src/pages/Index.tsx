@@ -6,7 +6,7 @@ import PostCard from "@/components/PostCard";
 import Sidebar from "@/components/Sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { usePosts } from "@/hooks/usePosts";
-import { Loader2 } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { Helmet } from "react-helmet-async";
 import { PostSkeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
@@ -50,7 +50,7 @@ const Index = () => {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="animate-spin" size={24} />
+        <FrogLoader className="" size={24} />
       </div>
     );
   }
@@ -108,7 +108,7 @@ const Index = () => {
                 ))}
 
                 <div ref={observerRef} className="h-10 flex justify-center items-center">
-                  {isFetchingNextPage && <Loader2 className="animate-spin text-muted-foreground" size={20} />}
+                  {isFetchingNextPage && <FrogLoader className=" text-muted-foreground" size={20} />}
                 </div>
               </div>
             )}

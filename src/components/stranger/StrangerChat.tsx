@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useStrangerMatch } from "./useStrangerMatch";
 import { MessageList } from "./MessageList";
 import { Send, UserRoundX, Orbit } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 
 export const StrangerChat = () => {
   const { status, messages, sendMessage, startSearch, stopSearch, skip, strangerName, onlineCount, isStrangerTyping, sendTypingIndicator } = useStrangerMatch();
@@ -79,7 +80,7 @@ export const StrangerChat = () => {
         <div className="flex-1 flex flex-col h-full bg-secondary/5">
             {status === 'searching' ? (
                <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
-                  <Orbit className="animate-spin mb-4 text-primary opacity-50" size={48} />
+                  <FrogLoader size={48} className="mb-4 opacity-50" />
                   <p className="font-bold tracking-widest uppercase text-xs">Waiting in lobby...</p>
                </div>
             ) : (

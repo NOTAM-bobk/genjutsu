@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Code, ImageIcon, Smile, Send, X, Loader2 } from "lucide-react";
+import { Code, ImageIcon, Smile, Send, X } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { useMentions } from "@/hooks/useMentions";
 import { motion, AnimatePresence } from "framer-motion";
 import MentionList from "./MentionList";
@@ -413,7 +414,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
               disabled={!content.trim() || submitting || cooldown > 0}
               className="gum-btn bg-primary text-primary-foreground text-sm disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {submitting ? <Loader2 size={14} className="animate-spin" /> : cooldown > 0 ? null : <Send size={14} />}
+              {submitting ? <FrogLoader size={14} className="" /> : cooldown > 0 ? null : <Send size={14} />}
               {submitting ? "Posting..." : cooldown > 0 ? `Wait ${cooldown}s` : t("feed.castSpell")}
             </button>
           </div>

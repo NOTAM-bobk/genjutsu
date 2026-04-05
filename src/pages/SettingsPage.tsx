@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import Navbar from "@/components/Navbar";
-import { LogOut, ArrowLeft, Shield, Settings, Check, Loader2, AtSign, Globe } from "lucide-react";
+import { LogOut, ArrowLeft, Shield, Settings, Check, AtSign, Globe } from "lucide-react";
+import { FrogLoader } from "@/components/ui/FrogLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { toast } from "sonner";
@@ -245,7 +246,7 @@ const SettingsPage = () => {
                                                         className="gum-btn bg-primary text-primary-foreground text-sm px-6 py-2.5 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
                                                     >
                                                         {isSaving ? (
-                                                            <Loader2 size={16} className="animate-spin" />
+                                                            <FrogLoader size={16} className="" />
                                                         ) : (
                                                             <Check size={16} />
                                                         )}
@@ -385,7 +386,7 @@ const SettingsPage = () => {
                                                                 className="bg-destructive text-white hover:bg-destructive/90 rounded-[3px] font-bold"
                                                             >
                                                                 {isDeleting ? (
-                                                                    <Loader2 size={16} className="animate-spin mr-2" />
+                                                                    <FrogLoader size={16} className=" mr-2" />
                                                                 ) : null}
                                                                 {t("settings.finalDestruction")}
                                                             </AlertDialogAction>
