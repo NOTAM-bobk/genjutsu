@@ -38,6 +38,10 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
     const [submitting, setSubmitting] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [uploadingBanner, setUploadingBanner] = useState(false);
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [bannerFile, setBannerFile] = useState<File | null>(null);
+    const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
+    const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(null);
     const [showUrls, setShowUrls] = useState(false);
     const [showSocials, setShowSocials] = useState(false);
     const [showMusic, setShowMusic] = useState(false);
@@ -63,6 +67,10 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             setShowMusic(false);
             setSearchResults([]);
             setSongQuery("");
+            setAvatarFile(null);
+            setBannerFile(null);
+            setAvatarPreviewUrl(null);
+            setBannerPreviewUrl(null);
         } else {
             if (audioRef.current) {
                 audioRef.current.pause();
@@ -76,11 +84,13 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                 audioRef.current.pause();
                 audioRef.current = null;
             }
+            if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
+            if (bannerPreviewUrl) URL.revokeObjectURL(bannerPreviewUrl);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, bucket: 'avatars' | 'banners') => {
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, bucket: 'avatars' | 'banners') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -90,36 +100,18 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
         }
 
         const isAvatar = bucket === 'avatars';
-        if (isAvatar) setUploadingAvatar(true);
-        else setUploadingBanner(true);
+        const previewUrl = URL.createObjectURL(file);
 
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("Authentication required");
-
-            // Old file cleanup is handled in handleSubmit's cleanupOldFile()
-
-            const fileExt = file.name.split('.').pop();
-            const filePath = `${user.id}/${Math.random()}.${fileExt}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from(bucket)
-                .upload(filePath, file);
-
-            if (uploadError) throw uploadError;
-
-            const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
-
-            if (isAvatar) setAvatarUrl(data.publicUrl);
-            else setBannerUrl(data.publicUrl);
-
-            toast.success(`${bucket.slice(0, -1).charAt(0).toUpperCase() + bucket.slice(1, -1)} uploaded!`);
-        } catch (error: any) {
-            console.error(`Error uploading ${bucket}:`, error);
-            toast.error(`We couldn't upload your ${bucket.slice(0, -1)}. Please check your connection and try again.`);
-        } finally {
-            if (isAvatar) setUploadingAvatar(false);
-            else setUploadingBanner(false);
+        if (isAvatar) {
+            if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
+            setAvatarFile(file);
+            setAvatarPreviewUrl(previewUrl);
+            setAvatarUrl(""); // Wipe explicit URL since user chose a file
+        } else {
+            if (bannerPreviewUrl) URL.revokeObjectURL(bannerPreviewUrl);
+            setBannerFile(file);
+            setBannerPreviewUrl(previewUrl);
+            setBannerUrl("");
         }
     };
 
@@ -135,6 +127,33 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("No user found");
 
+            let finalAvatarUrl = avatarUrl;
+            let finalBannerUrl = bannerUrl;
+
+            // Helper to upload files to Supabase inline
+            const uploadFile = async (file: File, bucket: 'avatars' | 'banners') => {
+                const fileExt = file.name.split('.').pop();
+                const filePath = `${user.id}/${Math.random()}.${fileExt}`;
+                const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file);
+                if (uploadError) throw uploadError;
+                return supabase.storage.from(bucket).getPublicUrl(filePath).data.publicUrl;
+            };
+
+            const uploadPromises = [];
+            
+            if (avatarFile) {
+                setUploadingAvatar(true);
+                uploadPromises.push(uploadFile(avatarFile, 'avatars').then(url => finalAvatarUrl = url));
+            }
+            if (bannerFile) {
+                setUploadingBanner(true);
+                uploadPromises.push(uploadFile(bannerFile, 'banners').then(url => finalBannerUrl = url));
+            }
+
+            if (uploadPromises.length > 0) {
+                await Promise.all(uploadPromises);
+            }
+
             // --- AUTO-DELETE OLD FILES IF URL CHANGED ---
             const cleanupOldFile = async (oldUrl: string | null, newUrl: string | null, bucket: 'avatars' | 'banners') => {
                 const bucketUrl = supabase.storage.from(bucket).getPublicUrl('').data.publicUrl;
@@ -148,8 +167,8 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             };
 
             await Promise.all([
-                cleanupOldFile(currentProfile.avatar_url, avatarUrl, 'avatars'),
-                cleanupOldFile(currentProfile.banner_url, bannerUrl, 'banners')
+                cleanupOldFile(currentProfile.avatar_url, finalAvatarUrl, 'avatars'),
+                cleanupOldFile(currentProfile.banner_url, finalBannerUrl, 'banners')
             ]);
             // --------------------------------------------
 
@@ -158,8 +177,8 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                 .update({
                     display_name: displayName,
                     bio: bio,
-                    avatar_url: avatarUrl,
-                    banner_url: bannerUrl,
+                    avatar_url: finalAvatarUrl,
+                    banner_url: finalBannerUrl,
                     social_links: socialLinks,
                     fav_song: favSong,
                     updated_at: getNow().toISOString(),
@@ -247,8 +266,8 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                 <div className="bg-secondary/5 rounded-[3px] border-2 border-foreground/10">
                                     {/* Banner Preview */}
                                     <div className="h-40 sm:h-72 w-full bg-muted relative group overflow-hidden border-b-2 border-foreground/10 rounded-t-[3px]">
-                                        {bannerUrl ? (
-                                            <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover" />
+                                        {(bannerPreviewUrl || bannerUrl) ? (
+                                            <img src={bannerPreviewUrl || bannerUrl} alt="Banner" className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-secondary/20">
                                                 No Banner Image
@@ -278,8 +297,8 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                         {/* Mobile: centered inline avatar below banner */}
                                         <div className="sm:hidden flex justify-center -mt-12 pb-4 w-full">
                                             <div className="relative group w-24 h-24 rounded-[3px] gum-border border-[4px] border-background bg-secondary overflow-hidden shadow-2xl">
-                                                {avatarUrl ? (
-                                                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                                {(avatarPreviewUrl || avatarUrl) ? (
+                                                    <img src={avatarPreviewUrl || avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-2xl font-bold bg-secondary">
                                                         {displayName[0]?.toUpperCase() || "?"}
@@ -308,8 +327,8 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                         <div className="hidden sm:block relative h-20">
                                             <div className="absolute -top-16 left-8">
                                                 <div className="relative group w-40 h-40 rounded-[3px] gum-border border-[6px] border-background bg-secondary overflow-hidden shadow-2xl">
-                                                    {avatarUrl ? (
-                                                        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                                    {(avatarPreviewUrl || avatarUrl) ? (
+                                                        <img src={avatarPreviewUrl || avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-3xl font-bold bg-secondary">
                                                             {displayName[0]?.toUpperCase() || "?"}
