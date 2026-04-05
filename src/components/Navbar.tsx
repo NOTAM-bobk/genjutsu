@@ -71,7 +71,7 @@ const Navbar = () => {
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <button onClick={() => navigate("/")} className="flex items-center gap-1 sm:gap-2 shrink-0">
             <div className="w-8 h-8 rounded-[3px] overflow-hidden">
-              <img src="/fav.jpg" alt="genjutsu" className="w-full h-full object-cover" />
+              <img src="/logo.png" alt="genjutsu" className="w-full h-full object-contain" />
             </div>
             <span className="font-black text-lg tracking-tight text-primary">genjutsu</span>
           </button>
@@ -293,8 +293,8 @@ const Navbar = () => {
                             navigate(path); setIsDrawerOpen(false);
                           }}
                           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-[3px] text-sm font-medium transition-colors ${location.pathname === path
-                              ? "bg-primary/10 text-primary font-bold"
-                              : "hover:bg-secondary text-foreground"
+                            ? "bg-primary/10 text-primary font-bold"
+                            : "hover:bg-secondary text-foreground"
                             }`}
                         >
                           <div className="relative">
