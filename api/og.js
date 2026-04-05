@@ -1,7 +1,7 @@
 export const config = { runtime: 'edge' };
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+let SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+let SUPABASE_PUBLISHABLE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const APP_URL = 'https://genjutsu-social.vercel.app';
 
 // Helper to prevent XSS in injected content
@@ -16,6 +16,28 @@ function escapeHtml(str) {
 }
 
 export default async function handler(req) {
+    if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+        const workerUrl = process.env.VITE_CONFIG_WORKER_URL || 'https://genjutsu-config.workers.dev/config';
+        try {
+            const configRes = await fetch(workerUrl, {
+                headers: {
+                    'Origin': 'https://genjutsu-social.vercel.app'
+                }
+            });
+            if (configRes.ok) {
+                const configData = await configRes.json();
+                SUPABASE_URL = configData.VITE_SUPABASE_URL;
+                SUPABASE_PUBLISHABLE_KEY = configData.VITE_SUPABASE_PUBLISHABLE_KEY;
+            }
+        } catch (e) {
+            console.error('Failed to load DB config from worker', e);
+        }
+    }
+
+    if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+        return new Response('Server configuration error', { status: 500 });
+    }
+
     const { searchParams } = new URL(req.url);
     const postId = searchParams.get('postId');
     const usernameParam = searchParams.get('username');
