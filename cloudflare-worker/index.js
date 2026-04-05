@@ -1,8 +1,5 @@
 const ALLOWED_ORIGINS = [
   "https://genjutsu-social.vercel.app",
-  "http://localhost:5173",
-  "http://localhost:8080",
-  "http://localhost:4173",
 ];
 
 export default {
