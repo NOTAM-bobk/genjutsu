@@ -37,7 +37,9 @@ export const playHoverSound = () => {
         
         osc.start();
         osc.stop(ctx.currentTime + 0.04);
-    } catch(e) {}
+    } catch (e) {
+        // Ignored
+    }
 };
 
 export const playClickSound = () => {
@@ -59,7 +61,9 @@ export const playClickSound = () => {
         
         osc.start();
         osc.stop(ctx.currentTime + 0.1);
-    } catch(e) {}
+    } catch (e) {
+        // Ignored
+    }
 };
 
 export const playTypeSound = () => {
@@ -88,7 +92,9 @@ export const playTypeSound = () => {
         gain.connect(ctx.destination);
         
         noiseSource.start();
-    } catch(e) {}
+    } catch (e) {
+        // Ignored
+    }
 };
 
 // -----------------------------------------------------

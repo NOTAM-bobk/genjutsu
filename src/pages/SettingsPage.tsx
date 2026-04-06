@@ -2,12 +2,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import Navbar from "@/components/Navbar";
-import { LogOut, ArrowLeft, Shield, Settings, Check, AtSign, Globe, Palette, Moon, Sun, Monitor, Pipette, WandSparkles, Music, Volume2, VolumeX } from "lucide-react";
+import { LogOut, ArrowLeft, Shield, Settings, Check, AtSign, Globe, Palette, Moon, Sun, Monitor, Pipette, WandSparkles, Music, Volume2, VolumeX, Clock, Lock } from "lucide-react";
 import { FrogLoader } from "@/components/ui/FrogLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/components/theme-provider";
 import {
@@ -35,6 +35,55 @@ const SettingsPage = () => {
     const [activeTab, setActiveTab] = useState<"general" | "language" | "appearance" | "audio" | "danger">("general");
     const [deleteConfirmation, setDeleteConfirmation] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
+
+    const [dangerUnlockedSession, setDangerUnlockedSession] = useState(false);
+    const [dangerTimeLeft, setDangerTimeLeft] = useState<number>(0);
+
+    const getDangerLockTime = useCallback(() => {
+        if (!user) return 0;
+        const stored = localStorage.getItem(`genjutsu-danger-lock-${user.id}`);
+        return stored ? parseInt(stored) : 0;
+    }, [user]);
+
+    const handleDangerClick = () => {
+        if (!user) return;
+        const lockedUntil = getDangerLockTime();
+        if (Date.now() < lockedUntil) {
+            setDangerUnlockedSession(false);
+        } else {
+            const newLock = Date.now() + 60 * 60 * 1000;
+            localStorage.setItem(`genjutsu-danger-lock-${user.id}`, newLock.toString());
+            setDangerUnlockedSession(true);
+        }
+        setActiveTab("danger");
+    };
+
+    useEffect(() => {
+        if (activeTab !== "danger" || dangerUnlockedSession) return;
+        
+        const interval = setInterval(() => {
+            const lockedUntil = getDangerLockTime();
+            const diff = lockedUntil - Date.now();
+            if (diff <= 0) {
+                setDangerTimeLeft(0);
+                clearInterval(interval);
+            } else {
+                setDangerTimeLeft(diff);
+            }
+        }, 1000);
+        
+        const initDiff = getDangerLockTime() - Date.now();
+        setDangerTimeLeft(initDiff > 0 ? initDiff : 0);
+
+        return () => clearInterval(interval);
+    }, [activeTab, dangerUnlockedSession, getDangerLockTime]);
+
+    const formatTime = (ms: number) => {
+        const totalSeconds = Math.floor(ms / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
 
     // Initialize input with current username
     useEffect(() => {
@@ -200,7 +249,7 @@ const SettingsPage = () => {
                                 Sound
                             </button>
                             <button
-                                onClick={() => setActiveTab("danger")}
+                                onClick={handleDangerClick}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-[3px] text-sm transition-all ${activeTab === "danger"
                                     ? "bg-destructive text-destructive-foreground font-bold gum-shadow-sm"
                                     : "hover:bg-destructive/10 text-muted-foreground hover:text-destructive font-medium"
@@ -594,7 +643,33 @@ const SettingsPage = () => {
                                     </motion.div>
                                 )}
 
-                                {activeTab === "danger" && (
+                                {activeTab === "danger" && !dangerUnlockedSession && (
+                                    <motion.div
+                                        key="danger-locked"
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="space-y-6"
+                                    >
+                                        <section className="gum-card p-6 flex flex-col items-center justify-center text-center py-16">
+                                            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-6">
+                                                <Lock size={32} className="text-destructive mb-1" />
+                                            </div>
+                                            <h2 className="text-2xl font-bold mb-2 text-foreground uppercase tracking-tight">Zone Sealed</h2>
+                                            <p className="text-sm text-muted-foreground mb-8 max-w-sm">
+                                                You have recently accessed the danger zone. For your security, this terminal has been locked.
+                                            </p>
+                                            
+                                            <div className="flex items-center gap-3 bg-secondary/50 border border-border px-6 py-4 rounded-[3px]">
+                                                <Clock className="text-destructive animate-pulse" size={20} />
+                                                <span className="font-mono text-2xl font-bold tracking-widest">{formatTime(dangerTimeLeft)}</span>
+                                            </div>
+                                        </section>
+                                    </motion.div>
+                                )}
+
+                                {activeTab === "danger" && dangerUnlockedSession && (
                                     <motion.div
                                         key="danger"
                                         initial={{ opacity: 0, x: 10 }}
