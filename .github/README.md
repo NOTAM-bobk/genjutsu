@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="https://raw.githubusercontent.com/iamovi/genjutsu/refs/heads/main/public/logo.png" width="90" />
+</div>
+
 ![banner](./main.png)
 
 **Live App: https://genjutsu-social.vercel.app**
