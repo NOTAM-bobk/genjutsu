@@ -12,7 +12,6 @@
 
 share code, post updates, connect with other builders. no permanent history, no clout chasing. just a daily feed that resets every morning.
 
-<img src="./fav.jpg" width="65" />
 
 ### why 24 hours?
 
@@ -59,4 +58,6 @@ mit - see [LICENSE](../LICENSE) file
 
 ***developers who got tired of their old tweets haunting them.***
 
-<img src="./fav.jpg" width="65" />
+<div align="center">
+  <img src="./fav.jpg" width="65" />
+</div>
