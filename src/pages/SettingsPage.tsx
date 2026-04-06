@@ -2,13 +2,14 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import Navbar from "@/components/Navbar";
-import { LogOut, ArrowLeft, Shield, Settings, Check, AtSign, Globe } from "lucide-react";
+import { LogOut, ArrowLeft, Shield, Settings, Check, AtSign, Globe, Palette, Moon, Sun, Monitor } from "lucide-react";
 import { FrogLoader } from "@/components/ui/FrogLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "@/components/theme-provider";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -26,11 +27,12 @@ const SettingsPage = () => {
     const { profile, changeUsername, getNextUsernameChangeDate, deleteAccount } = useProfile();
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
+    const { theme, color, customColor, font, radius, animateColor, setTheme, setColor, setCustomColor, setFont, setRadius, setAnimateColor } = useTheme();
 
     const [newUsername, setNewUsername] = useState("");
     const [usernameError, setUsernameError] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [activeTab, setActiveTab] = useState<"general" | "language" | "danger">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "language" | "appearance" | "danger">("general");
     const [deleteConfirmation, setDeleteConfirmation] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -160,6 +162,16 @@ const SettingsPage = () => {
                             >
                                 <Globe size={18} />
                                 {t("settings.language")}
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("appearance")}
+                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-[3px] text-sm transition-all ${activeTab === "appearance"
+                                    ? "bg-primary text-primary-foreground font-bold gum-shadow-sm"
+                                    : "hover:bg-secondary text-muted-foreground hover:text-foreground font-medium"
+                                    }`}
+                            >
+                                <Palette size={18} />
+                                {t("settings.appearance", "Appearance")}
                             </button>
                             <button
                                 onClick={() => setActiveTab("danger")}
@@ -352,6 +364,127 @@ const SettingsPage = () => {
                                                     >
                                                         Русский
                                                     </button>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </motion.div>
+                                )}
+
+                                {activeTab === "appearance" && (
+                                    <motion.div
+                                        key="appearance"
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 10 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="space-y-6"
+                                    >
+                                        <section className="gum-card p-6 space-y-6">
+                                            <div>
+                                                <h2 className="text-lg font-bold mb-1">Theme Mode</h2>
+                                                <p className="text-sm text-muted-foreground mb-4">Choose how you experience the illusion.</p>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {(["light", "dark", "system"] as const).map((m) => (
+                                                        <button 
+                                                            key={m}
+                                                            onClick={() => setTheme(m)}
+                                                            className={`gum-btn px-6 py-2.5 text-sm font-bold flex items-center gap-2 capitalize transition-all ${theme === m ? 'bg-primary text-primary-foreground gum-shadow-sm scale-105' : 'bg-background hover:bg-secondary border-border/50 text-foreground'}`}
+                                                        >
+                                                            {m === "light" && <Sun size={16}/>}
+                                                            {m === "dark" && <Moon size={16}/>}
+                                                            {m === "system" && <Monitor size={16}/>}
+                                                            {m}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-6 border-t border-border">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div>
+                                                        <h2 className="text-lg font-bold mb-1">Aura Color</h2>
+                                                        <p className="text-sm text-muted-foreground">Select the primary resonance of your spells.</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => setAnimateColor(!animateColor)}
+                                                        className={`gum-btn px-4 py-2 text-xs font-bold flex items-center gap-2 transition-all ${animateColor ? 'bg-primary text-primary-foreground gum-shadow-sm' : 'bg-background hover:bg-secondary text-foreground'}`}
+                                                    >
+                                                        <span className={`inline-block ${animateColor ? 'animate-spin-slow' : ''}`}>🌈</span>
+                                                        {animateColor ? 'Animated' : 'Animate'}
+                                                    </button>
+                                                </div>
+                                                <div className={`flex flex-wrap gap-3 transition-opacity ${animateColor ? 'opacity-40 pointer-events-none' : ''}`}>
+                                                    {(['purple', 'blue', 'green', 'orange', 'rose', 'zinc'] as const).map((c) => (
+                                                        <button 
+                                                            key={c}
+                                                            onClick={() => setColor(c)}
+                                                            className={`w-12 h-12 rounded-full border-4 transition-all flex items-center justify-center ${color === c ? 'border-primary/50 shadow-lg scale-110 shadow-primary/20' : 'border-transparent hover:scale-105'}`}
+                                                            style={{
+                                                                backgroundColor: `hsl(${
+                                                                    c === 'purple' ? '270 30% 63%' :
+                                                                    c === 'blue' ? '220 70% 50%' :
+                                                                    c === 'green' ? '142 60% 45%' :
+                                                                    c === 'orange' ? '24 85% 55%' :
+                                                                    c === 'rose' ? '346 80% 60%' :
+                                                                    '240 5% 50%'
+                                                                })`
+                                                            }}
+                                                        >
+                                                            {color === c && <Check size={20} className="text-primary-foreground" />}
+                                                        </button>
+                                                    ))}
+                                                    {/* Custom color picker */}
+                                                    <label
+                                                        className={`w-12 h-12 rounded-full border-4 transition-all flex items-center justify-center cursor-pointer overflow-hidden relative ${color === 'custom' ? 'border-primary/50 shadow-lg scale-110 shadow-primary/20' : 'border-transparent hover:scale-105'}`}
+                                                        style={{ backgroundColor: customColor }}
+                                                        title="Custom color"
+                                                    >
+                                                        {color === 'custom' && <Check size={20} className="text-white drop-shadow" />}
+                                                        <input
+                                                            type="color"
+                                                            value={customColor}
+                                                            onChange={(e) => {
+                                                                setCustomColor(e.target.value);
+                                                                setColor('custom');
+                                                            }}
+                                                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                                                            aria-label="Custom primary color"
+                                                        />
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-6 border-t border-border">
+                                                <h2 className="text-lg font-bold mb-1">Typography</h2>
+                                                <p className="text-sm text-muted-foreground mb-4">Set the textual vibe of the illusion.</p>
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                                    {(['Reddit Mono', 'Inter', 'Space Grotesk', 'Fira Code', 'JetBrains Mono', 'Comic Neue'] as const).map((f) => (
+                                                        <button 
+                                                            key={f}
+                                                            onClick={() => setFont(f)}
+                                                            className={`gum-btn px-4 py-3 text-sm font-bold truncate transition-colors ${font === f ? 'bg-primary text-primary-foreground gum-shadow-sm' : 'bg-background hover:bg-secondary text-foreground'}`}
+                                                            style={{ fontFamily: f !== 'Reddit Mono' ? `'${f}', sans-serif` : 'var(--font-sans)' }}
+                                                        >
+                                                            {f}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-6 border-t border-border">
+                                                <h2 className="text-lg font-bold mb-1">Border Radius</h2>
+                                                <p className="text-sm text-muted-foreground mb-4">How sharp should the edges be?</p>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {(['none', 'default', 'md', 'lg', 'full'] as const).map((r) => (
+                                                        <button 
+                                                            key={r}
+                                                            onClick={() => setRadius(r)}
+                                                            className={`gum-btn px-6 py-2.5 text-sm font-bold capitalize transition-colors ${radius === r ? 'bg-primary text-primary-foreground gum-shadow-sm' : 'bg-background hover:bg-secondary text-foreground'}`}
+                                                            style={{ borderRadius: r === 'none' ? '0px' : r === 'default' ? '3px' : r === 'md' ? '8px' : r === 'lg' ? '16px' : '2rem' }}
+                                                        >
+                                                            {r}
+                                                        </button>
+                                                    ))}
                                                 </div>
                                             </div>
                                         </section>

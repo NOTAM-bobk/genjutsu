@@ -42,7 +42,7 @@ html.dark {
     --input: 0 0% 5%;
     --ring: 0 0% 5%;
 
-    --radius: 0.75rem;
+    --radius: 3px;
 
     --shadow-gum: 4px 4px 0px hsl(0 0% 5%);
     --shadow-gum-sm: 2px 2px 0px hsl(0 0% 5%);
@@ -245,12 +245,14 @@ html.dark {
   }
 
   .gum-card {
-    @apply border-2 border-border bg-card rounded-[3px];
+    @apply border-2 border-border bg-card;
+    border-radius: var(--radius);
     box-shadow: var(--shadow-gum);
   }
 
   .gum-btn {
-    @apply border-2 border-border font-semibold rounded-[3px] px-5 py-2.5 transition-all duration-150 cursor-pointer;
+    @apply border-2 border-border font-semibold px-5 py-2.5 transition-all duration-150 cursor-pointer;
+    border-radius: var(--radius);
     box-shadow: var(--shadow-gum);
   }
 
@@ -281,6 +283,11 @@ html.dark {
     background: hsl(var(--muted-foreground) / 0.5);
   }
 
+  /* Override hardcoded rounded utilities to bind them to the dynamic Appearance settings */
+  .rounded-\[3px\] {
+    border-radius: var(--radius);
+  }
+
   /* GitHub-style Markdown Rendering */
   .prose-readme {
     @apply prose prose-sm dark:prose-invert max-w-none;
@@ -294,7 +301,7 @@ html.dark {
     @apply prose-a:text-primary prose-a:no-underline hover:prose-a:underline;
     @apply prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none;
     @apply prose-pre:bg-muted prose-pre:gum-border prose-pre:p-4;
-    @apply prose-img:rounded-[3px] prose-img:gum-border;
+    @apply prose-img:gum-border;
     @apply prose-hr:border-border prose-hr:my-6;
   }
 
