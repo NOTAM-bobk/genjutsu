@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import Navbar from "@/components/Navbar";
-import { LogOut, ArrowLeft, Shield, Settings, Check, AtSign, Globe, Palette, Moon, Sun, Monitor } from "lucide-react";
+import { LogOut, ArrowLeft, Shield, Settings, Check, AtSign, Globe, Palette, Moon, Sun, Monitor, Pipette, WandSparkles, Music, Volume2, VolumeX } from "lucide-react";
 import { FrogLoader } from "@/components/ui/FrogLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -27,12 +27,12 @@ const SettingsPage = () => {
     const { profile, changeUsername, getNextUsernameChangeDate, deleteAccount } = useProfile();
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
-    const { theme, color, customColor, font, radius, animateColor, setTheme, setColor, setCustomColor, setFont, setRadius, setAnimateColor } = useTheme();
+    const { theme, color, customColor, font, radius, animateColor, cursorTrail, grid, soundEnabled, setTheme, setColor, setCustomColor, setFont, setRadius, setAnimateColor, setCursorTrail, setGrid, setSoundEnabled } = useTheme();
 
     const [newUsername, setNewUsername] = useState("");
     const [usernameError, setUsernameError] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [activeTab, setActiveTab] = useState<"general" | "language" | "appearance" | "danger">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "language" | "appearance" | "audio" | "danger">("general");
     const [deleteConfirmation, setDeleteConfirmation] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -49,6 +49,22 @@ const SettingsPage = () => {
             navigate("/auth");
         }
     }, [user, navigate]);
+
+    // Preload available fonts to ensure preview buttons render them correctly
+    useEffect(() => {
+        const fonts = ['Inter', 'Space Grotesk', 'Fira Code', 'JetBrains Mono', 'Comic Neue'];
+        fonts.forEach(f => {
+            const fontName = f.replace(/ /g, "+");
+            const linkId = `preview-font-${fontName}`;
+            if (!document.getElementById(linkId)) {
+                const link = document.createElement("link");
+                link.id = linkId;
+                link.rel = "stylesheet";
+                link.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@300;400;500;600;700&display=swap`;
+                document.head.appendChild(link);
+            }
+        });
+    }, []);
 
     const validateUsername = (value: string): string | null => {
         const normalized = value.trim().toLowerCase();
@@ -172,6 +188,16 @@ const SettingsPage = () => {
                             >
                                 <Palette size={18} />
                                 {t("settings.appearance", "Appearance")}
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("audio")}
+                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-[3px] text-sm transition-all ${activeTab === "audio"
+                                    ? "bg-primary text-primary-foreground font-bold gum-shadow-sm"
+                                    : "hover:bg-secondary text-muted-foreground hover:text-foreground font-medium"
+                                    }`}
+                            >
+                                <Music size={18} />
+                                Sound
                             </button>
                             <button
                                 onClick={() => setActiveTab("danger")}
@@ -435,11 +461,15 @@ const SettingsPage = () => {
                                                     ))}
                                                     {/* Custom color picker */}
                                                     <label
-                                                        className={`w-12 h-12 rounded-full border-4 transition-all flex items-center justify-center cursor-pointer overflow-hidden relative ${color === 'custom' ? 'border-primary/50 shadow-lg scale-110 shadow-primary/20' : 'border-transparent hover:scale-105'}`}
-                                                        style={{ backgroundColor: customColor }}
-                                                        title="Custom color"
+                                                        className={`w-12 h-12 rounded-full border-4 transition-all flex items-center justify-center cursor-pointer overflow-hidden relative group ${color === 'custom' ? 'border-primary/50 shadow-lg scale-110 shadow-primary/20' : 'border-border/30 hover:border-border/60 bg-muted hover:bg-secondary border-dashed'}`}
+                                                        style={color === 'custom' ? { backgroundColor: customColor } : undefined}
+                                                        title="Pick custom color"
                                                     >
-                                                        {color === 'custom' && <Check size={20} className="text-white drop-shadow" />}
+                                                        {color === 'custom' ? (
+                                                            <Check size={20} className="text-white drop-shadow" />
+                                                        ) : (
+                                                            <Palette size={18} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+                                                        )}
                                                         <input
                                                             type="color"
                                                             value={customColor}
@@ -485,6 +515,79 @@ const SettingsPage = () => {
                                                             {r}
                                                         </button>
                                                     ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-6 border-t border-border">
+                                                <h2 className="text-lg font-bold mb-1">Background Grid</h2>
+                                                <p className="text-sm text-muted-foreground mb-4">Choose the tactical matrix for your spells.</p>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {(['blueprint', 'dotted', 'scanlines', 'none'] as const).map((g) => (
+                                                        <button 
+                                                            key={g}
+                                                            onClick={() => setGrid(g)}
+                                                            className={`gum-btn px-6 py-2.5 text-sm font-bold capitalize transition-colors ${grid === g ? 'bg-primary text-primary-foreground gum-shadow-sm' : 'bg-background hover:bg-secondary text-foreground'}`}
+                                                        >
+                                                            {g}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-6 border-t border-border hidden md:block">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
+                                                            <WandSparkles size={18} className="text-primary" />
+                                                            Cursor Trail
+                                                            <span className="text-[10px] uppercase tracking-wider bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">Beta</span>
+                                                        </h2>
+                                                        <p className="text-sm text-muted-foreground">Follows your mouse with a glowing trail matching your Aura color.</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => setCursorTrail(!cursorTrail)}
+                                                        className={`gum-btn px-4 py-2 text-sm font-bold flex items-center gap-2 transition-all ${cursorTrail ? 'bg-primary text-primary-foreground gum-shadow-sm' : 'bg-background hover:bg-secondary text-foreground'}`}
+                                                    >
+                                                        {cursorTrail ? 'Enabled' : 'Disabled'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </motion.div>
+                                )}
+
+                                {activeTab === "audio" && (
+                                    <motion.div
+                                        key="audio"
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 10 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="space-y-6"
+                                    >
+                                        <section className="gum-card p-6 space-y-6">
+                                            <div>
+                                                <h2 className="text-xl font-bold flex items-center gap-2 mb-6">
+                                                    <Music className="text-primary" />
+                                                    Audio & SFX
+                                                </h2>
+                                                
+                                                <div className="flex flex-col gap-4">
+                                                    <div className="flex items-start justify-between bg-secondary/30 p-4 rounded-[3px] border border-border">
+                                                        <div className="pr-4">
+                                                            <h3 className="font-bold mb-1 flex items-center gap-2">
+                                                                {soundEnabled ? <Volume2 size={18} className="text-primary" /> : <VolumeX size={18} className="text-muted-foreground" />}
+                                                                {soundEnabled ? "Audio Engine Enabled" : "Audio Engine Muted"}
+                                                            </h3>
+                                                            <p className="text-sm text-muted-foreground">Synthesize responsive sound effects directly from your browser. Adds satisfying haptic clicks, hover feedback, and delicate typing notes without loading external assets.</p>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => setSoundEnabled(!soundEnabled)}
+                                                            className={`gum-btn shrink-0 w-20 h-10 text-sm font-bold transition-all ${soundEnabled ? 'bg-primary text-primary-foreground gum-shadow-sm' : 'bg-background hover:bg-secondary text-foreground border-2 border-border'}`}
+                                                        >
+                                                            {soundEnabled ? "ON" : "OFF"}
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </section>

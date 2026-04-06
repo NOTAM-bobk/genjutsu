@@ -129,11 +129,33 @@ html.dark {
     position: fixed;
     inset: 0;
     z-index: 0; /* Sit behind content but above body color */
+    pointer-events: none;
+    /* Default fallback */
     background-image: 
       linear-gradient(hsl(var(--primary) / 0.07) 1px, transparent 1px),
       linear-gradient(90deg, hsl(var(--primary) / 0.07) 1px, transparent 1px);
     background-size: 40px 40px;
-    pointer-events: none;
+  }
+
+  html[data-grid="blueprint"] body::before {
+    background-image: 
+      linear-gradient(hsl(var(--primary) / 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--primary) / 0.07) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  html[data-grid="dotted"] body::before {
+    background-image: radial-gradient(hsl(var(--primary) / 0.2) 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+  }
+
+  html[data-grid="scanlines"] body::before {
+    background-image: linear-gradient(transparent 50%, hsl(var(--primary) / 0.05) 50%);
+    background-size: 100% 4px;
+  }
+
+  html[data-grid="none"] body::before {
+    background-image: none;
   }
 
   /* Ensure content is above the grid layer */

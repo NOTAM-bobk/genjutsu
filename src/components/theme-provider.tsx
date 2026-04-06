@@ -57,19 +57,27 @@ type ThemeProviderProps = {
     storageKey?: string;
 };
 
+type GridPreset = "blueprint" | "dotted" | "scanlines" | "none";
+
 type ThemeProviderState = {
     theme: Theme;
     color: ColorPreset;
     customColor: string;
     font: FontPreset;
+    grid: GridPreset;
     radius: RadiusPreset;
     animateColor: boolean;
+    cursorTrail: boolean;
+    soundEnabled: boolean;
     setTheme: (theme: Theme) => void;
     setColor: (color: ColorPreset) => void;
     setCustomColor: (hex: string) => void;
     setFont: (font: FontPreset) => void;
+    setGrid: (grid: GridPreset) => void;
     setRadius: (radius: RadiusPreset) => void;
     setAnimateColor: (v: boolean) => void;
+    setCursorTrail: (v: boolean) => void;
+    setSoundEnabled: (v: boolean) => void;
 };
 
 const initialState: ThemeProviderState = {
@@ -77,14 +85,20 @@ const initialState: ThemeProviderState = {
     color: "purple",
     customColor: "#8b5cf6",
     font: "Reddit Mono",
+    grid: "blueprint",
     radius: "default",
     animateColor: false,
+    cursorTrail: false,
+    soundEnabled: false,
     setTheme: () => null,
     setColor: () => null,
     setCustomColor: () => null,
     setFont: () => null,
+    setGrid: () => null,
     setRadius: () => null,
     setAnimateColor: () => null,
+    setCursorTrail: () => null,
+    setSoundEnabled: () => null,
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
@@ -105,6 +119,9 @@ export function ThemeProvider({
     const [font, setFontState] = useState<FontPreset>(() => {
         return (localStorage.getItem(`${storageKey}-font`) as FontPreset) || "Reddit Mono";
     });
+    const [grid, setGridState] = useState<GridPreset>(() => {
+        return (localStorage.getItem(`${storageKey}-grid`) as GridPreset) || "blueprint";
+    });
     const [radius, setRadiusState] = useState<RadiusPreset>(() => {
         return (localStorage.getItem(`${storageKey}-radius`) as RadiusPreset) || "default";
     });
@@ -114,6 +131,12 @@ export function ThemeProvider({
     const [animateColor, setAnimateColorState] = useState<boolean>(() => {
         return localStorage.getItem(`${storageKey}-animateColor`) === "true";
     });
+    const [cursorTrail, setCursorTrailState] = useState<boolean>(() => {
+        return localStorage.getItem(`${storageKey}-cursorTrail`) === "true";
+    });
+    const [soundEnabled, setSoundEnabledState] = useState<boolean>(() => {
+        return localStorage.getItem(`${storageKey}-soundEnabled`) === "true";
+    });
 
     const hueRef = useRef<number>(0);
     const rafRef = useRef<number | null>(null);
@@ -122,8 +145,11 @@ export function ThemeProvider({
     const setColor = (val: ColorPreset) => { localStorage.setItem(`${storageKey}-color`, val); setColorState(val); };
     const setCustomColor = (hex: string) => { localStorage.setItem(`${storageKey}-customColor`, hex); setCustomColorState(hex); };
     const setFont = (val: FontPreset) => { localStorage.setItem(`${storageKey}-font`, val); setFontState(val); };
+    const setGrid = (val: GridPreset) => { localStorage.setItem(`${storageKey}-grid`, val); setGridState(val); };
     const setRadius = (val: RadiusPreset) => { localStorage.setItem(`${storageKey}-radius`, val); setRadiusState(val); };
     const setAnimateColor = (val: boolean) => { localStorage.setItem(`${storageKey}-animateColor`, String(val)); setAnimateColorState(val); };
+    const setCursorTrail = (val: boolean) => { localStorage.setItem(`${storageKey}-cursorTrail`, String(val)); setCursorTrailState(val); };
+    const setSoundEnabled = (val: boolean) => { localStorage.setItem(`${storageKey}-soundEnabled`, String(val)); setSoundEnabledState(val); };
 
     // Mode + static color + radius effect
     useEffect(() => {
@@ -134,6 +160,8 @@ export function ThemeProvider({
             activeTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         }
         root.classList.add(activeTheme);
+        
+        root.setAttribute("data-grid", grid);
 
         // Only apply static color when animation is off
         if (!animateColor) {
@@ -156,7 +184,7 @@ export function ThemeProvider({
 
         // Apply Radius
         document.documentElement.style.setProperty('--radius', radiusPresets[radius]);
-    }, [theme, color, customColor, radius, animateColor]);
+    }, [theme, color, customColor, radius, animateColor, grid]);
 
     // Animated color loop — smooth 60fps hue cycling via requestAnimationFrame
     useEffect(() => {
@@ -207,8 +235,8 @@ export function ThemeProvider({
     }, [font]);
 
     const value = {
-        theme, color, customColor, font, radius, animateColor,
-        setTheme, setColor, setCustomColor, setFont, setRadius, setAnimateColor,
+        theme, color, customColor, font, grid, radius, animateColor, cursorTrail, soundEnabled,
+        setTheme, setColor, setCustomColor, setFont, setGrid, setRadius, setAnimateColor, setCursorTrail, setSoundEnabled
     };
 
     return (
