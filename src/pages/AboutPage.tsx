@@ -12,14 +12,15 @@ const AboutPage = () => {
     const { user } = useAuth();
     const { t } = useTranslation();
 
-    const { data: contributors, isLoading: isLoadingContributors } = useQuery({
+    const { data: contributors, isLoading: isLoadingContributors, isError } = useQuery({
         queryKey: ['github-contributors'],
         queryFn: async () => {
             const res = await fetch('https://api.github.com/repos/iamovi/genjutsu/contributors');
             if (!res.ok) throw new Error('Failed to fetch');
-            return res.json();
+            return await res.json();
         },
         staleTime: 1000 * 60 * 60, // 1 hour
+        retry: false, // Don't retry if hit rate limit
     });
     const features = [
         {
@@ -201,16 +202,22 @@ const AboutPage = () => {
                                                     <div className="h-2 w-12 rounded bg-secondary"></div>
                                                 </div>
                                             ))
-                                        ) : contributors?.map((c: any, i: number) => (
-                                            <a key={c.id || c.login} href={c.html_url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 group p-2 rounded-[3px] hover:bg-secondary/50 transition-colors">
-                                                <div className="relative">
-                                                    {i === 0 && <div className="absolute -top-2 -right-3 z-10 bg-primary text-primary-foreground px-1 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider rounded-[2px] whitespace-nowrap">{t("about.authorLabel")}</div>}
-                                                    <img src={c.avatar_url} alt={c.login} className="w-14 h-14 rounded-[3px] gum-border object-cover group-hover:opacity-80 transition-opacity" />
-                                                </div>
-                                                <span className="text-xs font-mono font-bold uppercase tracking-tight text-center truncate w-full group-hover:text-primary transition-colors">{c.login}</span>
-                                                <span className="text-[10px] font-mono text-muted-foreground">{c.contributions} {c.contributions !== 1 ? t("about.commits") : t("about.commit")}</span>
-                                            </a>
-                                        ))}
+                                        ) : isError && !contributors ? (
+                                            <div className="col-span-full py-4 text-center text-sm text-destructive">
+                                                Failed to load contributors. Too many requests to GitHub API.
+                                            </div>
+                                        ) : (
+                                            contributors?.map((c: any, i: number) => (
+                                                <a key={c.id || c.login} href={c.html_url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 group p-2 rounded-[3px] hover:bg-secondary/50 transition-colors">
+                                                    <div className="relative">
+                                                        {i === 0 && <div className="absolute -top-2 -right-3 z-10 bg-primary text-primary-foreground px-1 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider rounded-[2px] whitespace-nowrap">{t("about.authorLabel")}</div>}
+                                                        <img src={c.avatar_url} alt={c.login} className="w-14 h-14 rounded-[3px] gum-border object-cover group-hover:opacity-80 transition-opacity" />
+                                                    </div>
+                                                    <span className="text-xs font-mono font-bold uppercase tracking-tight text-center truncate w-full group-hover:text-primary transition-colors">{c.login}</span>
+                                                    <span className="text-[10px] font-mono text-muted-foreground">{c.contributions ?? 1} {c.contributions !== 1 ? t("about.commits") : t("about.commit")}</span>
+                                                </a>
+                                            ))
+                                        )}
                                     </div>
                                 </div>
                             </section>
