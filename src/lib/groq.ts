@@ -37,7 +37,9 @@ export async function fetchGroqReply(message: string, userName: string = "a user
             headers["Authorization"] = `Bearer ${apiKey}`;
         } else {
             const workerUrl = import.meta.env.VITE_CONFIG_WORKER_URL || "https://genjutsu-config.workers.dev/config";
-            url = workerUrl.replace("/config", "/translate");
+            const base = new URL(workerUrl);
+            base.pathname = "/translate";
+            url = base.toString();
         }
 
         const response = await fetch(url, {

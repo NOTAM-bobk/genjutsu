@@ -40,10 +40,10 @@ export function useStrangerMatch() {
     const config = getConfig();
     
     // Initialize Ably with persistent clientId
-    let clientId = sessionStorage.getItem(STORAGE_KEY);
+    let clientId = localStorage.getItem(STORAGE_KEY);
     if (!clientId) {
         clientId = "user_" + Math.random().toString(36).substring(2, 12);
-        sessionStorage.setItem(STORAGE_KEY, clientId);
+        localStorage.setItem(STORAGE_KEY, clientId);
     }
 
     const clientOptions: any = { clientId };
@@ -58,7 +58,10 @@ export function useStrangerMatch() {
         clientOptions.key = ABLY_KEY;
     } else {
         const workerUrlPattern = import.meta.env.VITE_CONFIG_WORKER_URL || "https://genjutsu-config.workers.dev/config";
-        clientOptions.authUrl = workerUrlPattern.replace("/config", `/ably-auth?clientId=${clientId}`);
+        const base = new URL(workerUrlPattern);
+        base.pathname = "/ably-auth";
+        base.searchParams.set("clientId", clientId);
+        clientOptions.authUrl = base.toString();
     }
 
     const client = new Ably.Realtime(clientOptions);
