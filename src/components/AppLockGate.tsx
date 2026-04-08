@@ -127,9 +127,9 @@ export function AppLockGate({ children }: AppLockGateProps) {
                         <motion.div
                             animate={error ? { rotate: [0, -8, 8, -8, 8, 0] } : {}}
                             transition={{ duration: 0.4 }}
-                            className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center"
+                            className="flex items-center justify-center mb-2"
                         >
-                            <Lock size={36} className="text-primary" />
+                            <img src="/logo.png" alt="Genjutsu Logo" className="w-16 h-16 object-contain drop-shadow-md" />
                         </motion.div>
 
                         <div className="text-center space-y-2">
