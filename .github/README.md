@@ -5,9 +5,9 @@
 
   <p>
     <a href="https://genjutsu-social.vercel.app"><img src="https://img.shields.io/badge/live_app-genjutsu--social.vercel.app-black?style=flat-square" /></a>
-    <a href="https://iamovi.github.io/genjutsu"><img src="https://img.shields.io/badge/download-PWA_install-black?style=flat-square" /></a>
+    <a href="https://iamovi.github.io/genjutsu"><img src="https://img.shields.io/badge/download-TWA_Apk-black?style=flat-square" /></a>
     <img src="https://img.shields.io/badge/license-MIT-black?style=flat-square" />
-    <img src="https://img.shields.io/badge/version-1.0.0-black?style=flat-square" />
+    <img src="https://img.shields.io/badge/version-2-black?style=flat-square" />
   </p>
 </div>
 
