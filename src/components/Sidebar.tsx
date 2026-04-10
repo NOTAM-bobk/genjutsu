@@ -283,7 +283,7 @@ const Sidebar = ({ onAction }: SidebarProps) => {
         </div>
         <div className="flex justify-center items-center gap-2 text-[11px]">
           <a
-            href={`https://github.com/iamovi/genjutsu/issues/new?template=bug_report.yml&title=${encodeURIComponent("[BUG]: ")}&body=${encodeURIComponent(`\n\n---\n**Page:** ${window.location.href}\n**User Agent:** ${navigator.userAgent}`)}`}
+            href={`https://github.com/iamovi/genjutsu/issues/new?template=bug_report.yml&title=${encodeURIComponent("[BUG]: ")}&environment=${encodeURIComponent(`- Page: ${window.location.href}\n- User Agent: ${navigator.userAgent}`)}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => onAction?.()}
