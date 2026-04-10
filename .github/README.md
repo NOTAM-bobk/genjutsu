@@ -6,7 +6,7 @@
 <p>
     <a href="https://genjutsu-social.vercel.app"><img src="https://img.shields.io/badge/live_app-genjutsu--social.vercel.app-9B78C2?style=flat-square" /></a>
     <a href="https://iamovi.github.io/genjutsu"><img src="https://img.shields.io/badge/download-TWA_Apk-9B78C2?style=flat-square" /></a>
-    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-9B78C2?style=flat-square" /></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-9B78C2?style=flat-square" /></a>
     <a href="https://github.com/iamovi/genjutsu/releases/tag/version2"><img src="https://img.shields.io/badge/version-2-9B78C2?style=flat-square" /></a>
   </p>
 </div>
