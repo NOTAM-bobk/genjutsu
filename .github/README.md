@@ -31,80 +31,10 @@ every post, comment, and message automatically deletes after 24 hours. this mean
 - the feed stays fresh and relevant
 - performance stays fast no matter how many users join
 
-> think snapchat meets twitter, but built for developers.
+> think snapchat meets twitter, but built for developers,but for casual users too!
 
 <br />
 
-## features
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-**posts & feed**
-- text posts, code snippets, and markdown
-- likes, comments, `@mentions`
-- inline comment translation
-- auto-expires after 24 hours
-
-**messaging**
-- direct messages (whispers) with real-time delivery
-- community chat room — public, ephemeral
-- stranger mode — anonymous chat with a random user
-- type `@ai` to summon Genjutsu AI
-
-**genjutsu ai**
-- built-in AI assistant in community chat
-- context-aware, remembers recent thread
-- prompt injection protection
-
-**play**
-- multiplayer game rooms with real-time presence
-- invite friends from their profile
-- 14 games:
-
-  `Chess` `Checkers` `Battleship` `Connect Four`
-  `Snake` `Pong` `2048` `Tic Tac Toe`
-  `Memory Match` `Rock Paper Scissors`
-  `Word Guessing` `Drawing & Guessing`
-  `Trivia Battle` `Typing Race`
-
-</td>
-<td width="50%" valign="top">
-
-**profiles**
-- display name, username, bio, avatar
-- follow / unfollow users
-- username change with cooldown
-- followers and following lists
-
-**notifications**
-- real-time: likes, comments, mentions, follows
-
-**appearance**
-- light / dark / system theme
-- accent color presets + custom hex picker
-- animated color mode
-- font selector
-- border radius control
-- cursor trail, shadow walk effects
-- sound effects, grid background toggle
-- app lock with 4-digit PIN + security questions
-
-**search**
-- find users by username or display name
-
-**languages**
-- EN · BN · HI · ES · PT · JA · KO · RU · FIL
-
-**twa**
-- installable on mobile
-
-</td>
-</tr>
-</table>
-
-<br />
 
 ## contributing
 
@@ -126,7 +56,7 @@ plus, the best developer tools are built by developers, for developers.
 
 ## license
 
-MIT — see [LICENSE](../LICENSE) file
+MIT Licensed — see [LICENSE](../LICENSE) file
 
 <br />
 
