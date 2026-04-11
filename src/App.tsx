@@ -15,6 +15,7 @@ import { CursorTrail } from "@/components/CursorTrail";
 import { SoundEngine } from "@/hooks/useSound";
 import { ShadowWalkEngine } from "@/components/ShadowWalk";
 import { AppLockGate } from "@/components/AppLockGate";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 import Index from "@/pages/Index";
 const AuthPage = lazy(() => import("@/pages/AuthPage"));
@@ -60,6 +61,7 @@ const App = () => {
               }}
             >
               <ScrollToTop />
+              <GoogleAnalytics />
               <AuthProvider>
                 <Suspense
                   fallback={
