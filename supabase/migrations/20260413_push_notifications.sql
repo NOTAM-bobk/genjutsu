@@ -26,6 +26,32 @@ CREATE POLICY "Users can insert own push subscriptions"
 CREATE POLICY "Users can delete own push subscriptions"
   ON public.push_subscriptions FOR DELETE USING ((select auth.uid()) = user_id);
 
+-- RPC: Upsert push subscription (removes endpoint from other users first)
+CREATE OR REPLACE FUNCTION public.upsert_push_subscription(
+  p_endpoint TEXT,
+  p_p256dh TEXT,
+  p_auth TEXT
+)
+RETURNS VOID AS $$
+DECLARE
+  v_user_id UUID := auth.uid();
+BEGIN
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  -- Remove this endpoint from any other user (same browser, different account)
+  DELETE FROM public.push_subscriptions
+  WHERE endpoint = p_endpoint AND user_id <> v_user_id;
+
+  -- Upsert for the current user
+  INSERT INTO public.push_subscriptions (user_id, endpoint, p256dh, auth)
+  VALUES (v_user_id, p_endpoint, p_p256dh, p_auth)
+  ON CONFLICT (user_id, endpoint)
+  DO UPDATE SET p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 -- Trigger function: call Supabase Edge Function send-push via pg_net
 -- Uses supabase_service_role_key from Vault to authenticate
 CREATE OR REPLACE FUNCTION public.send_push_notification()

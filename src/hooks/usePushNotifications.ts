@@ -90,19 +90,14 @@ export function usePushNotifications() {
       const p256dh = subJson.keys!.p256dh!;
       const auth = subJson.keys!.auth!;
 
-      // Save subscription to Supabase
+      // Save subscription to Supabase via RPC
+      // This also removes the endpoint from any other user (same browser, different account)
       const sb = supabase as any;
-      const { error: dbError } = await sb
-        .from("push_subscriptions")
-        .upsert(
-          {
-            user_id: user.id,
-            endpoint,
-            p256dh,
-            auth,
-          },
-          { onConflict: "user_id,endpoint" }
-        );
+      const { error: dbError } = await sb.rpc("upsert_push_subscription", {
+        p_endpoint: endpoint,
+        p_p256dh: p256dh,
+        p_auth: auth,
+      });
 
       if (dbError) {
         setLoading(false);
