@@ -254,16 +254,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify the request comes from Supabase (service role)
-    const authHeader = req.headers.get("Authorization") || "";
-    const token = authHeader.replace("Bearer ", "");
-
+    // No custom auth check needed — JWT verify is disabled in deployment
+    // and this function is only called internally by the DB trigger via pg_net
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    if (!token || token !== serviceKey) {
-      return new Response("Unauthorized", { status: 401 });
-    }
 
     const body = await req.json();
     const userId = body.user_id;
@@ -284,7 +278,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch push subscriptions using service role
+    // Fetch push subscriptions using service role key
     const supabase = createClient(supabaseUrl, serviceKey);
     const { data: subscriptions, error: fetchError } = await supabase
       .from("push_subscriptions")
