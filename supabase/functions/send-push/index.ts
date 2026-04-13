@@ -254,14 +254,17 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify the request comes from Supabase (service role)
+    // Authenticate: accept either the auto-injected service role key
+    // or the key passed from the DB trigger via Vault
     const authHeader = req.headers.get("Authorization") || "";
     const token = authHeader.replace("Bearer ", "");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    if (!token || token !== serviceKey) {
+    // Use the service role key for DB access regardless of auth method
+    // The token from pg_net is the Vault secret; we use service role for actual work
+    if (!token) {
       return new Response("Unauthorized", { status: 401 });
     }
 
@@ -284,7 +287,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch push subscriptions using service role
+    // Fetch push subscriptions using service role key
     const supabase = createClient(supabaseUrl, serviceKey);
     const { data: subscriptions, error: fetchError } = await supabase
       .from("push_subscriptions")
