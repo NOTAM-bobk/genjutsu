@@ -36,7 +36,7 @@ const SettingsPage = () => {
     const [newUsername, setNewUsername] = useState("");
     const [usernameError, setUsernameError] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [activeTab, setActiveTab] = useState<"general" | "language" | "appearance" | "audio" | "security" | "danger">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "language" | "appearance" | "audio" | "security" | "notifications" | "danger">("general");
     const [deleteConfirmation, setDeleteConfirmation] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -277,6 +277,16 @@ const SettingsPage = () => {
                                 Security
                             </button>
                             <button
+                                onClick={() => setActiveTab("notifications")}
+                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-[3px] text-sm transition-all ${activeTab === "notifications"
+                                    ? "bg-primary text-primary-foreground font-bold gum-shadow-sm"
+                                    : "hover:bg-secondary text-muted-foreground hover:text-foreground font-medium"
+                                    }`}
+                            >
+                                <Bell size={18} />
+                                Notifications
+                            </button>
+                            <button
                                 onClick={handleDangerClick}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-[3px] text-sm transition-all ${activeTab === "danger"
                                     ? "bg-destructive text-destructive-foreground font-bold gum-shadow-sm"
@@ -379,44 +389,7 @@ const SettingsPage = () => {
                                                 </p>
                                             </div>
 
-                                            {/* Push Notifications */}
-                                            <div className="pt-6 border-t border-border">
-                                                <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
-                                                    <Bell size={20} />
-                                                    Push Notifications
-                                                </h2>
-                                                <p className="text-sm text-muted-foreground mb-4">
-                                                    Get notified when someone likes, comments, follows, or mentions you — even when the app is closed.
-                                                </p>
-                                                {!pushNotifications.isSupported ? (
-                                                    <p className="text-sm text-muted-foreground italic">Push notifications are not supported in this browser.</p>
-                                                ) : pushNotifications.permission === "denied" ? (
-                                                    <p className="text-sm text-destructive">Notifications are blocked. Please enable them in your browser settings.</p>
-                                                ) : (
-                                                    <button
-                                                        onClick={async () => {
-                                                            const { error } = await pushNotifications.toggle();
-                                                            if (error) {
-                                                                toast.error(error);
-                                                            } else {
-                                                                toast.success(pushNotifications.isSubscribed ? "Push notifications disabled" : "Push notifications enabled!");
-                                                            }
-                                                        }}
-                                                        disabled={pushNotifications.loading}
-                                                        className={`gum-btn flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-bold w-full sm:w-auto ${
-                                                            pushNotifications.isSubscribed
-                                                                ? "border-2 border-foreground bg-secondary hover:bg-secondary/80"
-                                                                : "bg-primary text-primary-foreground"
-                                                        }`}
-                                                    >
-                                                        {pushNotifications.isSubscribed ? (
-                                                            <><BellOff size={18} /> Disable Notifications</>
-                                                        ) : (
-                                                            <><Bell size={18} /> Enable Notifications</>
-                                                        )}
-                                                    </button>
-                                                )}
-                                            </div>
+
 
                                             {/* Log Out Section */}
                                             <div className="pt-6 border-t border-border">
@@ -1171,6 +1144,88 @@ const SettingsPage = () => {
                                                 <p className="text-[11px] text-muted-foreground mt-4">
                                                     This is a convenience lock stored in your browser. Clearing browser data will reset it.
                                                 </p>
+                                            </div>
+                                        </section>
+                                    </motion.div>
+                                )}
+
+                                {activeTab === "notifications" && (
+                                    <motion.div
+                                        key="notifications"
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 10 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="space-y-6"
+                                    >
+                                        <section className="gum-card p-6 space-y-6">
+                                            <div>
+                                                <h2 className="text-xl font-bold flex items-center gap-2 mb-6">
+                                                    <Bell className="text-primary" />
+                                                    Push Notifications
+                                                </h2>
+                                                
+                                                <div className="flex flex-col gap-4">
+                                                    <div className="flex items-start justify-between bg-secondary/30 p-5 rounded-[3px] border border-border">
+                                                        <div className="pr-6">
+                                                            <h3 className="font-bold mb-2 flex items-center gap-2">
+                                                                {pushNotifications.isSubscribed ? <Bell size={18} className="text-primary" /> : <BellOff size={18} className="text-muted-foreground" />}
+                                                                {pushNotifications.isSubscribed ? "Notifications Enabled" : "Notifications Disabled"}
+                                                            </h3>
+                                                            <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                                                                Get instantly notified when you receive a new whisper, or when someone engages with your posts. Alerts arrive natively via your OS, even when Genjutsu is closed.
+                                                            </p>
+                                                            
+                                                            <div className="space-y-2 mb-4 hidden sm:block">
+                                                                <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                                                                    <p><strong>Whisper Previews:</strong> See who sent it and a short secure preview.</p>
+                                                                </div>
+                                                                <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                                                                    <p><strong>Smart Suppression:</strong> Notifications are hidden if you are actively looking at the app.</p>
+                                                                </div>
+                                                                <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                                                                    <p><strong>Per-Device Security:</strong> Subscription is tied to this specific browser. You must enable it on every device you use.</p>
+                                                                </div>
+                                                            </div>
+
+                                                            {!pushNotifications.isSupported ? (
+                                                                <p className="text-sm text-destructive font-bold p-3 bg-destructive/10 border border-destructive/20 rounded-[3px] max-w-[500px]">
+                                                                    ⚠️ Push notifications are not supported in this browser setup. If you are on iOS, you must add this site to your Home Screen first!
+                                                                </p>
+                                                            ) : pushNotifications.permission === "denied" ? (
+                                                                <p className="text-sm text-destructive font-bold p-3 bg-destructive/10 border border-destructive/20 rounded-[3px] max-w-[500px]">
+                                                                    ⚠️ Notifications are blocked. Please allow them in your browser/device settings to proceed.
+                                                                </p>
+                                                            ) : null}
+                                                        </div>
+                                                        
+                                                        {pushNotifications.isSupported && pushNotifications.permission !== "denied" && (
+                                                            <button
+                                                                onClick={async () => {
+                                                                    const { error } = await pushNotifications.toggle();
+                                                                    if (error) {
+                                                                        toast.error(error);
+                                                                    } else {
+                                                                        toast.success(pushNotifications.isSubscribed ? "Push notifications disabled" : "Push notifications enabled!");
+                                                                    }
+                                                                }}
+                                                                disabled={pushNotifications.loading}
+                                                                className={`gum-btn shrink-0 w-28 h-10 flex items-center justify-center text-sm font-bold transition-all ${
+                                                                    pushNotifications.isSubscribed 
+                                                                        ? 'bg-background hover:bg-secondary text-foreground border-2 border-border' 
+                                                                        : 'bg-primary text-primary-foreground gum-shadow-sm'
+                                                                }`}
+                                                            >
+                                                                {pushNotifications.loading ? (
+                                                                    <FrogLoader size={16} />
+                                                                ) : pushNotifications.isSubscribed ? "Disable" : "Enable"}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </section>
                                     </motion.div>

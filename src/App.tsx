@@ -17,6 +17,7 @@ import { ShadowWalkEngine } from "@/components/ShadowWalk";
 import { AppLockGate } from "@/components/AppLockGate";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { FloatingWhisperBubble } from "@/components/FloatingWhisperBubble";
+import { PushNotificationPrompt } from "@/components/PushNotificationPrompt";
 
 import Index from "@/pages/Index";
 const AuthPage = lazy(() => import("@/pages/AuthPage"));
@@ -65,6 +66,7 @@ const App = () => {
               <GoogleAnalytics />
               <AuthProvider>
                 <FloatingWhisperBubble />
+                <PushNotificationPrompt />
                 <Suspense
                   fallback={
                     <div className="flex h-screen items-center justify-center">

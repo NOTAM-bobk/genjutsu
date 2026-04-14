@@ -101,7 +101,7 @@ if you are updating an existing setup, run the migration files from `supabase/mi
 npm run dev
 ```
 
-open http://localhost:5173
+open http://localhost:8080
 
 ### important: never commit credentials
 
@@ -113,6 +113,28 @@ make sure your `.gitignore` includes:
 ```
 
 the supabase migrations in `supabase/migrations/` should be committed (they're public sql), but never commit files with actual credentials.
+
+### Web Push & Edge Functions
+
+genjutsu uses native web push notifications for social alerts and whispers.
+
+**1. VAPID keys**
+you need a pair of VAPID keys. you can generate them using a tool like `web-push` or online.
+- add your public vapid key to `VITE_VAPID_PUBLIC_KEY` in your `.env`.
+- add both `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` as secrets in your supabase project.
+
+**2. edge function deployment**
+the push notifications are dispatched via a supabase edge function.
+```bash
+# install supabase cli if you haven't
+npm install -g supabase
+
+# deploy the function
+supabase functions deploy send-push --no-verify-jwt
+```
+
+**3. database trigger**
+ensure you have run the migrations in `supabase/migrations/` (specifically the one adding `send_whisper_push_notification`). the database trigger handles the automatic call to the edge function on specific table inserts.
 
 ## code style
 
@@ -142,6 +164,7 @@ src/
   pages/         - route pages
   lib/           - utilities
   integrations/  - supabase client
+  types/         - type definitions
 ```
 
 ## commit messages
@@ -187,14 +210,14 @@ look for issues labeled `good first issue` - these are:
 - github oauth integration
 - syntax highlighting for code blocks
 - post export functionality
-- better mobile experience
+- better mobile experience (twa/pwa polish)
 - tests (we need more tests)
 
 ### medium priority
 - trending tags algorithm
-- notification system
 - user mentions
 - search functionality
+- real-time collaborative voids
 
 ### nice to have
 - browser extension
