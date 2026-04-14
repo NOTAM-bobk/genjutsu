@@ -1,3 +1,6 @@
+// @ts-nocheck
+
+
 // Supabase Edge Function: send-push
 // Called by the DB trigger on notifications INSERT via pg_net
 // Sends web push notifications using VAPID + RFC 8291 encryption
@@ -80,21 +83,21 @@ async function createVapidAuthHeader(
     sigBytes.length === 64
       ? sigBytes
       : (() => {
-          let offset = 3;
-          const rLen = sigBytes[offset++];
-          const rRaw = sigBytes.slice(offset, offset + rLen);
-          offset += rLen + 1;
-          const sLen = sigBytes[offset++];
-          const sRaw = sigBytes.slice(offset, offset + sLen);
-          const r = new Uint8Array(32);
-          const s = new Uint8Array(32);
-          r.set(rRaw.length > 32 ? rRaw.slice(rRaw.length - 32) : rRaw, 32 - Math.min(rRaw.length, 32));
-          s.set(sRaw.length > 32 ? sRaw.slice(sRaw.length - 32) : sRaw, 32 - Math.min(sRaw.length, 32));
-          const out = new Uint8Array(64);
-          out.set(r, 0);
-          out.set(s, 32);
-          return out;
-        })();
+        let offset = 3;
+        const rLen = sigBytes[offset++];
+        const rRaw = sigBytes.slice(offset, offset + rLen);
+        offset += rLen + 1;
+        const sLen = sigBytes[offset++];
+        const sRaw = sigBytes.slice(offset, offset + sLen);
+        const r = new Uint8Array(32);
+        const s = new Uint8Array(32);
+        r.set(rRaw.length > 32 ? rRaw.slice(rRaw.length - 32) : rRaw, 32 - Math.min(rRaw.length, 32));
+        s.set(sRaw.length > 32 ? sRaw.slice(sRaw.length - 32) : sRaw, 32 - Math.min(sRaw.length, 32));
+        const out = new Uint8Array(64);
+        out.set(r, 0);
+        out.set(s, 32);
+        return out;
+      })();
 
   const token = `${unsignedToken}.${base64UrlEncode(rawSig)}`;
 
@@ -264,6 +267,7 @@ Deno.serve(async (req) => {
     const notificationType = body.type;
     const actorId = body.actor_id;
     const postId = body.post_id;
+    const messageContent = body.message_content || "";
     if (!userId) {
       return new Response(JSON.stringify({ error: "missing user_id" }), {
         status: 400,
@@ -339,10 +343,25 @@ Deno.serve(async (req) => {
         case "mention":
           notifBody = `${actorName} mentioned you in a void`;
           break;
+        case "whisper": {
+          const preview = messageContent.length > 100
+            ? messageContent.slice(0, 100) + "..."
+            : messageContent;
+          notifBody = preview
+            ? `${actorUsername || actorName}: ${preview}`
+            : `${actorName} sent you a whisper`;
+          break;
+        }
       }
 
       // Set click URL based on notification type
-      if (notificationType === "follow" || notificationType === "unfollow") {
+      if (notificationType === "whisper") {
+        if (actorUsername) {
+          notifUrl = `https://genjutsu-social.vercel.app/whisper/${actorUsername}`;
+        } else {
+          notifUrl = `https://genjutsu-social.vercel.app/whispers`;
+        }
+      } else if (notificationType === "follow" || notificationType === "unfollow") {
         if (actorUsername) {
           notifUrl = `https://genjutsu-social.vercel.app/u/${actorUsername}`;
         }
