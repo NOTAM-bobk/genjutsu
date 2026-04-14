@@ -1166,8 +1166,8 @@ const SettingsPage = () => {
                                                 </h2>
                                                 
                                                 <div className="flex flex-col gap-4">
-                                                    <div className="flex items-start justify-between bg-secondary/30 p-5 rounded-[3px] border border-border">
-                                                        <div className="pr-6">
+                                                    <div className="flex flex-col sm:flex-row items-start justify-between bg-secondary/30 p-4 sm:p-5 rounded-[3px] border border-border gap-4 sm:gap-0">
+                                                        <div className="pr-0 sm:pr-6">
                                                             <h3 className="font-bold mb-2 flex items-center gap-2">
                                                                 {pushNotifications.isSubscribed ? <Bell size={18} className="text-primary" /> : <BellOff size={18} className="text-muted-foreground" />}
                                                                 {pushNotifications.isSubscribed ? "Notifications Enabled" : "Notifications Disabled"}
@@ -1213,7 +1213,7 @@ const SettingsPage = () => {
                                                                     }
                                                                 }}
                                                                 disabled={pushNotifications.loading}
-                                                                className={`gum-btn shrink-0 w-28 h-10 flex items-center justify-center text-sm font-bold transition-all ${
+                                                                className={`gum-btn shrink-0 w-full sm:w-28 h-10 flex items-center justify-center text-sm font-bold transition-all ${
                                                                     pushNotifications.isSubscribed 
                                                                         ? 'bg-background hover:bg-secondary text-foreground border-2 border-border' 
                                                                         : 'bg-primary text-primary-foreground gum-shadow-sm'

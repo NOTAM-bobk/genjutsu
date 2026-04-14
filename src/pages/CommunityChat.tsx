@@ -10,31 +10,10 @@ import { Helmet } from "react-helmet-async";
 import { linkify } from "@/lib/linkify";
 import ReactMarkdown from "react-markdown";
 
-const CommunityChat = () => {
+function ChatInputForm({ sendMessage, isSending, user, navigate }: any) {
     const [messageText, setMessageText] = useState("");
     const [showAiMention, setShowAiMention] = useState(false);
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-
-    const {
-        messages,
-        loadingMessages,
-        onlineCount,
-        sendMessage,
-        deleteMessage,
-        isSending,
-        isAiThinking,
-    } = useCommunityChat();
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages, isAiThinking]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
@@ -73,6 +52,96 @@ const CommunityChat = () => {
             // Error handled in hook
         }
     };
+
+    return (
+        <footer className="shrink-0 bg-background/95 backdrop-blur-md border-t-2 border-border p-4 pb-safe relative">
+            <AnimatePresence>
+                {showAiMention && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute bottom-full left-4 mb-2 z-50 min-w-[200px]"
+                    >
+                        <div className="bg-popover text-popover-foreground gum-border gum-shadow rounded-[3px] overflow-hidden flex flex-col p-1">
+                            <span className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider">Agents</span>
+                            <button
+                                type="button"
+                                onClick={handleAiMentionSelect}
+                                className="flex items-center gap-2 p-2 hover:bg-secondary transition-colors text-left rounded-sm w-full"
+                            >
+                                <div className="w-7 h-7 rounded-[3px] border-2 border-primary/20 bg-primary/10 flex items-center justify-center shrink-0">
+                                    <Ghost size={14} className="text-primary animate-pulse" />
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="font-bold text-sm leading-none text-primary">Genjutsu AI</span>
+                                    <span className="text-[10px] text-muted-foreground leading-none mt-1">@ai</span>
+                                </div>
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {user ? (
+                <form onSubmit={handleSend} className="max-w-4xl mx-auto flex gap-3">
+                    <input
+                        type="text"
+                        ref={inputRef}
+                        value={messageText}
+                        onChange={handleInputChange}
+                        placeholder="Say something to the community..."
+                        maxLength={500}
+                        className="flex-1 bg-secondary/50 gum-border py-2.5 px-4 outline-none focus:border-primary transition-colors text-sm"
+                        autoComplete="new-password"
+                    />
+                    <button
+                        type="submit"
+                        disabled={!messageText.trim() || isSending}
+                        className="gum-btn bg-primary text-primary-foreground px-5 h-10 flex items-center gap-2"
+                    >
+                        {isSending ? <FrogLoader size={16} className="" /> : <Send size={16} />}
+                        <span className="hidden sm:inline">Send</span>
+                    </button>
+                </form>
+            ) : (
+                <div className="max-w-4xl mx-auto text-center">
+                    <button
+                        onClick={() => navigate("/auth")}
+                        className="gum-btn bg-primary text-primary-foreground text-sm px-6 py-2.5"
+                    >
+                        Sign in to chat
+                    </button>
+                </div>
+            )}
+        </footer>
+    );
+}
+
+const CommunityChat = () => {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const {
+        messages,
+        loadingMessages,
+        onlineCount,
+        sendMessage,
+        deleteMessage,
+        isSending,
+        isAiThinking,
+    } = useCommunityChat();
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isAiThinking]);
+
+
 
     if (loadingMessages) {
         return (
@@ -143,9 +212,9 @@ const CommunityChat = () => {
                                 key={msg.id}
                                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                                className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+                                className={`flex w-full min-w-0 ${isMe ? "justify-end" : "justify-start"}`}
                             >
-                                <div className="flex items-end gap-2 max-w-[85%] sm:max-w-[70%]">
+                                <div className="flex items-end gap-2 max-w-[85%] sm:max-w-[70%] min-w-0">
                                     {/* Avatar (only for others or AI) */}
                                     {!isMe && (
                                         <button
@@ -162,7 +231,7 @@ const CommunityChat = () => {
                                         </button>
                                     )}
 
-                                    <div className={`px-3.5 py-2 text-sm border-2 rounded-[3px] gum-shadow-sm ${isMe
+                                    <div className={`px-3.5 py-2 text-sm border-2 rounded-[3px] gum-shadow-sm min-w-0 ${isMe
                                         ? "bg-primary text-primary-foreground border-primary"
                                         : "bg-secondary text-secondary-foreground border-border"
                                         }`}>
@@ -175,14 +244,14 @@ const CommunityChat = () => {
                                                 {isAi ? "Genjutsu AI" : msg.profile ? `@${msg.profile.username}` : "Unknown"}
                                             </button>
                                         )}
-                                        <div className="whitespace-pre-wrap break-words">
+                                        <div className="whitespace-pre-wrap break-words min-w-0 max-w-full">
                                             {isAi ? (
                                                 <ReactMarkdown
                                                     components={{
                                                         pre: ({ children }: any) => (
-                                                            <div className="relative my-2 rounded-[3px] gum-border bg-background/50 overflow-hidden shrink-0">
+                                                            <div className="relative my-2 rounded-[3px] gum-border bg-background/50 overflow-hidden shrink-0 max-w-full">
                                                                 <div className="text-[10px] bg-secondary/80 px-2 py-1 border-b-[1px] border-border font-mono opacity-70">Code Snippet</div>
-                                                                <pre className="p-3 overflow-x-auto text-xs font-mono scrollbar-hide">
+                                                                <pre className="p-3 overflow-x-auto text-xs font-mono scrollbar-hide max-w-full">
                                                                     {children}
                                                                 </pre>
                                                             </div>
@@ -266,67 +335,7 @@ const CommunityChat = () => {
                 <div ref={messagesEndRef} className="h-4" />
             </main>
 
-            <footer className="shrink-0 bg-background/95 backdrop-blur-md border-t-2 border-border p-4 pb-safe relative">
-                <AnimatePresence>
-                    {showAiMention && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
-                            className="absolute bottom-full left-4 mb-2 z-50 min-w-[200px]"
-                        >
-                            <div className="bg-popover text-popover-foreground gum-border gum-shadow rounded-[3px] overflow-hidden flex flex-col p-1">
-                                <span className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider">Agents</span>
-                                <button
-                                    type="button"
-                                    onClick={handleAiMentionSelect}
-                                    className="flex items-center gap-2 p-2 hover:bg-secondary transition-colors text-left rounded-sm w-full"
-                                >
-                                    <div className="w-7 h-7 rounded-[3px] border-2 border-primary/20 bg-primary/10 flex items-center justify-center shrink-0">
-                                        <Ghost size={14} className="text-primary animate-pulse" />
-                                    </div>
-                                    <div className="flex flex-col min-w-0">
-                                        <span className="font-bold text-sm leading-none text-primary">Genjutsu AI</span>
-                                        <span className="text-[10px] text-muted-foreground leading-none mt-1">@ai</span>
-                                    </div>
-                                </button>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {user ? (
-                    <form onSubmit={handleSend} className="max-w-4xl mx-auto flex gap-3">
-                        <input
-                            type="text"
-                            ref={inputRef}
-                            value={messageText}
-                            onChange={handleInputChange}
-                            placeholder="Say something to the community..."
-                            maxLength={500}
-                            className="flex-1 bg-secondary/50 gum-border py-2.5 px-4 outline-none focus:border-primary transition-colors text-sm"
-                            autoComplete="new-password"
-                        />
-                        <button
-                            type="submit"
-                            disabled={!messageText.trim() || isSending}
-                            className="gum-btn bg-primary text-primary-foreground px-5 h-10 flex items-center gap-2"
-                        >
-                            {isSending ? <FrogLoader size={16} className="" /> : <Send size={16} />}
-                            <span className="hidden sm:inline">Send</span>
-                        </button>
-                    </form>
-                ) : (
-                    <div className="max-w-4xl mx-auto text-center">
-                        <button
-                            onClick={() => navigate("/auth")}
-                            className="gum-btn bg-primary text-primary-foreground text-sm px-6 py-2.5"
-                        >
-                            Sign in to chat
-                        </button>
-                    </div>
-                )}
-            </footer>
+            <ChatInputForm sendMessage={sendMessage} isSending={isSending} user={user} navigate={navigate} />
         </div>
     );
 };
