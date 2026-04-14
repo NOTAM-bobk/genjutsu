@@ -94,6 +94,11 @@ const Navbar = () => {
               >
                 <Icon size={16} />
                 {label}
+                {path === "/play" && (
+                  <span className="ml-1 px-1 py-0.5 text-[8px] font-bold uppercase tracking-wider bg-destructive text-destructive-foreground rounded-[2px] leading-none shrink-0">
+                    Unstable
+                  </span>
+                )}
                 {path === "/whispers" && hasUnreadWhispers && (
                   <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary border-2 border-background animate-pulse" />
                 )}
@@ -304,6 +309,11 @@ const Navbar = () => {
                             )}
                           </div>
                           {label}
+                          {path === "/play" && (
+                            <span className="ml-auto px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider bg-destructive text-destructive-foreground rounded-[2px] leading-none">
+                              Unstable
+                            </span>
+                          )}
                         </button>
                       ))}
                     </div>
