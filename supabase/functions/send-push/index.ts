@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-
 
 // Supabase Edge Function: send-push
 // Called by the DB trigger on notifications INSERT via pg_net
