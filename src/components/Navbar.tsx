@@ -68,15 +68,18 @@ const Navbar = () => {
         animate={{ opacity: 1, y: 0 }}
         className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b-2 border-border"
       >
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <button onClick={() => navigate("/")} className="flex items-center gap-1 sm:gap-2 shrink-0">
+        <div className="max-w-6xl mx-auto px-4 h-14 md:h-16 flex items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr] md:gap-4">
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-1 sm:gap-2 shrink-0 rounded-[3px] md:px-2 md:py-1 md:hover:bg-secondary/60 transition-colors md:justify-self-start"
+          >
             <div className="w-8 h-8 rounded-[3px] overflow-hidden">
               <img src="/logo.png" alt="genjutsu" className="w-full h-full object-contain" />
             </div>
             <span className="font-black text-lg tracking-tight text-primary">genjutsu</span>
           </button>
 
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1.5 rounded-[3px] border-2 border-border bg-card/80 px-1.5 py-1 gum-shadow-sm md:justify-self-center">
             {[
               { icon: Home, label: t("nav.feed"), path: "/" },
               { icon: Search, label: t("nav.search"), path: "/search" },
@@ -87,9 +90,9 @@ const Navbar = () => {
               <button
                 key={path}
                 onClick={() => navigate(path)}
-                className={`relative flex items-center gap-2 px-3.5 py-2 rounded-[3px] text-sm font-medium transition-all gum-border ${location.pathname === path
-                  ? "bg-primary text-primary-foreground gum-shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                className={`relative h-9 flex items-center gap-2 px-3.5 rounded-[3px] text-sm font-medium transition-all border-2 ${location.pathname === path
+                  ? "bg-primary text-primary-foreground border-border gum-shadow-sm"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/80"
                   }`}
               >
                 <Icon size={16} />
@@ -106,7 +109,7 @@ const Navbar = () => {
             ))}
           </nav>
 
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 md:justify-self-end">
             <div className="hidden sm:block">
               <ModeToggle />
             </div>
@@ -163,8 +166,8 @@ const Navbar = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-1 sm:gap-2 group">
-                    <div className="hidden md:flex flex-col items-end mr-1">
+                  <button className="flex items-center gap-1 sm:gap-2 group rounded-[3px] md:gum-border md:px-2 md:py-1 md:bg-card/80 md:hover:bg-secondary/70 transition-colors">
+                    <div className="hidden md:flex flex-col items-end">
                       <span className="text-sm font-bold group-hover:underline leading-none">{profile?.display_name}</span>
                       <span className="text-[10px] text-muted-foreground leading-none mt-1">@{profile?.username}</span>
                     </div>

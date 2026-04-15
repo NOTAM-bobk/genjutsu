@@ -85,16 +85,22 @@ function ChatInputForm({ sendMessage, isSending, user, navigate }: any) {
             </AnimatePresence>
 
             {user ? (
-                <form onSubmit={handleSend} className="max-w-4xl mx-auto flex gap-3">
+                <form onSubmit={handleSend} autoComplete="off" className="max-w-4xl mx-auto flex gap-3">
                     <input
                         type="text"
+                        id="community-message-input"
+                        name="community-message"
                         ref={inputRef}
                         value={messageText}
                         onChange={handleInputChange}
                         placeholder="Say something to the community..."
                         maxLength={500}
                         className="flex-1 bg-secondary/50 gum-border py-2.5 px-4 outline-none focus:border-primary transition-colors text-sm"
-                        autoComplete="new-password"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck={false}
+                        enterKeyHint="send"
                     />
                     <button
                         type="submit"
@@ -142,13 +148,24 @@ const CommunityChat = () => {
         scrollToBottom();
     }, [messages, isAiThinking]);
 
+    useEffect(() => {
+        // Mobile browsers can keep accidental tap-selection during route transitions.
+        // Clear existing ranges once when entering Community Chat.
+        const selection = window.getSelection?.();
+        if (selection && selection.rangeCount > 0) {
+            selection.removeAllRanges();
+        }
+    }, []);
 
 
     if (loadingMessages) {
         return (
-            <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center">
+            <div
+                className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center select-none"
+                style={{ WebkitUserSelect: "none", userSelect: "none" }}
+            >
                 <FrogLoader className=" text-primary" size={32} />
-                <p className="mt-4 text-sm text-muted-foreground animate-pulse">Entering the void...</p>
+                <p className="mt-4 text-sm text-muted-foreground animate-pulse pointer-events-none">Entering the void...</p>
             </div>
         );
     }

@@ -79,6 +79,15 @@ const ChatPage = () => {
     }, [messages, isOtherUserTyping]);
 
     useEffect(() => {
+        // Mobile browsers can keep accidental tap-selection during route transitions.
+        // Clear existing ranges once when entering the DM screen.
+        const selection = window.getSelection?.();
+        if (selection && selection.rangeCount > 0) {
+            selection.removeAllRanges();
+        }
+    }, []);
+
+    useEffect(() => {
         return () => {
             if (selectedImagePreviewUrl) {
                 URL.revokeObjectURL(selectedImagePreviewUrl);
@@ -273,9 +282,12 @@ const ChatPage = () => {
 
     if (loadingProfile || loadingMessages) {
         return (
-            <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center">
+            <div
+                className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center select-none"
+                style={{ WebkitUserSelect: "none", userSelect: "none" }}
+            >
                 <FrogLoader className=" text-primary" size={32} />
-                <p className="mt-4 text-sm text-muted-foreground animate-pulse">Whispering to the abyss...</p>
+                <p className="mt-4 text-sm text-muted-foreground animate-pulse pointer-events-none">Whispering to the abyss...</p>
             </div>
         );
     }
@@ -305,17 +317,22 @@ const ChatPage = () => {
                             >
                                 <ArrowLeft size={18} />
                             </button>
-                            <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => navigate(`/u/${targetProfile.username}`)}
+                                className="flex items-center gap-2 min-w-0 text-left rounded-[3px] hover:bg-secondary/50 p-1 -m-1 transition-colors"
+                                aria-label={`Open ${targetProfile.display_name}'s profile`}
+                            >
                                 <div className="w-10 h-10 rounded-[3px] gum-border bg-secondary flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden">
                                     {targetProfile.avatar_url ? (
                                         <img src={targetProfile.avatar_url} alt={targetProfile.username} className="w-full h-full object-cover" />
                                     ) : targetProfile.display_name[0].toUpperCase()}
                                 </div>
                                 <div className="min-w-0">
-                                    <h3 className="font-bold text-sm -mb-0.5 truncate">{targetProfile.display_name}</h3>
+                                    <h3 className="font-bold text-sm -mb-0.5 truncate hover:underline">{targetProfile.display_name}</h3>
                                     <p className="text-[10px] text-muted-foreground truncate">@{targetProfile.username}</p>
                                 </div>
-                            </div>
+                            </button>
                         </div>
                     </div>
                 </header>
@@ -418,11 +435,10 @@ const ChatPage = () => {
                                 type="button"
                                 onClick={handleDownloadLightboxImage}
                                 disabled={isDownloadingLightboxImage}
-                                className="absolute top-2 right-2 z-10 h-9 px-3 rounded-[3px] border-2 border-border bg-background/90 backdrop-blur-sm hover:bg-background transition-colors disabled:opacity-60 flex items-center gap-2 text-xs font-semibold"
+                                className="absolute top-2 left-2 z-10 h-9 w-9 rounded-[3px] border-2 border-border bg-background/90 backdrop-blur-sm hover:bg-background transition-colors disabled:opacity-60 flex items-center justify-center"
                                 aria-label="Download whisper image"
                             >
                                 {isDownloadingLightboxImage ? <FrogLoader size={12} className="" /> : <Download size={14} />}
-                                Download
                             </button>
                             <img
                                 src={activeLightboxImageUrl}
@@ -441,6 +457,7 @@ const ChatPage = () => {
                     onDragOver={handleComposerDragOver}
                     onDragLeave={handleComposerDragLeave}
                     onDrop={handleComposerDrop}
+                    autoComplete="off"
                     className="max-w-4xl mx-auto space-y-2.5"
                 >
                     {isDraggingImage ? (
@@ -483,13 +500,17 @@ const ChatPage = () => {
 
                         <input
                             type="text"
-                            id="whisper-input"
-                            name="whisper"
+                            id="whisper-message-input"
+                            name="whisper-message"
                             value={messageText}
                             onChange={handleInputChange}
                             placeholder="Type a whisper... they vanish in 24h"
                             className="flex-1 bg-secondary/50 gum-border py-2.5 px-4 outline-none focus:border-primary transition-colors text-sm"
                             autoComplete="off"
+                            autoCorrect="off"
+                            autoCapitalize="off"
+                            spellCheck={false}
+                            enterKeyHint="send"
                         />
                         <button
                             type="submit"
