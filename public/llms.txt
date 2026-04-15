@@ -1,0 +1,26 @@
+# genjutsu
+
+Genjutsu is a social platform for developers where most user-generated content is ephemeral and expires after 24 hours.
+
+## Canonical Site
+- https://genjutsu-social.vercel.app/
+
+## Public Pages
+- Home: https://genjutsu-social.vercel.app/
+- About: https://genjutsu-social.vercel.app/about
+- Terms: https://genjutsu-social.vercel.app/terms
+- Privacy: https://genjutsu-social.vercel.app/privacy
+- Search: https://genjutsu-social.vercel.app/search
+
+## Core Product Notes
+- Feed posts disappear after 24 hours.
+- Whisper messages (direct messages) disappear after 24 hours.
+- Community chat messages are ephemeral.
+- Push notifications are supported for social activity and whispers.
+- User profiles, likes, comments, and follows are available with moderation controls.
+
+## Structured Machine Endpoint
+- https://genjutsu-social.vercel.app/api/llm-content
+
+## Sitemap
+- https://genjutsu-social.vercel.app/sitemap.xml

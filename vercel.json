@@ -2,6 +2,83 @@
     "rewrites": [
         {
             "source": "/post/:postId",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "user-agent",
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                }
+            ],
+            "destination": "/api/bot-render?route=/post/:postId"
+        },
+        {
+            "source": "/u/:username",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "user-agent",
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                }
+            ],
+            "destination": "/api/bot-render?route=/u/:username"
+        },
+        {
+            "source": "/",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "user-agent",
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                }
+            ],
+            "destination": "/api/bot-render?route=/"
+        },
+        {
+            "source": "/about",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "user-agent",
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                }
+            ],
+            "destination": "/api/bot-render?route=/about"
+        },
+        {
+            "source": "/terms",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "user-agent",
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                }
+            ],
+            "destination": "/api/bot-render?route=/terms"
+        },
+        {
+            "source": "/privacy",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "user-agent",
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                }
+            ],
+            "destination": "/api/bot-render?route=/privacy"
+        },
+        {
+            "source": "/search",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "user-agent",
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                }
+            ],
+            "destination": "/api/bot-render?route=/search"
+        },
+        {
+            "source": "/post/:postId",
             "destination": "/api/og?postId=:postId"
         },
         {

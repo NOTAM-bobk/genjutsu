@@ -13,6 +13,10 @@ Allow: /
 # OpenAI (ChatGPT)
 User-agent: GPTBot
 Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
 
 # Anthropic (Claude)
 User-agent: ClaudeBot
@@ -42,3 +46,6 @@ Crawl-delay: 5
 
 # Sitemaps (Good for SEO)
 Sitemap: https://genjutsu-social.vercel.app/sitemap.xml
+
+# Machine-readable docs for LLMs
+# https://genjutsu-social.vercel.app/llms.txt
