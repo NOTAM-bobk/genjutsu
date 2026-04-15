@@ -309,6 +309,7 @@ Deno.serve(async (req) => {
     // Build detailed notification message
     let notifBody = "You got a new notification — open app to see";
     let notifUrl = "https://genjutsu-social.vercel.app";
+    let notifTag: string | undefined;
 
     if (actorId && notificationType) {
       // Look up actor's display name
@@ -350,6 +351,14 @@ Deno.serve(async (req) => {
           notifBody = preview
             ? `${actorUsername || actorName}: ${preview}`
             : `${actorName} sent you a whisper`;
+          // Reuse one card for whispers from the same sender.
+          if (actorId) {
+            notifTag = `whisper-${actorId}`;
+          } else if (actorUsername) {
+            notifTag = `whisper-${actorUsername}`;
+          } else {
+            notifTag = "whisper";
+          }
           break;
         }
       }
@@ -375,6 +384,8 @@ Deno.serve(async (req) => {
       body: notifBody,
       icon: "https://genjutsu-social.vercel.app/icon-192x192.png",
       url: notifUrl,
+      tag: notifTag,
+      renotify: true,
     };
 
     const vapidSubject = "mailto:genjutsu@proton.me";

@@ -17,6 +17,8 @@ self.addEventListener('push', (event: any) => {
     body: 'You got a new notification — open app to see',
     icon: 'https://genjutsu-social.vercel.app/icon-192x192.png',
     url: 'https://genjutsu-social.vercel.app',
+    tag: '',
+    renotify: true,
   };
 
   try {
@@ -40,12 +42,17 @@ self.addEventListener('push', (event: any) => {
       }
 
       // App is not focused, show the OS notification
+      const notificationTag =
+        typeof data.tag === 'string' && data.tag.trim().length > 0
+          ? data.tag
+          : `genjutsu-${Date.now()}`;
+
       return (self as any).registration.showNotification(data.title, {
         body: data.body,
         icon: data.icon,
         badge: 'https://genjutsu-social.vercel.app/badge-96x96.png',
-        tag: `genjutsu-${Date.now()}`,
-        renotify: true,
+        tag: notificationTag,
+        renotify: Boolean(data.renotify),
         data: { url: data.url },
       });
     })
