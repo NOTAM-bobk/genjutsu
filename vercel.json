@@ -1,4 +1,18 @@
 {
+    "redirects": [
+        {
+            "source": "/",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "user-agent",
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot).*"
+                }
+            ],
+            "destination": "/api/bot-render?route=/",
+            "permanent": false
+        }
+    ],
     "rewrites": [
         {
             "source": "/post/:postId",
@@ -6,7 +20,7 @@
                 {
                     "type": "header",
                     "key": "user-agent",
-                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot).*"
                 }
             ],
             "destination": "/api/bot-render?route=/post/:postId"
@@ -17,21 +31,10 @@
                 {
                     "type": "header",
                     "key": "user-agent",
-                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot).*"
                 }
             ],
             "destination": "/api/bot-render?route=/u/:username"
-        },
-        {
-            "source": "/",
-            "has": [
-                {
-                    "type": "header",
-                    "key": "user-agent",
-                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
-                }
-            ],
-            "destination": "/api/bot-render?route=/"
         },
         {
             "source": "/about",
@@ -39,7 +42,7 @@
                 {
                     "type": "header",
                     "key": "user-agent",
-                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot).*"
                 }
             ],
             "destination": "/api/bot-render?route=/about"
@@ -50,7 +53,7 @@
                 {
                     "type": "header",
                     "key": "user-agent",
-                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot).*"
                 }
             ],
             "destination": "/api/bot-render?route=/terms"
@@ -61,7 +64,7 @@
                 {
                     "type": "header",
                     "key": "user-agent",
-                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot).*"
                 }
             ],
             "destination": "/api/bot-render?route=/privacy"
@@ -72,7 +75,7 @@
                 {
                     "type": "header",
                     "key": "user-agent",
-                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+                    "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|PerplexityBot|CCBot|Google-Extended|Googlebot|Bingbot|DuckAssistBot).*"
                 }
             ],
             "destination": "/api/bot-render?route=/search"
