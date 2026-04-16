@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, memo, useMemo } from "react";
 import { Hash, Heart, MessageSquare, Share, Bookmark, MoreHorizontal, Trash2, Send, Languages } from "lucide-react";
 import { FrogLoader } from "@/components/ui/FrogLoader";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { PostWithProfile } from "@/hooks/usePosts";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -100,6 +100,17 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
 
   const [isTextExpanded, setIsTextExpanded] = useState(false);
   const [isCodeExpanded, setIsCodeExpanded] = useState(false);
+  const [isLikeAnimating, setIsLikeAnimating] = useState(false);
+  const [likeBurstId, setLikeBurstId] = useState(0);
+  const likeAnimationTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (likeAnimationTimeoutRef.current !== null) {
+        window.clearTimeout(likeAnimationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Content Selection Logic
   const isAlreadyEnglish = useMemo(() => {
@@ -166,6 +177,24 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
     } finally {
       setIsTranslating(false);
     }
+  };
+
+  const handleLikeClick = () => {
+    const willLike = !post.user_liked;
+    onLike(post.id, post.user_liked);
+
+    if (!willLike) return;
+
+    setLikeBurstId((id) => id + 1);
+    setIsLikeAnimating(true);
+
+    if (likeAnimationTimeoutRef.current !== null) {
+      window.clearTimeout(likeAnimationTimeoutRef.current);
+    }
+
+    likeAnimationTimeoutRef.current = window.setTimeout(() => {
+      setIsLikeAnimating(false);
+    }, 520);
   };
 
 
@@ -347,14 +376,54 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
 
 
           <div className="flex items-center gap-6 mt-4 pt-3 border-t border-secondary">
-            <button
-              onClick={() => onLike(post.id, post.user_liked)}
+            <motion.button
+              onClick={handleLikeClick}
               className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${post.user_liked ? "text-red-500" : "text-muted-foreground hover:text-red-500"
-                }`}
+                } relative`}
+              whileTap={{ scale: 0.92 }}
+              animate={isLikeAnimating ? { scale: [1, 1.18, 0.96, 1] } : { scale: 1 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
             >
-              <Heart size={15} fill={post.user_liked ? "currentColor" : "none"} className={post.user_liked ? "text-red-500" : ""} />
+              <motion.span
+                animate={isLikeAnimating ? { rotate: [0, -14, 12, -8, 0] } : { rotate: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="inline-flex"
+              >
+                <Heart size={15} fill={post.user_liked ? "currentColor" : "none"} className={post.user_liked ? "text-red-500" : ""} />
+              </motion.span>
               {post.likes_count}
-            </button>
+
+              <AnimatePresence>
+                {isLikeAnimating && (
+                  <motion.span
+                    key={`like-burst-${likeBurstId}`}
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.45 }}
+                    className="pointer-events-none absolute inset-0"
+                  >
+                    {[
+                      { x: -18, y: -20, delay: 0.0 },
+                      { x: 0, y: -26, delay: 0.03 },
+                      { x: 18, y: -20, delay: 0.06 },
+                      { x: -22, y: -4, delay: 0.09 },
+                      { x: 22, y: -4, delay: 0.12 },
+                    ].map((particle, idx) => (
+                      <motion.span
+                        key={`${likeBurstId}-${idx}`}
+                        initial={{ opacity: 0, x: 0, y: 0, scale: 0.5 }}
+                        animate={{ opacity: [0, 1, 0], x: particle.x, y: particle.y, scale: [0.5, 1, 0.6] }}
+                        transition={{ duration: 0.45, ease: "easeOut", delay: particle.delay }}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-red-500"
+                      >
+                        <Heart size={10} fill="currentColor" />
+                      </motion.span>
+                    ))}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
             <Link
               to={`/post/${post.id}`}
               className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
