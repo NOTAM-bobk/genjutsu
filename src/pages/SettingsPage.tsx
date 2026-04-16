@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import Navbar from "@/components/Navbar";
-import { LogOut, ArrowLeft, Shield, Settings, Check, AtSign, Globe, Palette, Moon, Sun, Monitor, Pipette, WandSparkles, Music, Volume2, VolumeX, Clock, Lock, Eye, EyeOff, KeyRound, Layout, Type, Square, Grid, Bell, BellOff } from "lucide-react";
+import { LogOut, ArrowLeft, Shield, Settings, Check, AtSign, Globe, Palette, Moon, Sun, Monitor, Pipette, WandSparkles, Music, Volume2, VolumeX, Clock, Lock, Eye, EyeOff, KeyRound, Layout, Type, Square, Grid, Bell, BellOff, Smile } from "lucide-react";
 import { FrogLoader } from "@/components/ui/FrogLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/components/theme-provider";
+import TwemojiText from "@/components/TwemojiText";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { hashPin, verifyPin, APP_LOCK_HASH_KEY, APP_LOCK_SESSION_KEY, APP_LOCK_Q1_KEY, APP_LOCK_Q2_KEY, APP_LOCK_A1_HASH_KEY, APP_LOCK_A2_HASH_KEY, PREDEFINED_QUESTIONS, formatAnswer } from "@/lib/pin";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
@@ -30,7 +31,7 @@ const SettingsPage = () => {
     const { profile, changeUsername, getNextUsernameChangeDate, deleteAccount } = useProfile();
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
-    const { theme, color, customColor, font, radius, animateColor, cursorTrail, grid, soundEnabled, shadowWalk, setTheme, setColor, setCustomColor, setFont, setRadius, setAnimateColor, setCursorTrail, setGrid, setSoundEnabled, setShadowWalk } = useTheme();
+    const { theme, color, customColor, font, radius, emojiPack, animateColor, cursorTrail, grid, soundEnabled, shadowWalk, setTheme, setColor, setCustomColor, setFont, setRadius, setEmojiPack, setAnimateColor, setCursorTrail, setGrid, setSoundEnabled, setShadowWalk } = useTheme();
     const pushNotifications = usePushNotifications();
 
     const [newUsername, setNewUsername] = useState("");
@@ -587,6 +588,41 @@ const SettingsPage = () => {
                                                             {f}
                                                         </button>
                                                     ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-6 border-t border-border">
+                                                <h2 className="text-lg font-bold mb-1 flex items-center gap-2"><Smile size={18} className="text-primary" /> Emoji Pack</h2>
+                                                <p className="text-sm text-muted-foreground mb-4">Choose how emojis are rendered across chats and posts.</p>
+                                                <div className="mb-4 rounded-[3px] border border-border/60 bg-secondary/30 p-3">
+                                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Current Preview</p>
+                                                    <TwemojiText className="text-2xl leading-none">😀 😂 ❤️ 👍 🙏 😭 🔥</TwemojiText>
+                                                </div>
+                                                <div className="flex flex-wrap gap-3">
+                                                    <button
+                                                        onClick={() => setEmojiPack("native")}
+                                                        className={`gum-btn px-6 py-2.5 text-sm font-bold transition-colors ${emojiPack === "native" ? 'bg-primary text-primary-foreground gum-shadow-sm' : 'bg-background hover:bg-secondary text-foreground'}`}
+                                                    >
+                                                        Device Default
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setEmojiPack("twemoji")}
+                                                        className={`gum-btn px-6 py-2.5 text-sm font-bold transition-colors ${emojiPack === "twemoji" ? 'bg-primary text-primary-foreground gum-shadow-sm' : 'bg-background hover:bg-secondary text-foreground'}`}
+                                                    >
+                                                        Twitter
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setEmojiPack("google")}
+                                                        className={`gum-btn px-6 py-2.5 text-sm font-bold transition-colors ${emojiPack === "google" ? 'bg-primary text-primary-foreground gum-shadow-sm' : 'bg-background hover:bg-secondary text-foreground'}`}
+                                                    >
+                                                        Google
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setEmojiPack("openmoji")}
+                                                        className={`gum-btn px-6 py-2.5 text-sm font-bold transition-colors ${emojiPack === "openmoji" ? 'bg-primary text-primary-foreground gum-shadow-sm' : 'bg-background hover:bg-secondary text-foreground'}`}
+                                                    >
+                                                        OpenMoji
+                                                    </button>
                                                 </div>
                                             </div>
 

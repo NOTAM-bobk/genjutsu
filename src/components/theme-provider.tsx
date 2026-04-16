@@ -4,6 +4,7 @@ type Theme = "dark" | "light" | "system";
 type ColorPreset = "purple" | "blue" | "green" | "orange" | "rose" | "zinc" | "custom";
 type FontPreset = "Reddit Mono" | "Inter" | "Space Grotesk" | "Fira Code" | "JetBrains Mono" | "Comic Neue";
 type RadiusPreset = "none" | "default" | "md" | "lg" | "full";
+export type EmojiPack = "native" | "twemoji" | "google" | "openmoji";
 
 /** Convert a hex color (#rrggbb) to an HSL string "H S% L%" suitable for CSS variables. */
 function hexToHsl(hex: string): string {
@@ -66,6 +67,7 @@ type ThemeProviderState = {
     font: FontPreset;
     grid: GridPreset;
     radius: RadiusPreset;
+    emojiPack: EmojiPack;
     animateColor: boolean;
     cursorTrail: boolean;
     soundEnabled: boolean;
@@ -76,6 +78,7 @@ type ThemeProviderState = {
     setFont: (font: FontPreset) => void;
     setGrid: (grid: GridPreset) => void;
     setRadius: (radius: RadiusPreset) => void;
+    setEmojiPack: (emojiPack: EmojiPack) => void;
     setAnimateColor: (v: boolean) => void;
     setCursorTrail: (v: boolean) => void;
     setSoundEnabled: (v: boolean) => void;
@@ -89,6 +92,7 @@ const initialState: ThemeProviderState = {
     font: "Reddit Mono",
     grid: "blueprint",
     radius: "default",
+    emojiPack: "twemoji",
     animateColor: false,
     cursorTrail: false,
     soundEnabled: false,
@@ -99,6 +103,7 @@ const initialState: ThemeProviderState = {
     setFont: () => null,
     setGrid: () => null,
     setRadius: () => null,
+    setEmojiPack: () => null,
     setAnimateColor: () => null,
     setCursorTrail: () => null,
     setSoundEnabled: () => null,
@@ -129,6 +134,13 @@ export function ThemeProvider({
     const [radius, setRadiusState] = useState<RadiusPreset>(() => {
         return (localStorage.getItem(`${storageKey}-radius`) as RadiusPreset) || "default";
     });
+    const [emojiPack, setEmojiPackState] = useState<EmojiPack>(() => {
+        const stored = localStorage.getItem(`${storageKey}-emojiPack`);
+        if (stored === "native" || stored === "twemoji" || stored === "google" || stored === "openmoji") {
+            return stored;
+        }
+        return "twemoji";
+    });
     const [customColor, setCustomColorState] = useState<string>(() => {
         return localStorage.getItem(`${storageKey}-customColor`) || "#8b5cf6";
     });
@@ -154,6 +166,7 @@ export function ThemeProvider({
     const setFont = (val: FontPreset) => { localStorage.setItem(`${storageKey}-font`, val); setFontState(val); };
     const setGrid = (val: GridPreset) => { localStorage.setItem(`${storageKey}-grid`, val); setGridState(val); };
     const setRadius = (val: RadiusPreset) => { localStorage.setItem(`${storageKey}-radius`, val); setRadiusState(val); };
+    const setEmojiPack = (val: EmojiPack) => { localStorage.setItem(`${storageKey}-emojiPack`, val); setEmojiPackState(val); };
     const setAnimateColor = (val: boolean) => { localStorage.setItem(`${storageKey}-animateColor`, String(val)); setAnimateColorState(val); };
     const setCursorTrail = (val: boolean) => { localStorage.setItem(`${storageKey}-cursorTrail`, String(val)); setCursorTrailState(val); };
     const setSoundEnabled = (val: boolean) => { localStorage.setItem(`${storageKey}-soundEnabled`, String(val)); setSoundEnabledState(val); };
@@ -170,6 +183,7 @@ export function ThemeProvider({
         root.classList.add(activeTheme);
         
         root.setAttribute("data-grid", grid);
+        root.setAttribute("data-emoji-pack", emojiPack);
         root.setAttribute("data-shadow-walk", String(shadowWalk));
 
         // Only apply static color when animation is off
@@ -193,7 +207,7 @@ export function ThemeProvider({
 
         // Apply Radius
         document.documentElement.style.setProperty('--radius', radiusPresets[radius]);
-    }, [theme, color, customColor, radius, animateColor, grid, shadowWalk]);
+    }, [theme, color, customColor, radius, emojiPack, animateColor, grid, shadowWalk]);
 
     // Animated color loop — smooth 60fps hue cycling via requestAnimationFrame
     useEffect(() => {
@@ -244,8 +258,8 @@ export function ThemeProvider({
     }, [font]);
 
     const value = {
-        theme, color, customColor, font, grid, radius, animateColor, cursorTrail, soundEnabled, shadowWalk,
-        setTheme, setColor, setCustomColor, setFont, setGrid, setRadius, setAnimateColor, setCursorTrail, setSoundEnabled, setShadowWalk
+        theme, color, customColor, font, grid, radius, emojiPack, animateColor, cursorTrail, soundEnabled, shadowWalk,
+        setTheme, setColor, setCustomColor, setFont, setGrid, setRadius, setEmojiPack, setAnimateColor, setCursorTrail, setSoundEnabled, setShadowWalk
     };
 
     return (

@@ -1,15 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import TwemojiText from "@/components/TwemojiText";
 
 const urlRegex = /(https?:\/\/[^\s]+)/g;
 const mentionRegex = /((?:^|\s)@[a-zA-Z0-9_]+)/g;
+const fullUrlRegex = /^https?:\/\/[^\s]+$/;
 
 export function linkify(text: string, isMe: boolean = false) {
     if (!text) return text;
 
     // First, split by URL
-    return text.split(urlRegex).map((part, i) => {
-        if (urlRegex.test(part)) {
+    const parts = text.split(urlRegex).map((part, i) => {
+        if (fullUrlRegex.test(part)) {
             const trailingPunctuationMatch = part.match(/[.,!?:;]+$/);
             const url = trailingPunctuationMatch ? part.slice(0, -trailingPunctuationMatch[0].length) : part;
             const punctuation = trailingPunctuationMatch ? trailingPunctuationMatch[0] : "";
@@ -51,4 +53,6 @@ export function linkify(text: string, isMe: boolean = false) {
             return subPart;
         });
     });
+
+    return <TwemojiText>{parts}</TwemojiText>;
 }

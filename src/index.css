@@ -370,3 +370,10 @@ html.dark {
     background-color: transparent !important;
   }
 }
+
+img.twemoji {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  display: inline-block;
+}
