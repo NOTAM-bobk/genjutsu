@@ -49,62 +49,92 @@ const ProfilePage = () => {
     const [bookmarks, setBookmarks] = useState<PostWithProfile[]>([]);
     const [isLiking, setIsLiking] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const playAttemptIdRef = useRef(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
 
-    const togglePlay = () => {
-        if (!profile?.fav_song?.previewUrl) return;
+    const disposeAudio = (resetUi = true) => {
+        if (!audioRef.current) return;
 
-        if (!audioRef.current) {
-            audioRef.current = new Audio(profile.fav_song.previewUrl);
-            audioRef.current.addEventListener('timeupdate', () => {
-                if (audioRef.current) {
-                    setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
-                }
-            });
-            audioRef.current.addEventListener('ended', () => {
-                setIsPlaying(false);
-                setProgress(0);
-            });
-        }
+        playAttemptIdRef.current += 1;
+        const audio = audioRef.current;
+        audio.onplay = null;
+        audio.onpause = null;
+        audio.ontimeupdate = null;
+        audio.onended = null;
+        audio.pause();
+        audio.src = "";
+        audio.load();
+        audioRef.current = null;
 
-        if (isPlaying) {
-            audioRef.current.pause();
+        if (resetUi) {
             setIsPlaying(false);
+            setProgress(0);
+        }
+    };
+
+    const ensureAudio = () => {
+        if (!profile?.fav_song?.previewUrl) return null;
+        if (audioRef.current) return audioRef.current;
+
+        const audio = new Audio(profile.fav_song.previewUrl);
+        audio.ontimeupdate = () => {
+            if (!Number.isFinite(audio.duration) || audio.duration <= 0) {
+                setProgress(0);
+                return;
+            }
+            setProgress((audio.currentTime / audio.duration) * 100);
+        };
+        audio.onplay = () => setIsPlaying(true);
+        audio.onpause = () => setIsPlaying(false);
+        audio.onended = () => {
+            setIsPlaying(false);
+            setProgress(0);
+        };
+
+        audioRef.current = audio;
+        return audio;
+    };
+
+    const togglePlay = () => {
+        const audio = ensureAudio();
+        if (!audio) return;
+
+        const currentlyPlaying = !audio.paused && !audio.ended;
+        if (currentlyPlaying) {
+            playAttemptIdRef.current += 1;
+            audio.pause();
         } else {
-            const playPromise = audioRef.current.play();
+            const attemptId = ++playAttemptIdRef.current;
+            // Reflect intent instantly so the button flips on first click.
+            setIsPlaying(true);
+            const playPromise = audio.play();
             if (playPromise !== undefined) {
                 playPromise
-                    .then(() => setIsPlaying(true))
                     .catch((error: any) => {
+                        // Ignore stale rejections from previously replaced audio instances.
+                        if (attemptId !== playAttemptIdRef.current) return;
                         // Browsers throw AbortError when play() is interrupted by unmount/src change.
                         if (error?.name !== "AbortError") {
                             console.error("Audio playback failed:", error);
                             toast.error("Couldn't play song preview.");
                         }
-                        setIsPlaying(false);
+                        // Keep UI in sync with actual element state.
+                        if (audio.paused || audio.ended) {
+                            setIsPlaying(false);
+                        }
                     });
-            } else {
-                setIsPlaying(true);
             }
         }
     };
 
     useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current = null;
-            setIsPlaying(false);
-            setProgress(0);
-        }
+        disposeAudio();
     }, [profile?.fav_song?.previewUrl]);
 
     useEffect(() => {
         return () => {
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current = null;
-            }
+            disposeAudio(false);
         };
     }, []);
     const [loading, setLoading] = useState(true);

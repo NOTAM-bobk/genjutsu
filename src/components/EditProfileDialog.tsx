@@ -52,6 +52,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
     const [open, setOpen] = useState(false);
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const previewAttemptIdRef = useRef(0);
     const [playingPreview, setPlayingPreview] = useState<string | null>(null);
 
     const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -74,6 +75,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             setBannerPreviewUrl(null);
         } else {
             if (audioRef.current) {
+                previewAttemptIdRef.current += 1;
                 audioRef.current.pause();
                 audioRef.current = null;
                 setPlayingPreview(null);
@@ -82,6 +84,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
 
         return () => {
             if (audioRef.current) {
+                previewAttemptIdRef.current += 1;
                 audioRef.current.pause();
                 audioRef.current = null;
             }
@@ -216,21 +219,30 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
 
     const togglePreview = (previewUrl: string) => {
         if (playingPreview === previewUrl) {
+            previewAttemptIdRef.current += 1;
             audioRef.current?.pause();
             setPlayingPreview(null);
         } else {
             if (audioRef.current) {
+                previewAttemptIdRef.current += 1;
                 audioRef.current.pause();
             }
             const audio = new Audio(previewUrl);
             audioRef.current = audio;
-            audio.onended = () => setPlayingPreview(null);
+            const attemptId = ++previewAttemptIdRef.current;
+            audio.onended = () => {
+                if (attemptId !== previewAttemptIdRef.current) return;
+                setPlayingPreview(null);
+            };
+            // Reflect intent instantly so the icon flips on first click.
+            setPlayingPreview(previewUrl);
 
             const playPromise = audio.play();
             if (playPromise !== undefined) {
                 playPromise
-                    .then(() => setPlayingPreview(previewUrl))
                     .catch((error: any) => {
+                        // Ignore stale rejections from previously replaced audio instances.
+                        if (attemptId !== previewAttemptIdRef.current) return;
                         // Ignore aborts from quick toggle/close while play() is pending.
                         if (error?.name !== "AbortError") {
                             console.error("Preview playback failed:", error);
@@ -238,8 +250,6 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                         }
                         setPlayingPreview(null);
                     });
-            } else {
-                setPlayingPreview(previewUrl);
             }
         }
     };
