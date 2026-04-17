@@ -10,6 +10,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { getNow } from "@/lib/utils";
 import { getConfig } from "@/lib/config";
 import { linkify } from "@/lib/linkify";
+import { shareWithFallback } from "@/lib/nativeShare";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkGemoji from "remark-gemoji";
@@ -195,6 +196,20 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
     likeAnimationTimeoutRef.current = window.setTimeout(() => {
       setIsLikeAnimating(false);
     }, 520);
+  };
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/post/${post.id}`;
+    const title = `${post.profiles?.display_name || "Someone"} on genjutsu`;
+    const baseText = post.content?.trim() || "Check out this post on genjutsu.";
+    const text = baseText.length > 140 ? `${baseText.slice(0, 137)}...` : baseText;
+
+    const result = await shareWithFallback({ title, text, url });
+    if (result === "copied") {
+      toast.success("Link copied to clipboard!");
+    } else if (result === "failed") {
+      toast.error("Couldn't share this post right now.");
+    }
   };
 
 
@@ -473,11 +488,9 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
             )}
 
             <button
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.origin + "/post/" + post.id);
-                toast.success("Link copied to clipboard!");
-              }}
+              onClick={handleShare}
               className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+              title="Share post"
             >
               <Share size={15} />
             </button>

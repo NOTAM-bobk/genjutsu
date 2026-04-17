@@ -5,7 +5,7 @@ import { PostWithProfile } from "@/hooks/usePosts";
 import Navbar from "@/components/Navbar";
 import PostCard from "@/components/PostCard";
 import Sidebar from "@/components/Sidebar";
-import { ArrowLeft, Calendar, ImageIcon, Send, Bookmark, Github, Twitter, Facebook, Globe, Play, Pause, Ban } from "lucide-react";
+import { ArrowLeft, Calendar, ImageIcon, Send, Bookmark, Github, Twitter, Facebook, Globe, Play, Pause, Ban, Share } from "lucide-react";
 import { FrogLoader } from "@/components/ui/FrogLoader";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,6 +27,7 @@ import {
 import { useFollow } from "@/hooks/useFollow";
 import { usePostActions } from "@/hooks/usePostActions";
 import { linkify } from "@/lib/linkify";
+import { shareWithFallback } from "@/lib/nativeShare";
 
 interface ProfileData {
     id: string;
@@ -147,6 +148,22 @@ const ProfilePage = () => {
 
     // Use our new professional hook
     const { isFollowing, toggleFollow, stats, refresh: refreshFollows } = useFollow(profile?.user_id);
+
+    const handleShareProfile = async () => {
+        if (!profile?.username) return;
+
+        const url = `${window.location.origin}/u/${profile.username}`;
+        const title = `${profile.display_name} (@${profile.username}) on genjutsu`;
+        const baseText = profile.bio?.trim() || `Check out @${profile.username} on genjutsu.`;
+        const text = baseText.length > 140 ? `${baseText.slice(0, 137)}...` : baseText;
+
+        const result = await shareWithFallback({ title, text, url });
+        if (result === "copied") {
+            toast.success("Profile link copied to clipboard!");
+        } else if (result === "failed") {
+            toast.error("Couldn't share this profile right now.");
+        }
+    };
 
     const fetchData = async () => {
         if (!username) return;
@@ -455,17 +472,26 @@ const ProfilePage = () => {
 
                                         <div className="flex justify-end pt-4">
                                             {isOwnProfile ? (
-                                                <EditProfileDialog
-                                                    currentProfile={{
-                                                        display_name: profile.display_name,
-                                                        bio: profile.bio,
-                                                        avatar_url: profile.avatar_url,
-                                                        banner_url: profile.banner_url,
-                                                        social_links: profile.social_links,
-                                                        fav_song: profile.fav_song
-                                                    }}
-                                                    onUpdate={fetchData}
-                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={handleShareProfile}
+                                                        className="p-2 gum-card bg-secondary text-muted-foreground hover:text-primary transition-colors"
+                                                        title="Share profile"
+                                                    >
+                                                        <Share size={18} />
+                                                    </button>
+                                                    <EditProfileDialog
+                                                        currentProfile={{
+                                                            display_name: profile.display_name,
+                                                            bio: profile.bio,
+                                                            avatar_url: profile.avatar_url,
+                                                            banner_url: profile.banner_url,
+                                                            social_links: profile.social_links,
+                                                            fav_song: profile.fav_song
+                                                        }}
+                                                        onUpdate={fetchData}
+                                                    />
+                                                </div>
                                             ) : (
                                                 <div className="flex items-center gap-2">
                                                     <button
@@ -480,6 +506,13 @@ const ProfilePage = () => {
                                                         title="Whisper"
                                                     >
                                                         <Send size={18} />
+                                                    </button>
+                                                    <button
+                                                        onClick={handleShareProfile}
+                                                        className="p-2 gum-card bg-secondary text-muted-foreground hover:text-primary transition-colors"
+                                                        title="Share profile"
+                                                    >
+                                                        <Share size={18} />
                                                     </button>
                                                     <button
                                                         onClick={toggleFollow}
