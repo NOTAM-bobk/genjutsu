@@ -39,7 +39,9 @@ const StrangerPage = lazy(() => import("@/pages/StrangerPage"));
 const MfaChallengePage = lazy(() => import("@/pages/MfaChallengePage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
-const MAINTENANCE_MODE = true;
+////////////////////////////////////////////////////////////////
+const MAINTENANCE_MODE = false; 
+///////////////////////////////////////////////////////////////////////////////////////////////
 
 const queryClient = new QueryClient();
 
