@@ -23,6 +23,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -74,6 +75,7 @@ const AdminPage = () => {
   // Confirmation State
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmValue, setConfirmValue] = useState("");
+  const [banReason, setBanReason] = useState("");
   const [pendingAction, setPendingAction] = useState<{
     type: "delete_post" | "ban_user" | "unban_user";
     targetId: string;
@@ -239,6 +241,7 @@ const AdminPage = () => {
   const triggerDeleteConfirm = (postId: string) => {
     setPendingAction({ type: "delete_post", targetId: postId });
     setConfirmValue("");
+    setBanReason("");
     setConfirmOpen(true);
   };
 
@@ -260,18 +263,24 @@ const AdminPage = () => {
       label
     });
     setConfirmValue("");
+    setBanReason("");
     setConfirmOpen(true);
   };
 
   const triggerUnbanConfirm = (userId: string) => {
     setPendingAction({ type: "unban_user", targetId: userId });
     setConfirmValue("");
+    setBanReason("");
     setConfirmOpen(true);
   };
 
   const executeConfirmedAction = () => {
     if (confirmValue !== "CONFIRM") return;
     if (!pendingAction) return;
+    if (pendingAction.type === "ban_user" && !banReason.trim()) {
+      toast.error("Please write a ban reason before banning.");
+      return;
+    }
 
     switch (pendingAction.type) {
       case "delete_post":
@@ -281,7 +290,7 @@ const AdminPage = () => {
         banUserMutation.mutate({
           userId: pendingAction.targetId,
           minutes: pendingAction.params.minutes,
-          reason: pendingAction.label,
+          reason: banReason.trim(),
           scopes: pendingAction.params.scopes,
           permanent: pendingAction.params.permanent
         });
@@ -293,6 +302,8 @@ const AdminPage = () => {
 
     setConfirmOpen(false);
     setPendingAction(null);
+    setConfirmValue("");
+    setBanReason("");
   };
 
   const isBanned = (user: ModerationUser) => {
@@ -351,7 +362,17 @@ const AdminPage = () => {
         </header>
 
         {/* Action Confirmation Dialog */}
-        <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <Dialog
+          open={confirmOpen}
+          onOpenChange={(open) => {
+            setConfirmOpen(open);
+            if (!open) {
+              setPendingAction(null);
+              setConfirmValue("");
+              setBanReason("");
+            }
+          }}
+        >
           <DialogContent className="rounded-none border-border bg-background backdrop-blur-xl border-l-4 border-l-primary gap-6 p-6 sm:p-8">
             <DialogTitle className="sr-only">Edit User</DialogTitle>
             <DialogDescription className="sr-only">Admin tool to modify user profile details and status.</DialogDescription>
@@ -371,6 +392,24 @@ const AdminPage = () => {
               <p className="text-[11px] font-bold leading-relaxed uppercase italic text-muted-foreground">
                 This action is significant and will be logged. Type <span className="text-primary font-black underline">CONFIRM</span> to bypass security locks.
               </p>
+              {pendingAction?.type === "ban_user" && (
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase font-black tracking-widest text-primary">Ban Reason</label>
+                  <Textarea
+                    id="ban-reason"
+                    name="ban-reason"
+                    autoComplete="off"
+                    className="rounded-none bg-background border-border min-h-20 text-[11px] font-medium placeholder:opacity-40 focus:border-primary/50"
+                    placeholder="Write why this user is being banned..."
+                    value={banReason}
+                    onChange={(e) => setBanReason(e.target.value)}
+                    maxLength={300}
+                  />
+                  <p className="text-[9px] uppercase font-bold text-muted-foreground">
+                    This reason is shown to the user while the ban is active.
+                  </p>
+                </div>
+              )}
               <Input
                 id="admin-confirm"
                 name="admin-confirm"
@@ -386,14 +425,19 @@ const AdminPage = () => {
               <Button
                 variant="outline"
                 className="rounded-none h-11 flex-1 uppercase font-black text-[10px] border-border hover:bg-secondary/10 transition-all"
-                onClick={() => setConfirmOpen(false)}
+                onClick={() => {
+                  setConfirmOpen(false);
+                  setPendingAction(null);
+                  setConfirmValue("");
+                  setBanReason("");
+                }}
               >
                 Abort
               </Button>
               <Button
                 variant="destructive"
                 className="rounded-none h-11 flex-1 uppercase font-black text-[10px] italic shadow-[4px_4px_0px_rgba(244,63,94,0.2)] disabled:opacity-30 disabled:grayscale transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
-                disabled={confirmValue !== "CONFIRM"}
+                disabled={confirmValue !== "CONFIRM" || (pendingAction?.type === "ban_user" && !banReason.trim())}
                 onClick={executeConfirmedAction}
               >
                 Execute
