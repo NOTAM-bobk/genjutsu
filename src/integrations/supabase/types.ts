@@ -187,7 +187,9 @@ export type Database = {
           username: string
           whisper_last_seen_at: string | null
           banned_until: string | null
+          ban_permanent: boolean
           ban_reason: string | null
+          ban_scopes: string[] | null
           social_links: Json | null
           fav_song: Json | null
         }
@@ -203,7 +205,9 @@ export type Database = {
           username: string
           whisper_last_seen_at?: string | null
           banned_until?: string | null
+          ban_permanent?: boolean
           ban_reason?: string | null
+          ban_scopes?: string[] | null
           social_links?: Json | null
           fav_song?: Json | null
         }
@@ -219,7 +223,9 @@ export type Database = {
           username?: string
           whisper_last_seen_at?: string | null
           banned_until?: string | null
+          ban_permanent?: boolean
           ban_reason?: string | null
+          ban_scopes?: string[] | null
           social_links?: Json | null
           fav_song?: Json | null
         }

@@ -59,6 +59,7 @@ interface ModerationUser {
   username: string;
   display_name: string;
   banned_until: string | null;
+  ban_permanent?: boolean;
   ban_reason: string | null;
   ban_scopes: string[] | null;
 }
@@ -136,12 +137,24 @@ const AdminPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, user_id, username, display_name, banned_until, ban_reason, ban_scopes")
+        .select("id, user_id, username, display_name, banned_until, ban_permanent, ban_reason, ban_scopes")
         .order("created_at", { ascending: false })
         .limit(200);
 
+      // Backward compatibility: old DB schema may not have ban_permanent yet.
+      if (error && /ban_permanent/i.test(error.message || "")) {
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from("profiles")
+          .select("id, user_id, username, display_name, banned_until, ban_reason, ban_scopes")
+          .order("created_at", { ascending: false })
+          .limit(200);
+
+        if (fallbackError) throw fallbackError;
+        return (fallbackData || []).map((u: any) => ({ ...u, ban_permanent: false })) as ModerationUser[];
+      }
+
       if (error) throw error;
-      return data as unknown as ModerationUser[];
+      return (data || []).map((u: any) => ({ ...u, ban_permanent: !!u.ban_permanent })) as ModerationUser[];
     },
   });
 
@@ -180,20 +193,32 @@ const AdminPage = () => {
   });
 
   const banUserMutation = useMutation({
-    mutationFn: async (params: { userId: string; minutes: number; reason?: string; scopes: string[] }) => {
-      const { error } = await (supabase as any).rpc("admin_ban_user", {
+    mutationFn: async (params: { userId: string; minutes: number; reason?: string; scopes: string[]; permanent?: boolean }) => {
+      const payload: Record<string, any> = {
         p_user_id: params.userId,
         p_minutes: params.minutes,
         p_reason: params.reason ?? null,
         p_scopes: params.scopes,
-      });
+      };
+      if (params.permanent) {
+        payload.p_permanent = true;
+      }
+
+      const { error } = await (supabase as any).rpc("admin_ban_user", payload);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       toast.success("User banned.");
     },
-    onError: () => toast.error("Failed to ban user."),
+    onError: (err: any) => {
+      const msg = String(err?.message || "");
+      if (msg.includes("admin_ban_user") && msg.includes("does not exist")) {
+        toast.error("Permanent ban requires the latest DB migration. Run migration and try again.");
+        return;
+      }
+      toast.error("Failed to ban user.");
+    },
   });
 
   const unbanUserMutation = useMutation({
@@ -217,7 +242,7 @@ const AdminPage = () => {
     setConfirmOpen(true);
   };
 
-  const triggerBanConfirm = (userId: string, minutes: number, label: string) => {
+  const triggerBanConfirm = (userId: string, minutes: number, label: string, permanent = false) => {
     const scopes: string[] = [];
     if (blockContent) scopes.push("post", "comment");
     if (blockSocial) scopes.push("social");
@@ -231,7 +256,7 @@ const AdminPage = () => {
     setPendingAction({
       type: "ban_user",
       targetId: userId,
-      params: { minutes, scopes },
+      params: { minutes, scopes, permanent },
       label
     });
     setConfirmValue("");
@@ -257,7 +282,8 @@ const AdminPage = () => {
           userId: pendingAction.targetId,
           minutes: pendingAction.params.minutes,
           reason: pendingAction.label,
-          scopes: pendingAction.params.scopes
+          scopes: pendingAction.params.scopes,
+          permanent: pendingAction.params.permanent
         });
         break;
       case "unban_user":
@@ -270,6 +296,7 @@ const AdminPage = () => {
   };
 
   const isBanned = (user: ModerationUser) => {
+    if (user.ban_permanent) return true;
     if (!user.banned_until) return false;
     return new Date(user.banned_until) > getNow();
   };
@@ -655,21 +682,27 @@ const AdminPage = () => {
                                     Amnesty
                                   </Button>
                                 ) : (
-                                  <div className="grid grid-cols-3 gap-2">
-                                    {["1h", "24h", "7d"].map((duration) => (
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {[
+                                      { label: "1h", minutes: 60 },
+                                      { label: "24h", minutes: 1440 },
+                                      { label: "7d", minutes: 10080 },
+                                      { label: "perm", minutes: 0, permanent: true },
+                                    ].map((duration) => (
                                       <Button
-                                        key={duration}
+                                        key={duration.label}
                                         size="sm"
-                                        variant={duration === "7d" ? "destructive" : "outline"}
-                                        className={`h-8 rounded-none text-[9px] font-black uppercase border-border active:scale-95 transition-all ${duration !== '7d' ? 'active:bg-primary/20 active:text-primary active:border-primary/50' : ''}`}
+                                        variant={duration.label === "7d" || duration.permanent ? "destructive" : "outline"}
+                                        className={`h-8 rounded-none text-[9px] font-black uppercase border-border active:scale-95 transition-all ${duration.label !== "7d" && !duration.permanent ? 'active:bg-primary/20 active:text-primary active:border-primary/50' : ''}`}
                                         onClick={() => triggerBanConfirm(
                                           user.user_id,
-                                          duration === '1h' ? 60 : duration === '24h' ? 1440 : 10080,
-                                          duration
+                                          duration.minutes,
+                                          duration.label,
+                                          Boolean(duration.permanent)
                                         )}
                                         disabled={banUserMutation.isPending}
                                       >
-                                        {duration}
+                                        {duration.label}
                                       </Button>
                                     ))}
                                   </div>
@@ -734,20 +767,26 @@ const AdminPage = () => {
                                       </Button>
                                     ) : (
                                       <div className="flex justify-end gap-1.5">
-                                        {["1h", "24h", "7d"].map((duration) => (
+                                        {[
+                                          { label: "1h", minutes: 60 },
+                                          { label: "24h", minutes: 1440 },
+                                          { label: "7d", minutes: 10080 },
+                                          { label: "perm", minutes: 0, permanent: true },
+                                        ].map((duration) => (
                                           <Button
-                                            key={duration}
+                                            key={duration.label}
                                             size="sm"
-                                            variant={duration === "7d" ? "destructive" : "outline"}
-                                            className={`h-8 rounded-none text-[9px] font-black uppercase border-border hover:scale-105 transition-transform ${duration !== '7d' ? 'hover:bg-primary/20 hover:text-primary hover:border-primary/50' : ''}`}
+                                            variant={duration.label === "7d" || duration.permanent ? "destructive" : "outline"}
+                                            className={`h-8 rounded-none text-[9px] font-black uppercase border-border hover:scale-105 transition-transform ${duration.label !== '7d' && !duration.permanent ? 'hover:bg-primary/20 hover:text-primary hover:border-primary/50' : ''}`}
                                             onClick={() => triggerBanConfirm(
                                               user.user_id,
-                                              duration === '1h' ? 60 : duration === '24h' ? 1440 : 10080,
-                                              duration
+                                              duration.minutes,
+                                              duration.label,
+                                              Boolean(duration.permanent)
                                             )}
                                             disabled={banUserMutation.isPending}
                                           >
-                                            {duration}
+                                            {duration.label}
                                           </Button>
                                         ))}
                                       </div>
@@ -795,13 +834,19 @@ const AdminPage = () => {
                             <span className="text-[10px] text-destructive/70 font-bold">@{user.username}</span>
                           </div>
                           <div className="flex flex-col items-end gap-1">
-                            <div className="flex items-center gap-1 text-[9px] font-black uppercase text-destructive italic">
-                              <Clock className="w-2.5 h-2.5" />
-                              {new Date(user.banned_until as string).toLocaleDateString()}
-                            </div>
-                            <span className="text-[8px] font-bold opacity-40 uppercase leading-none">
-                              {new Date(user.banned_until as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+                            {user.ban_permanent ? (
+                              <Badge className="rounded-none bg-destructive text-white text-[8px] uppercase font-black px-2 py-0 border-none">Permanent</Badge>
+                            ) : (
+                              <>
+                                <div className="flex items-center gap-1 text-[9px] font-black uppercase text-destructive italic">
+                                  <Clock className="w-2.5 h-2.5" />
+                                  {new Date(user.banned_until as string).toLocaleDateString()}
+                                </div>
+                                <span className="text-[8px] font-bold opacity-40 uppercase leading-none">
+                                  {new Date(user.banned_until as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
 
@@ -856,15 +901,19 @@ const AdminPage = () => {
                               </div>
                             </TableCell>
                             <TableCell className="py-5">
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-destructive/80 italic">
-                                  <Clock className="w-3 h-3" />
-                                  {new Date(user.banned_until as string).toLocaleDateString()}
+                              {user.ban_permanent ? (
+                                <Badge className="rounded-none bg-destructive text-white text-[8px] uppercase font-black px-2 py-0 border-none">Permanent</Badge>
+                              ) : (
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-destructive/80 italic">
+                                    <Clock className="w-3 h-3" />
+                                    {new Date(user.banned_until as string).toLocaleDateString()}
+                                  </div>
+                                  <div className="text-[9px] font-bold opacity-50 uppercase leading-none">
+                                    {new Date(user.banned_until as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </div>
                                 </div>
-                                <div className="text-[9px] font-bold opacity-50 uppercase leading-none">
-                                  {new Date(user.banned_until as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </div>
-                              </div>
+                              )}
                             </TableCell>
                             <TableCell className="py-5">
                               <div className="flex flex-wrap gap-1">
@@ -907,5 +956,3 @@ const AdminPage = () => {
 };
 
 export default AdminPage;
-
-

@@ -41,6 +41,9 @@ interface ProfileData {
     fav_song?: any;
     created_at: string;
     banned_until?: string | null;
+    ban_permanent?: boolean;
+    ban_reason?: string | null;
+    ban_scopes?: string[] | null;
 }
 
 const ProfilePage = () => {
@@ -174,7 +177,7 @@ const ProfilePage = () => {
             // 1. Fetch Profile
             const { data: p, error: pError } = await supabase
                 .from("profiles")
-                .select("*, banned_until")
+                .select("*")
                 .eq("username", username.toLowerCase())
                 .single();
 
@@ -390,6 +393,39 @@ const ProfilePage = () => {
 
     const initials = profile?.display_name?.substring(0, 2).toUpperCase() || "??";
     const isOwnProfile = user?.id === profile?.user_id;
+    const hasActiveBan = !!(
+        isOwnProfile &&
+        profile &&
+        (profile.ban_permanent || (profile.banned_until && new Date(profile.banned_until) > getNow()))
+    );
+
+    const normalizedScopes = Array.from(
+        new Set(
+            (Array.isArray(profile?.ban_scopes) ? profile.ban_scopes : [])
+                .filter((scope): scope is string => typeof scope === "string")
+                .map((scope) => scope.toLowerCase())
+        )
+    );
+
+    const isGlobalRestriction = normalizedScopes.length === 0;
+    const blockedActions = isGlobalRestriction
+        ? [
+            "Create posts",
+            "Write comments",
+            "Like and unlike posts",
+            "Bookmark and unbookmark posts",
+            "Follow and unfollow users",
+            "Send whispers",
+        ]
+        : [
+            ...(normalizedScopes.includes("post") ? ["Create posts"] : []),
+            ...(normalizedScopes.includes("comment") ? ["Write comments"] : []),
+            ...(normalizedScopes.includes("social") ? ["Like/bookmark/follow interactions"] : []),
+            ...(normalizedScopes.includes("message") ? ["Send whispers"] : []),
+        ];
+    const blockedActionsDisplay = blockedActions.length > 0
+        ? blockedActions
+        : ["Restricted actions are configured by admin."];
 
     return (
         <div className="min-h-screen bg-background text-foreground">
@@ -524,7 +560,7 @@ const ProfilePage = () => {
                                             )}
                                         </div>
 
-                                        {isOwnProfile && profile.banned_until && new Date(profile.banned_until) > getNow() && (
+                                        {hasActiveBan && (
                                             <div className="mt-8 mb-4">
                                                 <div className="bg-destructive/10 border-2 border-destructive/20 rounded-[3px] p-4 flex items-start gap-3">
                                                     <div className="bg-destructive text-destructive-foreground p-1.5 rounded-sm shrink-0">
@@ -532,15 +568,39 @@ const ProfilePage = () => {
                                                     </div>
                                                     <div>
                                                         <h3 className="text-sm font-bold text-destructive">Account Restricted</h3>
-                                                        <p className="text-xs text-destructive/80 mt-1">
-                                                            You are temporarily banned from posting and commenting until <strong>{new Date(profile.banned_until).toLocaleString()}</strong>.
+                                                        {profile.ban_permanent ? (
+                                                            <p className="text-xs text-destructive/80 mt-1">
+                                                                Ban type: <strong>Permanent</strong>
+                                                            </p>
+                                                        ) : (
+                                                            <p className="text-xs text-destructive/80 mt-1">
+                                                                Ban type: <strong>Temporary</strong> until <strong>{new Date(profile.banned_until as string).toLocaleString()}</strong>.
+                                                            </p>
+                                                        )}
+                                                        {profile.ban_reason && (
+                                                            <p className="text-xs text-destructive/80 mt-1">
+                                                                Reason: <strong>{profile.ban_reason}</strong>
+                                                            </p>
+                                                        )}
+                                                        <div className="mt-2">
+                                                            <p className="text-xs text-destructive/80">
+                                                                You currently cannot:
+                                                            </p>
+                                                            <ul className="mt-1 text-xs text-destructive/80 list-disc ml-4 space-y-1">
+                                                                {blockedActionsDisplay.map((action) => (
+                                                                    <li key={action}>{action}</li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                        <p className="text-[11px] text-destructive/70 mt-2">
+                                                            Scope mode: <strong>{isGlobalRestriction ? "Global restriction" : "Scoped restriction"}</strong>
                                                         </p>
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
 
-                                        <div className={`min-w-0 max-w-full overflow-hidden ${!(isOwnProfile && profile.banned_until && new Date(profile.banned_until) > getNow()) ? 'mt-8' : ''}`}>
+                                        <div className={`min-w-0 max-w-full overflow-hidden ${!hasActiveBan ? 'mt-8' : ''}`}>
                                             <h1 className="text-2xl font-bold tracking-tight truncate">
                                                 {profile.display_name}
                                             </h1>

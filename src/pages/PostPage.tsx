@@ -298,7 +298,9 @@ const PostPage = () => {
                 return;
             }
             if (result?.error === "banned") {
-                if (result.banned_until) {
+                if (result.ban_permanent) {
+                    toast.error("You are permanently banned from commenting.");
+                } else if (result.banned_until) {
                     const until = new Date(result.banned_until);
                     toast.error(`You are banned from commenting until ${until.toLocaleString()}.`);
                 } else {

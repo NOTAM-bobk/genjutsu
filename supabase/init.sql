@@ -56,6 +56,7 @@ CREATE TABLE public.profiles (
   social_links JSONB DEFAULT '{}'::jsonb,
   fav_song JSONB DEFAULT NULL,
   banned_until TIMESTAMPTZ,
+  ban_permanent BOOLEAN NOT NULL DEFAULT false,
   ban_reason TEXT,
   ban_scopes TEXT[] DEFAULT '{}'::text[],
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
@@ -592,14 +593,16 @@ RETURNS BOOLEAN AS $$
 DECLARE
   v_banned_until TIMESTAMPTZ;
   v_scopes TEXT[];
+  v_ban_permanent BOOLEAN;
 BEGIN
-  SELECT banned_until, ban_scopes
-  INTO v_banned_until, v_scopes
+  SELECT banned_until, ban_scopes, ban_permanent
+  INTO v_banned_until, v_scopes, v_ban_permanent
   FROM public.profiles
   WHERE user_id = auth.uid();
 
-  -- Not banned or ban expired → everything allowed
-  IF v_banned_until IS NULL OR v_banned_until <= now() THEN
+  -- If ban is not permanent, then no active/expired timestamp means allowed.
+  IF NOT COALESCE(v_ban_permanent, false)
+     AND (v_banned_until IS NULL OR v_banned_until <= now()) THEN
     RETURN true;
   END IF;
 
@@ -624,23 +627,38 @@ CREATE OR REPLACE FUNCTION public.admin_ban_user(
   p_user_id UUID,
   p_minutes INTEGER,
   p_reason TEXT DEFAULT NULL,
-  p_scopes TEXT[] DEFAULT NULL
+  p_scopes TEXT[] DEFAULT NULL,
+  p_permanent BOOLEAN DEFAULT false
 )
 RETURNS VOID AS $$
 DECLARE
   v_until TIMESTAMPTZ;
+  v_updated_rows INTEGER;
 BEGIN
   IF NOT public.is_admin() THEN
     RAISE EXCEPTION 'not_authorized';
   END IF;
 
-  v_until := now() + make_interval(mins => p_minutes);
+  IF COALESCE(p_permanent, false) THEN
+    v_until := NULL;
+  ELSE
+    IF p_minutes IS NULL OR p_minutes <= 0 THEN
+      RAISE EXCEPTION 'invalid_ban_duration';
+    END IF;
+    v_until := now() + make_interval(mins => p_minutes);
+  END IF;
 
   UPDATE public.profiles
   SET banned_until = v_until,
+      ban_permanent = COALESCE(p_permanent, false),
       ban_reason = COALESCE(p_reason, ban_reason),
       ban_scopes = COALESCE(p_scopes, '{}'::text[])
   WHERE user_id = p_user_id;
+
+  GET DIAGNOSTICS v_updated_rows = ROW_COUNT;
+  IF v_updated_rows = 0 THEN
+    RAISE EXCEPTION 'user_profile_not_found';
+  END IF;
 END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER
@@ -649,6 +667,8 @@ SET search_path = public;
 -- Admin RPC: admin_unban_user
 CREATE OR REPLACE FUNCTION public.admin_unban_user(p_user_id UUID)
 RETURNS VOID AS $$
+DECLARE
+  v_updated_rows INTEGER;
 BEGIN
   IF NOT public.is_admin() THEN
     RAISE EXCEPTION 'not_authorized';
@@ -656,8 +676,15 @@ BEGIN
 
   UPDATE public.profiles
   SET banned_until = NULL,
+      ban_permanent = false,
+      ban_reason = NULL,
       ban_scopes = '{}'::text[]
   WHERE user_id = p_user_id;
+
+  GET DIAGNOSTICS v_updated_rows = ROW_COUNT;
+  IF v_updated_rows = 0 THEN
+    RAISE EXCEPTION 'user_profile_not_found';
+  END IF;
 END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER
@@ -795,6 +822,7 @@ DECLARE
   v_retry_after INT;
   v_new_post_id UUID;
   v_banned_until TIMESTAMPTZ;
+  v_ban_permanent BOOLEAN := false;
 BEGIN
   v_user_id := auth.uid();
   IF v_user_id IS NULL THEN
@@ -802,15 +830,20 @@ BEGIN
   END IF;
 
   -- Ban check for posting
-  SELECT banned_until INTO v_banned_until
+  SELECT banned_until, ban_permanent
+  INTO v_banned_until, v_ban_permanent
   FROM public.profiles
   WHERE user_id = v_user_id;
 
-  IF v_banned_until IS NOT NULL AND v_banned_until > now() AND NOT public.is_action_allowed('post') THEN
+  IF NOT public.is_action_allowed('post') THEN
     RETURN jsonb_build_object(
       'error', 'banned',
-      'message', 'You are temporarily banned from posting',
-      'banned_until', v_banned_until
+      'message', CASE
+        WHEN v_ban_permanent THEN 'You are permanently banned from posting'
+        ELSE 'You are temporarily banned from posting'
+      END,
+      'banned_until', v_banned_until,
+      'ban_permanent', v_ban_permanent
     );
   END IF;
 
@@ -867,6 +900,7 @@ DECLARE
   v_retry_after INT;
   v_new_comment_id UUID;
   v_banned_until TIMESTAMPTZ;
+  v_ban_permanent BOOLEAN := false;
 BEGIN
   v_user_id := auth.uid();
   IF v_user_id IS NULL THEN
@@ -874,15 +908,20 @@ BEGIN
   END IF;
 
   -- Ban check for commenting
-  SELECT banned_until INTO v_banned_until
+  SELECT banned_until, ban_permanent
+  INTO v_banned_until, v_ban_permanent
   FROM public.profiles
   WHERE user_id = v_user_id;
 
-  IF v_banned_until IS NOT NULL AND v_banned_until > now() AND NOT public.is_action_allowed('comment') THEN
+  IF NOT public.is_action_allowed('comment') THEN
     RETURN jsonb_build_object(
       'error', 'banned',
-      'message', 'You are temporarily banned from commenting',
-      'banned_until', v_banned_until
+      'message', CASE
+        WHEN v_ban_permanent THEN 'You are permanently banned from commenting'
+        ELSE 'You are temporarily banned from commenting'
+      END,
+      'banned_until', v_banned_until,
+      'ban_permanent', v_ban_permanent
     );
   END IF;
 
@@ -1389,4 +1428,3 @@ EXCEPTION
         RETURN jsonb_build_object('error', 'internal_error', 'message', SQLERRM);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, auth, extensions, vault, net;
-

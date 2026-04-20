@@ -129,6 +129,9 @@ export function usePosts() {
         throw new Error(`COOLDOWN:${result.retry_after}`);
       }
       if (result?.error === "banned") {
+        if (result?.ban_permanent) {
+          throw new Error("BANNED_POST_PERMANENT");
+        }
         throw new Error(`BANNED_POST:${result.banned_until || ""}`);
       }
       if (result?.error) {
@@ -155,6 +158,10 @@ export function usePosts() {
         } else {
           toast.error("You are currently banned from posting.");
         }
+        return;
+      }
+      if (msg === "BANNED_POST_PERMANENT") {
+        toast.error("You are permanently banned from posting.");
         return;
       }
       toast.error("Your thoughts couldn't be woven into the world. Please try again.");
