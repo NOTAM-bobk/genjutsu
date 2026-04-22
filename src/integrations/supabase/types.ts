@@ -147,6 +147,7 @@ export type Database = {
           user_id: string
           is_readme: boolean
           code_language: string | null
+          views_count: number
         }
         Insert: {
           code?: string | null
@@ -159,6 +160,7 @@ export type Database = {
           user_id: string
           is_readme?: boolean
           code_language?: string | null
+          views_count?: number
         }
         Update: {
           code?: string | null
@@ -171,8 +173,44 @@ export type Database = {
           user_id?: string
           is_readme?: boolean
           code_language?: string | null
+          views_count?: number
         }
         Relationships: []
+      }
+      post_views: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          trigger: string | null
+          viewer_key: string
+          viewer_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          trigger?: string | null
+          viewer_key: string
+          viewer_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          trigger?: string | null
+          viewer_key?: string
+          viewer_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_views_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -372,6 +410,14 @@ export type Database = {
           p_post_id: string
           p_content: string
           p_idempotency_key?: string
+        }
+        Returns: Json
+      }
+      record_post_view: {
+        Args: {
+          p_post_id: string
+          p_viewer_key: string
+          p_trigger?: string
         }
         Returns: Json
       }

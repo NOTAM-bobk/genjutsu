@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, memo, useMemo } from "react";
-import { Hash, Heart, MessageSquare, Share, Bookmark, MoreHorizontal, Trash2, Send, Languages } from "lucide-react";
+import { Hash, Heart, MessageSquare, Share, Bookmark, MoreHorizontal, Trash2, Send, Languages, Eye } from "lucide-react";
 import { FrogLoader } from "@/components/ui/FrogLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import { PostWithProfile } from "@/hooks/usePosts";
 import { useAuth } from "@/hooks/useAuth";
+import { usePostViews } from "@/hooks/usePostViews";
 import { toast } from "sonner";
 
 import { useNavigate, Link } from "react-router-dom";
@@ -64,9 +65,12 @@ function timeAgo(dateStr: string): string {
 
 const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
   const { user } = useAuth();
+  const { recordView } = usePostViews();
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
   const menuRef = useRef<HTMLDivElement>(null);
+  const articleRef = useRef<HTMLElement | null>(null);
+  const [viewCount, setViewCount] = useState<number>(post.views_count || 0);
 
   // Translation States
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
@@ -112,6 +116,38 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
       }
     };
   }, []);
+
+  useEffect(() => {
+    setViewCount(Number(post.views_count || 0));
+  }, [post.id, post.views_count]);
+
+  useEffect(() => {
+    const node = articleRef.current;
+    if (!node) return;
+
+    let observer: IntersectionObserver | null = new IntersectionObserver(
+      (entries) => {
+        const hit = entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.5);
+        if (!hit) return;
+
+        void recordView(post.id, "impression").then((count) => {
+          if (typeof count === "number") {
+            setViewCount((prev) => Math.max(prev, count));
+          }
+        });
+
+        observer?.disconnect();
+        observer = null;
+      },
+      { threshold: [0.5] },
+    );
+
+    observer.observe(node);
+
+    return () => {
+      observer?.disconnect();
+    };
+  }, [post.id, recordView]);
 
   // Content Selection Logic
   const isAlreadyEnglish = useMemo(() => {
@@ -215,6 +251,7 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
 
   return (
     <motion.article
+      ref={articleRef}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="gum-card p-5 mb-4"
@@ -446,6 +483,10 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) =>
               <MessageSquare size={15} />
               {post.comments_count}
             </Link>
+            <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground" title="Views">
+              <Eye size={15} />
+              {viewCount}
+            </span>
             {!isOwner && (
               <button
                 onClick={() => {

@@ -74,8 +74,20 @@ CREATE TABLE public.posts (
   tags TEXT[] DEFAULT '{}',
   is_readme BOOLEAN DEFAULT false,
   code_language TEXT DEFAULT NULL,
+  views_count BIGINT NOT NULL DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Post Views (dedupe per viewer/post)
+CREATE TABLE public.post_views (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  post_id UUID REFERENCES public.posts(id) ON DELETE CASCADE NOT NULL,
+  viewer_key TEXT NOT NULL,
+  viewer_user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  trigger TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(post_id, viewer_key)
 );
 
 -- Likes
@@ -170,6 +182,8 @@ CREATE TABLE public.notifications (
 
 CREATE INDEX idx_notifications_user ON public.notifications (user_id, created_at DESC);
 CREATE INDEX idx_notifications_unread ON public.notifications (user_id, is_read) WHERE is_read = false;
+CREATE INDEX idx_post_views_post_id ON public.post_views (post_id);
+CREATE INDEX idx_post_views_viewer_user_id ON public.post_views (viewer_user_id);
 
 
 -- =============================================================================
@@ -179,6 +193,7 @@ CREATE INDEX idx_notifications_unread ON public.notifications (user_id, is_read)
 ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.post_views ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bookmarks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
@@ -685,6 +700,127 @@ BEGIN
   IF v_updated_rows = 0 THEN
     RAISE EXCEPTION 'user_profile_not_found';
   END IF;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public;
+
+-- RPC: record_post_view (unique per viewer_key + post)
+CREATE OR REPLACE FUNCTION public.record_post_view(
+  p_post_id UUID,
+  p_viewer_key TEXT,
+  p_trigger TEXT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+  v_post_owner UUID;
+  v_user_id UUID;
+  v_user_key TEXT;
+  v_guest_key TEXT;
+  v_views_count BIGINT := 0;
+  v_inserted_rows INTEGER := 0;
+BEGIN
+  IF p_post_id IS NULL THEN
+    RETURN jsonb_build_object('counted', false, 'reason', 'invalid_input');
+  END IF;
+
+  v_user_id := auth.uid();
+  IF p_viewer_key IS NOT NULL AND btrim(p_viewer_key) <> '' THEN
+    v_guest_key := btrim(p_viewer_key);
+  END IF;
+
+  SELECT user_id, views_count
+  INTO v_post_owner, v_views_count
+  FROM public.posts
+  WHERE id = p_post_id;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('counted', false, 'reason', 'post_not_found');
+  END IF;
+
+  IF v_user_id IS NOT NULL THEN
+    v_user_key := 'u:' || v_user_id::text;
+
+    IF v_post_owner = v_user_id THEN
+      RETURN jsonb_build_object(
+        'counted', false,
+        'reason', 'self_view',
+        'views_count', COALESCE(v_views_count, 0)
+      );
+    END IF;
+
+    IF EXISTS (
+      SELECT 1
+      FROM public.post_views
+      WHERE post_id = p_post_id
+        AND (viewer_key = v_user_key OR viewer_user_id = v_user_id)
+    ) THEN
+      RETURN jsonb_build_object(
+        'counted', false,
+        'reason', 'already_counted',
+        'views_count', COALESCE(v_views_count, 0)
+      );
+    END IF;
+
+    IF v_guest_key IS NOT NULL
+       AND left(v_guest_key, 2) = 'g:'
+       AND length(v_guest_key) BETWEEN 12 AND 82
+       AND v_guest_key ~ '^g:[a-z0-9-]+$' THEN
+      UPDATE public.post_views
+      SET viewer_user_id = v_user_id
+      WHERE post_id = p_post_id
+        AND viewer_key = v_guest_key;
+
+      GET DIAGNOSTICS v_inserted_rows = ROW_COUNT;
+      IF v_inserted_rows > 0 THEN
+        RETURN jsonb_build_object(
+          'counted', false,
+          'reason', 'already_counted',
+          'views_count', COALESCE(v_views_count, 0)
+        );
+      END IF;
+    END IF;
+
+    INSERT INTO public.post_views (post_id, viewer_key, viewer_user_id, trigger)
+    VALUES (p_post_id, v_user_key, v_user_id, p_trigger)
+    ON CONFLICT (post_id, viewer_key) DO NOTHING;
+  ELSE
+    IF v_guest_key IS NULL
+       OR left(v_guest_key, 2) <> 'g:'
+       OR length(v_guest_key) NOT BETWEEN 12 AND 82
+       OR v_guest_key !~ '^g:[a-z0-9-]+$' THEN
+      RETURN jsonb_build_object('counted', false, 'reason', 'invalid_input');
+    END IF;
+
+    INSERT INTO public.post_views (post_id, viewer_key, viewer_user_id, trigger)
+    VALUES (p_post_id, v_guest_key, NULL, p_trigger)
+    ON CONFLICT (post_id, viewer_key) DO NOTHING;
+  END IF;
+
+  GET DIAGNOSTICS v_inserted_rows = ROW_COUNT;
+
+  IF v_inserted_rows > 0 THEN
+    UPDATE public.posts
+    SET views_count = views_count + 1
+    WHERE id = p_post_id
+    RETURNING views_count INTO v_views_count;
+
+    RETURN jsonb_build_object(
+      'counted', true,
+      'reason', 'counted',
+      'views_count', COALESCE(v_views_count, 0)
+    );
+  END IF;
+
+  SELECT views_count INTO v_views_count
+  FROM public.posts
+  WHERE id = p_post_id;
+
+  RETURN jsonb_build_object(
+    'counted', false,
+    'reason', 'already_counted',
+    'views_count', COALESCE(v_views_count, 0)
+  );
 END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER

@@ -189,7 +189,7 @@ const ProfilePage = () => {
             const { data: postsData } = await (supabase
                 .from("posts")
                 .select(`
-                  id, content, code, media_url, tags, created_at, user_id, is_readme,
+                  id, content, code, code_language, media_url, tags, created_at, user_id, is_readme, views_count,
                   profiles ( username, display_name, avatar_url )
                 `) as any)
                 .gt("created_at", new Date(getNow().getTime() - 24 * 60 * 60 * 1000).toISOString())
@@ -231,6 +231,7 @@ const ProfilePage = () => {
                 const enriched = postsData.map(post => ({
                     ...post,
                     profiles: post.profiles as any,
+                    views_count: Number((post as any).views_count || 0),
                     likes_count: likesCounts[post.id] || 0,
                     user_liked: userLikes.has(post.id),
                     user_bookmarked: userBookmarks.has(post.id),
@@ -273,7 +274,7 @@ const ProfilePage = () => {
             const { data: postsData } = await (supabase
                 .from("posts")
                 .select(`
-                    id, content, code, media_url, tags, created_at, user_id, is_readme,
+                    id, content, code, code_language, media_url, tags, created_at, user_id, is_readme, views_count,
                     profiles ( username, display_name, avatar_url )
                 `) as any)
                 .in("id", postIds)
@@ -310,6 +311,7 @@ const ProfilePage = () => {
             const enriched = postsData.map(post => ({
                 ...post,
                 profiles: post.profiles as any,
+                views_count: Number((post as any).views_count || 0),
                 likes_count: likesCounts[post.id] || 0,
                 user_liked: userLikes.has(post.id),
                 user_bookmarked: true,

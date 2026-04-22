@@ -51,7 +51,7 @@ const SearchPage = () => {
             const { data: postsData } = await (supabase
                 .from("posts")
                 .select(`
-                    id, content, code, media_url, tags, created_at, user_id, is_readme,
+                    id, content, code, code_language, media_url, tags, created_at, user_id, is_readme, views_count,
                     profiles ( username, display_name, avatar_url )
                 `) as any)
                 .or(`content.ilike.%${sanitized}%,tags.cs.{${sanitized.replace('#', '')}}`)
@@ -92,6 +92,7 @@ const SearchPage = () => {
                 const enrichedPosts = postsData.map((p: any) => ({
                     ...p,
                     profiles: p.profiles as any,
+                    views_count: Number(p.views_count || 0),
                     likes_count: likesCounts[p.id] || 0,
                     comments_count: commentsCounts[p.id] || 0,
                     user_liked: userLikes.has(p.id),

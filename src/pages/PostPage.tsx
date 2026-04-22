@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
 import { formatDistanceToNow } from "date-fns";
 import { usePostActions } from "@/hooks/usePostActions";
+import { usePostViews } from "@/hooks/usePostViews";
 import { linkify } from "@/lib/linkify";
 import { getConfig } from "@/lib/config";
 import { useMentions } from "@/hooks/useMentions";
@@ -194,6 +195,7 @@ const PostPage = () => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const navigate = useNavigate();
     const { toggleLike, toggleBookmark, deletePost } = usePostActions();
+    const { recordView } = usePostViews();
 
 
     const fetchPost = async () => {
@@ -204,7 +206,7 @@ const PostPage = () => {
             const { data: p, error } = await (supabase
                 .from("posts")
                 .select(`
-          id, content, code, media_url, tags, created_at, user_id, is_readme,
+          id, content, code, code_language, media_url, tags, created_at, user_id, is_readme, views_count,
           profiles ( username, display_name, avatar_url )
         `) as any)
                 .eq("id", postId)
@@ -259,6 +261,7 @@ const PostPage = () => {
             setPost({
                 ...p,
                 profiles: p.profiles as any,
+                views_count: Number(p.views_count || 0),
                 likes_count: likesCount || 0,
                 user_liked: userLiked,
                 user_bookmarked: userBookmarked,
@@ -375,6 +378,26 @@ const PostPage = () => {
         fetchPost();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [postId, user?.id]);
+
+    useEffect(() => {
+        if (!post?.id) return;
+        let isActive = true;
+
+        void recordView(post.id, "detail_open").then((count) => {
+            if (!isActive || typeof count !== "number") return;
+            setPost((prev) => {
+                if (!prev || prev.id !== post.id) return prev;
+                return {
+                    ...prev,
+                    views_count: Math.max(prev.views_count || 0, count),
+                };
+            });
+        });
+
+        return () => {
+            isActive = false;
+        };
+    }, [post?.id, recordView]);
 
     const handleLike = async (id: string, currentlyLiked: boolean) => {
         if (!user) {
