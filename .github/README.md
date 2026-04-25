@@ -56,12 +56,12 @@ plus, the best developer tools are built by developers, for developers.
 
 ## license
 
-Copyright (c) 2026 Ovi ren (iamovi) (init.ovi@gmail.com)
+Copyright (C) 2026 Ovi ren (iamovi) (init.ovi@gmail.com)
 
 Licensed under GNU Affero General Public License as stated in the [LICENSE](LICENSE):
 
 ```text
-Copyright (c) Ovi ren (iamovi)
+Copyright (C) 2026 Ovi ren (iamovi)
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU Affero General Public License as published by the Free
