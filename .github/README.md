@@ -56,15 +56,26 @@ plus, the best developer tools are built by developers, for developers.
 
 ## license
 
-AGPL-3.0 Licensed — see [LICENSE](https://github.com/iamovi/genjutsu/blob/main/LICENSE) file
+Copyright (c) 2026 Ovi ren (iamovi) (init.ovi@gmail.com)
 
-- you can use, modify, and contribute freely
-- forks and modifications must stay open-source
-- if you deploy a modified version, you must share the source code publicly
-- you cannot make it proprietary or closed-source
-- original copyright and credit must be kept intact
+Licensed under GNU Affero General Public License as stated in the [LICENSE](LICENSE):
 
-for full terms, check the [LICENSE](https://github.com/iamovi/genjutsu/blob/main/LICENSE) file.
+```text
+Copyright (c) Ovi ren (iamovi)
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+details.
+
+You should have received a copy of the GNU Affero General Public License along
+with this program. If not, see https://www.gnu.org/licenses/
+```
 
 <br />
 
@@ -76,7 +87,7 @@ for full terms, check the [LICENSE](https://github.com/iamovi/genjutsu/blob/main
 **support this project to keep it alive and growing or just buy me a cup of tea / coffee:**
 
 <a href="https://www.supportkori.com/iamovi">
-  <img src="./tea_text.jpg" alt="supportkori" width="230">
+  <img src="./tea_text.jpg" alt="supportkori" width="210">
 </a>
 
 ---
