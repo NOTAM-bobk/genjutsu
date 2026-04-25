@@ -58,7 +58,7 @@ plus, the best developer tools are built by developers, for developers.
 
 Copyright (C) 2026 Ovi ren (iamovi) (init.ovi@gmail.com)
 
-Licensed under GNU Affero General Public License as stated in the [LICENSE](LICENSE):
+Licensed under GNU Affero General Public License as stated in the [LICENSE](https://github.com/iamovi/genjutsu/blob/main/LICENSE):
 
 ```text
 Copyright (C) 2026 Ovi ren (iamovi)
