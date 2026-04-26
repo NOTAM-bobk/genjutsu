@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, type ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PostWithProfile } from "@/hooks/usePosts";
 import Navbar from "@/components/Navbar";
 import PostCard from "@/components/PostCard";
 import Sidebar from "@/components/Sidebar";
-import { ArrowLeft, Calendar, ImageIcon, Send, Bookmark, Github, Twitter, Facebook, Globe, Play, Pause, Ban, Share } from "lucide-react";
+import { ArrowLeft, Calendar, ImageIcon, Send, Bookmark, Github, Twitter, Facebook, Globe, Play, Pause, Ban, Share, Upload, Trash2 } from "lucide-react";
 import { FrogLoader } from "@/components/ui/FrogLoader";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,11 +40,22 @@ interface ProfileData {
     ban_scopes?: string[] | null;
 }
 
+interface ProfileAlbumPhoto {
+    id: string;
+    user_id: string;
+    photo_url: string;
+    storage_path: string;
+    created_at: string;
+}
+
 const ProfilePage = () => {
     const { username } = useParams<{ username: string }>();
     const [profile, setProfile] = useState<ProfileData | null>(null);
     const [posts, setPosts] = useState<PostWithProfile[]>([]);
     const [bookmarks, setBookmarks] = useState<PostWithProfile[]>([]);
+    const [albumPhotos, setAlbumPhotos] = useState<ProfileAlbumPhoto[]>([]);
+    const [albumUploading, setAlbumUploading] = useState(false);
+    const [albumDeletingIds, setAlbumDeletingIds] = useState<Set<string>>(new Set());
     const [isLiking, setIsLiking] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const playAttemptIdRef = useRef(0);
@@ -141,6 +152,9 @@ const ProfilePage = () => {
     const [followsModalOpen, setFollowsModalOpen] = useState(false);
     const [followsModalType, setFollowsModalType] = useState<"followers" | "following">("followers");
     const [isAvatarPreviewOpen, setIsAvatarPreviewOpen] = useState(false);
+    const [isAlbumPreviewOpen, setIsAlbumPreviewOpen] = useState(false);
+    const [selectedAlbumPhotoUrl, setSelectedAlbumPhotoUrl] = useState<string | null>(null);
+    const albumInputRef = useRef<HTMLInputElement>(null);
     const { user } = useAuth();
     const navigate = useNavigate();
 
@@ -168,6 +182,7 @@ const ProfilePage = () => {
 
         try {
             setLoading(true);
+            setAlbumPhotos([]);
 
             // 1. Fetch Profile
             const { data: p, error: pError } = await supabase
@@ -180,7 +195,21 @@ const ProfilePage = () => {
             if (!p) throw new Error("Profile not found");
             setProfile(p as unknown as ProfileData);
 
-            // 2. Fetch Posts
+            // 2. Fetch Persistent Profile Album
+            const { data: albumData, error: albumError } = await supabase
+                .from("profile_album_photos")
+                .select("id, user_id, photo_url, storage_path, created_at")
+                .eq("user_id", (p as any).user_id)
+                .order("created_at", { ascending: false });
+
+            if (albumError) {
+                console.error("Error fetching profile album:", albumError);
+                setAlbumPhotos([]);
+            } else {
+                setAlbumPhotos((albumData || []) as ProfileAlbumPhoto[]);
+            }
+
+            // 3. Fetch Posts
             const { data: postsData } = await (supabase
                 .from("posts")
                 .select(`
@@ -325,6 +354,115 @@ const ProfilePage = () => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeTab, profile?.user_id, user?.id]);
+
+    const handleAlbumUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+
+        if (!file) return;
+        if (!user || !profile || user.id !== profile.user_id) {
+            toast.error("You can only edit your own album.");
+            return;
+        }
+        if (albumPhotos.length >= 5) {
+            toast.error("Album is full. Delete a photo before uploading a new one.");
+            return;
+        }
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please upload an image file.");
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error("That image is too large. Please keep it under 2MB.");
+            return;
+        }
+
+        const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const filePath = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
+
+        setAlbumUploading(true);
+        try {
+            const { error: uploadError } = await supabase.storage
+                .from("profile-album")
+                .upload(filePath, file);
+            if (uploadError) throw uploadError;
+
+            const { data: publicData } = supabase.storage.from("profile-album").getPublicUrl(filePath);
+            const photoUrl = publicData.publicUrl;
+
+            const { data: insertedPhoto, error: insertError } = await supabase
+                .from("profile_album_photos")
+                .insert({
+                    user_id: user.id,
+                    photo_url: photoUrl,
+                    storage_path: filePath,
+                })
+                .select("id, user_id, photo_url, storage_path, created_at")
+                .single();
+
+            if (insertError) {
+                await supabase.storage.from("profile-album").remove([filePath]);
+                if ((insertError.message || "").includes("album_limit_exceeded")) {
+                    toast.error("Album is full. Delete a photo before uploading a new one.");
+                    return;
+                }
+                throw insertError;
+            }
+
+            setAlbumPhotos((prev) => [insertedPhoto as ProfileAlbumPhoto, ...prev].slice(0, 5));
+            toast.success("Photo added to your album.");
+        } catch (error) {
+            console.error("Error uploading album photo:", error);
+            toast.error("Couldn't upload photo right now. Please try again.");
+        } finally {
+            setAlbumUploading(false);
+        }
+    };
+
+    const handleAlbumDelete = async (photo: ProfileAlbumPhoto) => {
+        if (!user || !profile || user.id !== profile.user_id) {
+            toast.error("You can only edit your own album.");
+            return;
+        }
+        if (albumDeletingIds.has(photo.id)) return;
+
+        setAlbumDeletingIds((prev) => {
+            const next = new Set(prev);
+            next.add(photo.id);
+            return next;
+        });
+
+        try {
+            const { error: removeError } = await supabase.storage
+                .from("profile-album")
+                .remove([photo.storage_path]);
+            if (removeError) throw removeError;
+
+            const { error: deleteError } = await supabase
+                .from("profile_album_photos")
+                .delete()
+                .eq("id", photo.id)
+                .eq("user_id", user.id);
+            if (deleteError) throw deleteError;
+
+            setAlbumPhotos((prev) => prev.filter((item) => item.id !== photo.id));
+            toast.success("Photo deleted from album.");
+        } catch (error) {
+            console.error("Error deleting album photo:", error);
+            toast.error("Couldn't delete photo. Please try again.");
+        } finally {
+            setAlbumDeletingIds((prev) => {
+                const next = new Set(prev);
+                next.delete(photo.id);
+                return next;
+            });
+        }
+    };
+
+    const openAlbumPreview = (photoUrl: string) => {
+        setSelectedAlbumPhotoUrl(photoUrl);
+        setIsAlbumPreviewOpen(true);
+    };
 
     const { toggleLike, toggleBookmark, deletePost } = usePostActions();
 
@@ -710,6 +848,77 @@ const ProfilePage = () => {
                                     </div>
                                 </div>
 
+                                <div className="gum-card p-5 sm:p-6 mb-8">
+                                    <div className="flex flex-wrap items-center justify-between gap-3">
+                                        <div>
+                                            <h2 className="text-lg font-bold tracking-tight">Album</h2>
+                                            <p className="text-xs text-muted-foreground">
+                                                Persistent profile photos. Nothing expires automatically.
+                                            </p>
+                                        </div>
+                                        <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                                            {albumPhotos.length}/5
+                                        </span>
+                                    </div>
+
+                                    {isOwnProfile && (
+                                        <div className="mt-4">
+                                            <input
+                                                ref={albumInputRef}
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleAlbumUpload}
+                                            />
+                                            <button
+                                                onClick={() => albumInputRef.current?.click()}
+                                                disabled={albumUploading || albumPhotos.length >= 5}
+                                                className="gum-btn flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {albumUploading ? <FrogLoader className="" size={16} /> : <Upload size={16} />}
+                                                {albumPhotos.length >= 5 ? "Album Full (5/5)" : "Upload Photo"}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {albumPhotos.length === 0 ? (
+                                        <div className="mt-4 border-2 border-dashed border-border rounded-[3px] p-6 text-center text-sm text-muted-foreground">
+                                            No album photos yet.
+                                        </div>
+                                    ) : (
+                                        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                            {albumPhotos.map((photo) => {
+                                                const isDeleting = albumDeletingIds.has(photo.id);
+                                                return (
+                                                    <div key={photo.id} className="relative group">
+                                                        <button
+                                                            onClick={() => openAlbumPreview(photo.photo_url)}
+                                                            className="w-full aspect-square rounded-[3px] overflow-hidden gum-border bg-secondary hover:opacity-90 transition-opacity"
+                                                            title="Open photo"
+                                                        >
+                                                            <img
+                                                                src={photo.photo_url}
+                                                                alt={`${profile.display_name} album photo`}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </button>
+                                                        {isOwnProfile && (
+                                                            <button
+                                                                onClick={() => handleAlbumDelete(photo)}
+                                                                disabled={isDeleting}
+                                                                className="absolute top-2 right-2 p-1.5 rounded-[3px] bg-black/60 text-white hover:bg-black/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                title="Delete photo"
+                                                            >
+                                                                {isDeleting ? <FrogLoader className="" size={14} /> : <Trash2 size={14} />}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="space-y-6">
                                     {isOwnProfile ? (
                                         <div className="flex gap-2 border-b border-border pb-px mb-4">
@@ -787,6 +996,16 @@ const ProfilePage = () => {
                     </div>
                 </div>
             </main>
+
+            <ImagePreviewDialog
+                src={selectedAlbumPhotoUrl}
+                isOpen={isAlbumPreviewOpen}
+                onOpenChange={(open) => {
+                    setIsAlbumPreviewOpen(open);
+                    if (!open) setSelectedAlbumPhotoUrl(null);
+                }}
+                alt={profile ? `${profile.display_name}'s album photo` : "Album photo"}
+            />
 
             {profile && (
                 <FollowsList

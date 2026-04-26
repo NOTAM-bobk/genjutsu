@@ -64,6 +64,18 @@ CREATE TABLE public.profiles (
   whisper_last_seen_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Profile Album Photos (persistent profile gallery)
+CREATE TABLE public.profile_album_photos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES public.profiles(user_id) ON DELETE CASCADE NOT NULL,
+  photo_url TEXT NOT NULL,
+  storage_path TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_profile_album_photos_user_created_at
+  ON public.profile_album_photos (user_id, created_at DESC);
+
 -- Posts
 CREATE TABLE public.posts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -196,6 +208,7 @@ CREATE INDEX idx_post_views_viewer_user_id ON public.post_views (viewer_user_id)
 
 ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profile_album_photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.post_views ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
@@ -218,6 +231,14 @@ CREATE POLICY "Users can insert their own profile"
   ON public.profiles FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
 CREATE POLICY "Users can update their own profile"
   ON public.profiles FOR UPDATE USING ((select auth.uid()) = user_id);
+
+-- Profile album photos
+CREATE POLICY "Profile album photos are viewable by everyone"
+  ON public.profile_album_photos FOR SELECT USING (true);
+CREATE POLICY "Users can insert their own album photos"
+  ON public.profile_album_photos FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
+CREATE POLICY "Users can delete their own album photos"
+  ON public.profile_album_photos FOR DELETE USING ((select auth.uid()) = user_id);
 
 -- Posts (INSERT blocked — must use create_post() function)
 CREATE POLICY "Posts are viewable by everyone"
@@ -332,6 +353,36 @@ CREATE TRIGGER guard_username_change
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.prevent_direct_username_change();
 
+-- Guard: Enforce max 5 photos in persistent profile album
+CREATE OR REPLACE FUNCTION public.enforce_profile_album_limit()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_photo_count INTEGER;
+BEGIN
+  -- Serialize album inserts per user to avoid race conditions across concurrent requests.
+  PERFORM 1
+  FROM public.profiles
+  WHERE user_id = NEW.user_id
+  FOR UPDATE;
+
+  SELECT count(*)::INTEGER INTO v_photo_count
+  FROM public.profile_album_photos
+  WHERE user_id = NEW.user_id;
+
+  IF v_photo_count >= 5 THEN
+    RAISE EXCEPTION 'album_limit_exceeded'
+      USING ERRCODE = 'P0001',
+            DETAIL = 'A profile album can contain up to 5 photos.';
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+CREATE TRIGGER enforce_profile_album_limit_trigger
+  BEFORE INSERT ON public.profile_album_photos
+  FOR EACH ROW EXECUTE FUNCTION public.enforce_profile_album_limit();
+
 -- Auto-create profile on signup (supports email/password + Google OAuth)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -398,6 +449,11 @@ ON CONFLICT (id) DO NOTHING;
 -- Whisper media bucket
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('whisper-media', 'whisper-media', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Profile album bucket
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('profile-album', 'profile-album', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- post-media policies
@@ -476,6 +532,29 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'objects' AND schemaname = 'storage' AND policyname = 'Users can delete own whisper media') THEN
     CREATE POLICY "Users can delete own whisper media" ON storage.objects FOR DELETE TO authenticated USING (
       bucket_id = 'whisper-media' AND (storage.foldername(name))[1] = auth.uid()::text
+    );
+  END IF;
+END $$;
+
+-- profile-album policies
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'objects' AND schemaname = 'storage' AND policyname = 'Public Access for Profile Album') THEN
+    CREATE POLICY "Public Access for Profile Album" ON storage.objects FOR SELECT USING ( bucket_id = 'profile-album' );
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'objects' AND schemaname = 'storage' AND policyname = 'Authenticated users can upload profile album photos') THEN
+    CREATE POLICY "Authenticated users can upload profile album photos" ON storage.objects FOR INSERT TO authenticated WITH CHECK (
+      bucket_id = 'profile-album' AND (storage.foldername(name))[1] = auth.uid()::text
+    );
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'objects' AND schemaname = 'storage' AND policyname = 'Users can delete their own profile album photos') THEN
+    CREATE POLICY "Users can delete their own profile album photos" ON storage.objects FOR DELETE TO authenticated USING (
+      bucket_id = 'profile-album' AND (storage.foldername(name))[1] = auth.uid()::text
     );
   END IF;
 END $$;
@@ -1645,6 +1724,20 @@ BEGIN
                     );
                 END IF;
             END IF;
+        END LOOP;
+
+        -- Profile Album
+        FOR v_record IN
+            SELECT storage_path
+            FROM public.profile_album_photos
+            WHERE user_id = v_user_id
+              AND storage_path IS NOT NULL
+              AND storage_path <> ''
+        LOOP
+            PERFORM net.http_delete(
+                url := 'https://' || v_project_id || '.supabase.co/storage/v1/object/profile-album/' || v_record.storage_path,
+                headers := jsonb_build_object('Authorization', 'Bearer ' || v_service_key)
+            );
         END LOOP;
     END IF;
 

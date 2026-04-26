@@ -272,6 +272,38 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_album_photos: {
+        Row: {
+          id: string
+          user_id: string
+          photo_url: string
+          storage_path: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          photo_url: string
+          storage_path: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          photo_url?: string
+          storage_path?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_album_photos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       admin_users: {
         Row: {
           user_id: string
