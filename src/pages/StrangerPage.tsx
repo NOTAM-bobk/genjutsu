@@ -10,7 +10,7 @@ const StrangerPage = () => {
   return (
     <>
       <Helmet>
-        <title>Stranger Beta | genjutsu</title>
+        <title>Stranger | genjutsu</title>
         <meta name="description" content="Meet fellow developers securely and entirely anonymously via real-time WebSockets." />
       </Helmet>
       <div className="flex flex-col h-[100dvh] w-full animate-in fade-in zoom-in-95 duration-500 bg-background/50">
@@ -26,8 +26,7 @@ const StrangerPage = () => {
 
             <h1 className="flex-1 flex justify-center text-lg sm:text-2xl font-black tracking-tight items-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden">
               <UsersRound className="text-primary hidden sm:block shrink-0" size={24} />
-              <span className="truncate">Stranger</span> 
-              <span className="bg-primary shrink-0 text-primary-foreground text-[8px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 rounded-[3px] tracking-widest uppercase align-middle gum-border ml-0.5 -rotate-2">Beta</span>
+              <span className="truncate">Stranger</span>
             </h1>
 
             <div className="relative z-10">

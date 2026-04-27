@@ -19,7 +19,7 @@ const OnlineFriends = ({ friends, others, totalOnline, onChallenge, challengingU
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="glass glass-border rounded-2xl p-5 glow-sm"
+            className="gum-card p-4 sm:p-5"
         >
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -28,8 +28,8 @@ const OnlineFriends = ({ friends, others, totalOnline, onChallenge, challengingU
                 </div>
                 <div className="flex items-center gap-1.5">
                     <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/60" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success/60" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
                     </span>
                     <span className="text-xs text-muted-foreground">{totalOnline} online</span>
                 </div>
@@ -48,7 +48,7 @@ const OnlineFriends = ({ friends, others, totalOnline, onChallenge, challengingU
                                 layout
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest px-1 mb-1"
+                                className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest px-1 mb-1"
                             >
                                 Friends
                             </motion.p>
@@ -66,7 +66,7 @@ const OnlineFriends = ({ friends, others, totalOnline, onChallenge, challengingU
                                 layout
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest px-1 mt-3 mb-1"
+                                className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest px-1 mt-3 mb-1"
                             >
                                 Others on Play
                             </motion.p>
@@ -98,10 +98,10 @@ const PlayerRow = ({ player, onChallenge, isChallenging }: PlayerRowProps) => (
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 10 }}
-        className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-secondary/50 transition-colors group"
+        className="flex items-center gap-3 p-2.5 rounded-[3px] border-2 border-border bg-card hover:bg-secondary/40 transition-colors group"
     >
         <div className="relative">
-            <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center font-bold text-xs overflow-hidden border border-border/50">
+            <div className="w-9 h-9 rounded-[3px] bg-secondary flex items-center justify-center font-bold text-xs overflow-hidden border-2 border-border">
                 {player.avatar_url ? (
                     <img src={player.avatar_url} alt={player.username} className="w-full h-full object-cover" />
                 ) : (
@@ -109,8 +109,8 @@ const PlayerRow = ({ player, onChallenge, isChallenging }: PlayerRowProps) => (
                 )}
             </div>
             <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 border-2 border-card" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success/50" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success border-2 border-card" />
             </span>
         </div>
 
@@ -122,7 +122,7 @@ const PlayerRow = ({ player, onChallenge, isChallenging }: PlayerRowProps) => (
         <button
             onClick={() => onChallenge(player)}
             disabled={isChallenging}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-wait"
+            className="gum-btn bg-primary text-primary-foreground text-[11px] px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-wait"
         >
             {isChallenging ? (
                 <>

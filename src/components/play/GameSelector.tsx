@@ -26,13 +26,13 @@ const games: { id: GameId; name: string; description: string; icon: any; tag?: s
 
 const GameSelector = ({ onSelectGame, disabled }: GameSelectorProps) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-full p-6 md:p-8">
+    <div className="flex flex-col items-center justify-center min-h-full p-4 sm:p-6">
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
+        className="text-center mb-6 gum-card p-4 w-full max-w-6xl"
       >
-        <h2 className="text-2xl font-bold gradient-text mb-2">Choose a Game</h2>
+        <h2 className="text-2xl font-black mb-2 text-primary">Choose a Game</h2>
         <p className="text-sm text-muted-foreground">Select a game to invite your friend</p>
       </motion.div>
       
@@ -45,14 +45,14 @@ const GameSelector = ({ onSelectGame, disabled }: GameSelectorProps) => {
             transition={{ delay: i * 0.04, duration: 0.3 }}
             onClick={() => !disabled && onSelectGame(game.id)}
             disabled={disabled}
-            className="group relative glass glass-border rounded-xl p-5 text-left transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:glow-sm hover:border-foreground/15 hover:scale-[1.02] active:scale-[0.98]"
+            className="group relative gum-card p-5 text-left transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-0 active:translate-y-0"
           >
             <div className="absolute top-3 right-3">
-              <span className="text-[10px] font-medium text-muted-foreground/60 bg-secondary/80 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-semibold text-muted-foreground bg-secondary px-2 py-0.5 rounded-[3px] border border-border">
                 {game.tag}
               </span>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-secondary/80 flex items-center justify-center mb-3 group-hover:bg-foreground/10 transition-colors">
+            <div className="h-10 w-10 rounded-[3px] bg-secondary border-2 border-border flex items-center justify-center mb-3">
               <game.icon className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
             </div>
             <h3 className="font-semibold text-sm mb-1 group-hover:text-foreground transition-colors">{game.name}</h3>

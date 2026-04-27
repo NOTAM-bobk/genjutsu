@@ -21,6 +21,12 @@ const ChatPanel = ({ messages, onSendMessage, peerTyping, onTyping }: ChatPanelP
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, peerTyping]);
 
+  useEffect(() => {
+    return () => {
+      clearTimeout(typingTimeoutRef.current);
+    };
+  }, []);
+
   const handleTyping = useCallback((value: string) => {
     setText(value);
     onTyping(true);
@@ -49,9 +55,9 @@ const ChatPanel = ({ messages, onSendMessage, peerTyping, onTyping }: ChatPanelP
     <div className="flex flex-1 flex-col min-h-0">
       <div ref={scrollRef} className="flex-1 overflow-auto p-3 space-y-2">
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/50">
+          <div className="gum-card flex flex-col items-center justify-center py-10 text-muted-foreground/70">
             <p className="text-xs">No messages yet</p>
-            <p className="text-[10px] mt-1">Say hello! 👋</p>
+            <p className="text-[10px] mt-1">Start the conversation.</p>
           </div>
         )}
         <AnimatePresence initial={false}>
@@ -63,10 +69,10 @@ const ChatPanel = ({ messages, onSendMessage, peerTyping, onTyping }: ChatPanelP
               transition={{ duration: 0.2 }}
               className={`flex ${msg.isMe ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-sm ${
+              <div className={`max-w-[80%] rounded-[3px] px-3 py-2 text-sm border-2 ${
                 msg.isMe 
-                  ? 'bg-primary text-primary-foreground rounded-br-md' 
-                  : 'bg-secondary text-secondary-foreground rounded-bl-md glass-border'
+                  ? 'bg-primary text-primary-foreground border-border' 
+                  : 'bg-card text-foreground border-border'
               }`}>
                 {!msg.isMe && <p className="text-[10px] font-semibold opacity-60 mb-0.5">{msg.sender}</p>}
                 <p className="break-words leading-relaxed">{msg.text}</p>
@@ -83,7 +89,7 @@ const ChatPanel = ({ messages, onSendMessage, peerTyping, onTyping }: ChatPanelP
             animate={{ opacity: 1, y: 0 }}
             className="flex justify-start"
           >
-            <div className="bg-secondary rounded-2xl rounded-bl-md px-3.5 py-2 text-sm text-muted-foreground/60 flex items-center gap-1">
+            <div className="bg-secondary rounded-[3px] border-2 border-border px-3 py-2 text-sm text-muted-foreground/60 flex items-center gap-1">
               <span className="flex gap-0.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '0ms' }} />
                 <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -93,20 +99,20 @@ const ChatPanel = ({ messages, onSendMessage, peerTyping, onTyping }: ChatPanelP
           </motion.div>
         )}
       </div>
-      <div className="border-t border-border/50 p-3 flex gap-2">
+      <div className="border-t-2 border-border p-3 flex gap-2">
         <Input
           value={text}
           onChange={(e) => handleTyping(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type a message..."
           maxLength={500}
-          className="bg-secondary/60 border-0 focus:ring-1 focus:ring-foreground/20 rounded-xl"
+          className="bg-background border-2 border-border rounded-[3px] focus-visible:ring-0"
         />
         <Button 
           size="icon" 
           onClick={handleSend} 
           disabled={!text.trim()}
-          className="rounded-xl shrink-0 glow-sm hover:glow-md transition-shadow disabled:shadow-none"
+          className="gum-btn bg-primary text-primary-foreground shrink-0 h-10 w-10 px-0"
         >
           <Send className="h-4 w-4" />
         </Button>

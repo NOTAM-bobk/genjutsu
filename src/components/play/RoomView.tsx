@@ -139,12 +139,9 @@ const RoomView = (props: RoomViewProps) => {
 
   if (status === 'creating' || status === 'joining') {
     return (
-      <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="absolute inset-0 bg-foreground/10 rounded-full blur-xl animate-pulse" />
-            <FrogLoader className="relative h-8 w-8  text-muted-foreground" />
-          </div>
+      <div className="flex h-full items-center justify-center bg-background">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="gum-card px-8 py-7 flex flex-col items-center gap-4">
+          <FrogLoader className="h-8 w-8 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Connecting...</span>
         </motion.div>
       </div>
@@ -153,22 +150,18 @@ const RoomView = (props: RoomViewProps) => {
 
   if (status === 'waiting') {
     return (
-      <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center p-4 bg-background relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
-          backgroundImage: 'linear-gradient(hsl(0 0% 50%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 50%) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-        }} />
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-8 relative z-10">
+      <div className="flex h-full items-center justify-center p-4 sm:p-6 bg-background overflow-y-auto">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="gum-card text-center space-y-6 p-6 sm:p-8 w-full max-w-xl">
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold gradient-text">Waiting for a friend...</h2>
+            <h2 className="text-2xl font-black text-primary">Waiting for a friend...</h2>
             <p className="text-sm text-muted-foreground">Share this code to invite someone</p>
           </div>
           <button
             onClick={copyRoomCode}
-            className="group inline-flex items-center gap-3 glass glass-border rounded-2xl px-8 py-5 font-mono text-4xl tracking-[0.2em] hover:glow-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+            className="gum-btn group inline-flex items-center gap-3 bg-card font-mono text-3xl sm:text-4xl tracking-[0.2em] px-6 py-4"
           >
             {roomCode}
-            <Copy className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+            <Copy className="h-5 w-5 text-muted-foreground transition-colors" />
           </button>
           <div className="flex items-center justify-center gap-2 text-muted-foreground/60">
             <span className="relative flex h-2 w-2">
@@ -177,7 +170,7 @@ const RoomView = (props: RoomViewProps) => {
             </span>
             <span className="text-sm">Listening for connections...</span>
           </div>
-          <Button variant="ghost" onClick={leaveRoom} className="text-muted-foreground hover:text-foreground">Cancel</Button>
+          <Button variant="outline" onClick={leaveRoom} className="gum-btn bg-card text-foreground">Cancel</Button>
         </motion.div>
       </div>
     );
@@ -220,10 +213,15 @@ const RoomView = (props: RoomViewProps) => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] flex-col bg-background">
-      <header className="flex items-center justify-between border-b border-border/50 px-4 py-2.5 glass shrink-0">
+    <div className="relative flex h-full flex-col bg-background">
+      <header className="flex items-center justify-between border-b-2 border-border px-4 py-2.5 bg-background shrink-0">
         <div className="flex items-center gap-3">
-          <button onClick={copyRoomCode} className="font-mono text-[11px] bg-secondary/80 glass-border px-2.5 py-1 rounded-lg hover:bg-accent transition-all hover:scale-105 active:scale-95">{roomCode}</button>
+          <button
+            onClick={copyRoomCode}
+            className="font-mono text-[11px] bg-secondary px-2.5 py-1 rounded-[3px] border-2 border-border hover:bg-accent transition-colors"
+          >
+            {roomCode}
+          </button>
           <div className="flex items-center gap-1.5">
             <span className={`relative flex h-2 w-2`}>
               {!peerDisconnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success/50" />}
@@ -231,16 +229,16 @@ const RoomView = (props: RoomViewProps) => {
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm">
-          <span className="font-medium text-foreground/90">{myName}</span>
+        <div className="hidden sm:flex items-center gap-2 text-sm">
+          <span className="font-bold text-foreground/90">{myName}</span>
           <span className="text-muted-foreground/50 text-xs">vs</span>
-          <span className="font-medium text-foreground/90">{peerName || '...'}</span>
+          <span className="font-bold text-foreground/90">{peerName || '...'}</span>
         </div>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={toggleSound} title={soundEnabled ? 'Mute sounds' : 'Unmute sounds'} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" onClick={toggleSound} title={soundEnabled ? 'Mute sounds' : 'Unmute sounds'} className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-[3px] border-2 border-transparent hover:border-border">
             {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
           </Button>
-          <Button variant="ghost" size="icon" className="md:hidden relative h-8 w-8" onClick={handleOpenChat}>
+          <Button variant="ghost" size="icon" className="md:hidden relative h-8 w-8 rounded-[3px] border-2 border-transparent hover:border-border" onClick={handleOpenChat}>
             <MessageCircle className="h-4 w-4" />
             {unreadCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-foreground text-background text-[10px] flex items-center justify-center font-bold">
@@ -248,7 +246,7 @@ const RoomView = (props: RoomViewProps) => {
               </span>
             )}
           </Button>
-          <Button variant="ghost" size="icon" onClick={leaveRoom} className="h-8 w-8 text-muted-foreground hover:text-destructive"><LogOut className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" onClick={leaveRoom} className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-[3px] border-2 border-transparent hover:border-border"><LogOut className="h-4 w-4" /></Button>
         </div>
       </header>
 
@@ -259,7 +257,7 @@ const RoomView = (props: RoomViewProps) => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-b border-destructive/30 bg-destructive/10 overflow-hidden shrink-0"
+            className="border-b-2 border-destructive/40 bg-destructive/10 overflow-hidden shrink-0"
           >
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-2">
@@ -274,18 +272,18 @@ const RoomView = (props: RoomViewProps) => {
 
       <AnimatePresence>
         {pendingInvite && !isInviter && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-b border-border bg-secondary/50 overflow-hidden shrink-0">
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-b-2 border-border bg-secondary/40 overflow-hidden shrink-0">
             <div className="flex items-center justify-between px-4 py-3">
               <span className="text-sm"><strong>{peerName}</strong> wants to play <strong>{GAME_NAMES[pendingInvite]}</strong></span>
               <div className="flex gap-2">
-                <Button size="sm" onClick={acceptGameInvite}>Play</Button>
-                <Button size="sm" variant="ghost" onClick={declineGameInvite}>Decline</Button>
+                <Button size="sm" onClick={acceptGameInvite} className="gum-btn bg-primary text-primary-foreground">Play</Button>
+                <Button size="sm" variant="outline" onClick={declineGameInvite} className="gum-btn bg-card text-foreground">Decline</Button>
               </div>
             </div>
           </motion.div>
         )}
         {pendingInvite && isInviter && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-b border-border bg-secondary/50 overflow-hidden shrink-0">
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-b-2 border-border bg-secondary/40 overflow-hidden shrink-0">
             <div className="flex items-center justify-center gap-2 px-4 py-3">
               <FrogLoader className="h-4 w-4 " />
               <span className="text-sm">Waiting for {peerName} to accept {GAME_NAMES[pendingInvite]}...</span>
@@ -298,17 +296,17 @@ const RoomView = (props: RoomViewProps) => {
         <main className="flex-1 overflow-auto">
           {activeGame ? renderGame() : <GameSelector onSelectGame={handleSelectGame} disabled={!!pendingInvite || peerDisconnected} />}
         </main>
-        <aside className="hidden md:flex w-80 border-l border-border flex-col min-h-0">
+        <aside className="hidden md:flex w-80 border-l-2 border-border flex-col min-h-0 bg-card">
           <ChatPanel messages={messages} onSendMessage={handleSendChat} peerTyping={peerTyping} onTyping={sendTyping} />
         </aside>
       </div>
 
       <AnimatePresence>
         {showChat && (
-          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="fixed inset-0 top-14 z-50 bg-background md:hidden flex flex-col">
-            <div className="flex items-center justify-between border-b border-border px-4 py-2 shrink-0">
+          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="absolute inset-0 z-50 bg-background md:hidden flex flex-col border-t-2 border-border">
+            <div className="flex items-center justify-between border-b-2 border-border px-4 py-2 shrink-0">
               <span className="font-medium text-sm">Chat</span>
-              <Button variant="ghost" size="icon" onClick={handleCloseChat}><X className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="icon" onClick={handleCloseChat} className="rounded-[3px] border-2 border-transparent hover:border-border"><X className="h-4 w-4" /></Button>
             </div>
             <ChatPanel messages={messages} onSendMessage={handleSendChat} peerTyping={peerTyping} onTyping={sendTyping} />
           </motion.div>

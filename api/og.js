@@ -145,14 +145,14 @@ export default async function handler(req) {
         }
         // --- HANDLE SPECIAL PAGES ---
         else if (specialPage === 'stranger') {
-            title = 'Stranger Beta | genjutsu';
+            title = 'Stranger | genjutsu';
             description = 'Instantly match with random developers globally. 100% ephemeral, completely anonymous, lightning-fast WebSockets.';
             image = `${APP_URL}/og-image.png`;
             targetUrl = `${APP_URL}/stranger`;
             
             bodyContent = `
                 <div id="ssr-content" style="font-family:sans-serif;max-width:680px;margin:40px auto;padding:0 20px;text-align:center;">
-                    <h1>Stranger Beta</h1>
+                    <h1>Stranger</h1>
                     <p style="font-size:16px;line-height:1.6;">${escapeHtml(description)}</p>
                     <p style="color:#888;font-size:12px;margin-top:16px;">Access on <a href="${APP_URL}">Genjutsu</a></p>
                 </div>

@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
 import HomeScreen from '@/components/play/HomeScreen';
 import RoomView from '@/components/play/RoomView';
 import { useSupabaseConnection } from '@/hooks/useSupabaseConnection';
@@ -9,11 +8,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'sonner';
-import { Swords, X } from 'lucide-react';
+import { ArrowLeft, Swords, X } from 'lucide-react';
+import { ModeToggle } from '@/components/ModeToggle';
+import { useNavigate } from 'react-router-dom';
 
 const PlayPage = () => {
     const { user } = useAuth();
     const { profile } = useProfile();
+    const navigate = useNavigate();
     const peer = useSupabaseConnection();
     const presence = usePlayPresence();
     const invites = usePlayInvites();
@@ -103,29 +105,49 @@ const PlayPage = () => {
     }, [peer.status]);
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="h-[100dvh] w-full bg-background/50">
             <Helmet>
                 <title>Play | Genjutsu</title>
                 <meta name="description" content="Play mini games with friends in real-time." />
             </Helmet>
-            <Navbar />
-            <main className="flex-1 flex flex-col">
-                {peer.status === 'disconnected' ? (
-                    <HomeScreen
-                        onCreateRoom={peer.createRoom}
-                        onJoinRoom={peer.joinRoom}
-                        isLoggedIn={!!user}
-                        displayName={profile?.display_name || ''}
-                        onlineFriends={presence.onlineFriends}
-                        onlineOthers={presence.onlineOthers}
-                        totalOnline={presence.totalOnline}
-                        onChallenge={handleChallenge}
-                        challengingUserId={challengingUserId}
-                    />
-                ) : (
-                    <RoomView {...peer} />
-                )}
-            </main>
+            <div className="flex-1 w-full max-w-6xl mx-auto p-2 sm:p-4 md:p-6 flex flex-col h-full overflow-hidden">
+                <div className="flex items-center justify-between mb-3 sm:mb-4 px-1 relative">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex relative z-10 items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold text-muted-foreground hover:text-foreground gum-btn px-2.5 sm:px-3 py-1.5 border border-border bg-background hover:bg-secondary rounded-[3px] transition-all w-fit shadow-[2px_2px_0_theme(colors.border)] active:translate-y-[2px] active:shadow-none"
+                    >
+                        <ArrowLeft size={16} />
+                        <span className="hidden sm:inline">Back</span>
+                    </button>
+
+                    <h1 className="flex-1 flex justify-center text-lg sm:text-2xl font-black tracking-tight items-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden">
+                        <Swords className="text-primary hidden sm:block shrink-0" size={24} />
+                        <span className="truncate">Play</span>
+                    </h1>
+
+                    <div className="relative z-10">
+                        <ModeToggle />
+                    </div>
+                </div>
+
+                <main className="flex-1 min-h-0 flex flex-col">
+                    {peer.status === 'disconnected' ? (
+                        <HomeScreen
+                            onCreateRoom={peer.createRoom}
+                            onJoinRoom={peer.joinRoom}
+                            isLoggedIn={!!user}
+                            displayName={profile?.display_name || ''}
+                            onlineFriends={presence.onlineFriends}
+                            onlineOthers={presence.onlineOthers}
+                            totalOnline={presence.totalOnline}
+                            onChallenge={handleChallenge}
+                            challengingUserId={challengingUserId}
+                        />
+                    ) : (
+                        <RoomView {...peer} />
+                    )}
+                </main>
+            </div>
         </div>
     );
 };
