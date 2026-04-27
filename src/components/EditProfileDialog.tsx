@@ -1,17 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
     DialogTitle,
     DialogDescription,
     DialogTrigger,
-    DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Edit3, Upload, Camera, Link as LinkIcon, ChevronDown, ChevronUp, Music, Search, Play, Pause, X } from "lucide-react";
+import { Edit3, Camera, Link as LinkIcon, ChevronDown, ChevronUp, Music, Search, Play, Pause, X } from "lucide-react";
 import { FrogLoader } from "@/components/ui/FrogLoader";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +26,46 @@ interface EditProfileDialogProps {
     };
     onUpdate: () => void;
 }
+
+const MAX_DISPLAY_NAME = 40;
+const MAX_BIO = 280;
+
+const SOCIAL_PLATFORMS = [
+    { id: "github", label: "GitHub", placeholder: "https://github.com/username" },
+    { id: "twitter", label: "Twitter / X", placeholder: "https://x.com/username" },
+    { id: "facebook", label: "Facebook", placeholder: "https://facebook.com/username" },
+    { id: "website", label: "Website", placeholder: "https://yourwebsite.com" },
+] as const;
+
+const normalizeUrlInput = (value: string): string => {
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+};
+
+const isHttpUrl = (value: string): boolean => {
+    try {
+        const parsed = new URL(value);
+        return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+        return false;
+    }
+};
+
+const sanitizeSocialLinks = (links: Record<string, string>): Record<string, string> => {
+    const cleaned = Object.entries(links).reduce<Record<string, string>>((acc, [key, value]) => {
+        const normalized = normalizeUrlInput(String(value || ""));
+        if (normalized) acc[key] = normalized;
+        return acc;
+    }, {});
+    return cleaned;
+};
+
+const getSongIdentity = (song: any) => {
+    if (!song) return null;
+    return song.trackId || song.previewUrl || song.trackName || null;
+};
 
 const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps) => {
     const [displayName, setDisplayName] = useState(currentProfile.display_name);
@@ -49,6 +87,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
     const [songQuery, setSongQuery] = useState("");
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [searching, setSearching] = useState(false);
+    const [hasSearchedSongs, setHasSearchedSongs] = useState(false);
     const [open, setOpen] = useState(false);
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -58,6 +97,79 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
+    const initialDisplayName = currentProfile.display_name || "";
+    const initialBio = currentProfile.bio || "";
+    const initialAvatarUrl = currentProfile.avatar_url || "";
+    const initialBannerUrl = currentProfile.banner_url || "";
+    const initialSocialLinks = useMemo(
+        () => sanitizeSocialLinks(currentProfile.social_links || {}),
+        [currentProfile.social_links],
+    );
+    const initialSongIdentity = getSongIdentity(currentProfile.fav_song);
+
+    const trimmedDisplayName = displayName.trim();
+    const displayNameCount = displayName.length;
+    const bioCount = bio.length;
+
+    const normalizedAvatarUrl = normalizeUrlInput(avatarUrl);
+    const normalizedBannerUrl = normalizeUrlInput(bannerUrl);
+    const normalizedSocialLinks = useMemo(() => sanitizeSocialLinks(socialLinks), [socialLinks]);
+
+    const avatarUrlError = normalizedAvatarUrl && !isHttpUrl(normalizedAvatarUrl)
+        ? "Please enter a valid http(s) URL."
+        : "";
+    const bannerUrlError = normalizedBannerUrl && !isHttpUrl(normalizedBannerUrl)
+        ? "Please enter a valid http(s) URL."
+        : "";
+
+    const socialLinkErrors = useMemo(() => {
+        return Object.entries(normalizedSocialLinks).reduce<Record<string, string>>((acc, [key, value]) => {
+            if (value && !isHttpUrl(value)) {
+                acc[key] = "Please enter a valid http(s) URL.";
+            }
+            return acc;
+        }, {});
+    }, [normalizedSocialLinks]);
+
+    const hasValidationErrors = Boolean(
+        avatarUrlError ||
+        bannerUrlError ||
+        Object.keys(socialLinkErrors).length > 0
+    );
+
+    const hasUnsavedChanges = useMemo(() => {
+        const socialChanged =
+            JSON.stringify(normalizedSocialLinks) !== JSON.stringify(initialSocialLinks);
+
+        return (
+            trimmedDisplayName !== initialDisplayName ||
+            bio !== initialBio ||
+            normalizedAvatarUrl !== initialAvatarUrl ||
+            normalizedBannerUrl !== initialBannerUrl ||
+            socialChanged ||
+            getSongIdentity(favSong) !== initialSongIdentity ||
+            !!avatarFile ||
+            !!bannerFile
+        );
+    }, [
+        trimmedDisplayName,
+        initialDisplayName,
+        bio,
+        initialBio,
+        normalizedAvatarUrl,
+        initialAvatarUrl,
+        normalizedBannerUrl,
+        initialBannerUrl,
+        normalizedSocialLinks,
+        initialSocialLinks,
+        favSong,
+        initialSongIdentity,
+        avatarFile,
+        bannerFile,
+    ]);
+
+    const canSubmit = hasUnsavedChanges && !hasValidationErrors && trimmedDisplayName.length > 0 && !submitting;
+
     useEffect(() => {
         if (open) {
             setDisplayName(currentProfile.display_name);
@@ -66,13 +178,18 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             setBannerUrl(currentProfile.banner_url || "");
             setSocialLinks(currentProfile.social_links || {});
             setFavSong(currentProfile.fav_song || null);
-            setShowMusic(false);
+            setShowMusic(Boolean(currentProfile.fav_song));
+            setShowSocials(Object.values(currentProfile.social_links || {}).some((value) => String(value || "").trim() !== ""));
+            setShowUrls(false);
             setSearchResults([]);
             setSongQuery("");
+            setHasSearchedSongs(false);
             setAvatarFile(null);
             setBannerFile(null);
             setAvatarPreviewUrl(null);
             setBannerPreviewUrl(null);
+            setUploadingAvatar(false);
+            setUploadingBanner(false);
         } else {
             if (audioRef.current) {
                 previewAttemptIdRef.current += 1;
@@ -88,18 +205,49 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                 audioRef.current.pause();
                 audioRef.current = null;
             }
-            if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
-            if (bannerPreviewUrl) URL.revokeObjectURL(bannerPreviewUrl);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
+
+    useEffect(() => {
+        return () => {
+            if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
+        };
+    }, [avatarPreviewUrl]);
+
+    useEffect(() => {
+        return () => {
+            if (bannerPreviewUrl) URL.revokeObjectURL(bannerPreviewUrl);
+        };
+    }, [bannerPreviewUrl]);
+
+    const handleOpenChange = (nextOpen: boolean) => {
+        if (nextOpen) {
+            setOpen(true);
+            return;
+        }
+
+        if (submitting) return;
+        if (hasUnsavedChanges) {
+            const shouldDiscard = window.confirm("You have unsaved changes. Discard them?");
+            if (!shouldDiscard) return;
+        }
+        setOpen(false);
+    };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, bucket: 'avatars' | 'banners') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please choose a valid image file.");
+            e.target.value = "";
+            return;
+        }
+
         if (file.size > 2 * 1024 * 1024) {
             toast.error("That file is a bit too heavy! Please keep it under 2MB.");
+            e.target.value = "";
             return;
         }
 
@@ -117,12 +265,21 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             setBannerPreviewUrl(previewUrl);
             setBannerUrl("");
         }
+        e.target.value = "";
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!displayName.trim()) {
+        if (!trimmedDisplayName) {
             toast.error("Display name is required");
+            return;
+        }
+        if (!hasUnsavedChanges) {
+            toast.message("No changes to save.");
+            return;
+        }
+        if (hasValidationErrors) {
+            toast.error("Please fix the invalid URL fields before saving.");
             return;
         }
 
@@ -131,8 +288,8 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("No user found");
 
-            let finalAvatarUrl = avatarUrl;
-            let finalBannerUrl = bannerUrl;
+            let finalAvatarUrl = normalizedAvatarUrl;
+            let finalBannerUrl = normalizedBannerUrl;
 
             // Helper to upload files to Supabase inline
             const uploadFile = async (file: File, bucket: 'avatars' | 'banners') => {
@@ -147,11 +304,23 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             
             if (avatarFile) {
                 setUploadingAvatar(true);
-                uploadPromises.push(uploadFile(avatarFile, 'avatars').then(url => finalAvatarUrl = url));
+                uploadPromises.push(
+                    uploadFile(avatarFile, 'avatars')
+                        .then(url => {
+                            finalAvatarUrl = url;
+                        })
+                        .finally(() => setUploadingAvatar(false))
+                );
             }
             if (bannerFile) {
                 setUploadingBanner(true);
-                uploadPromises.push(uploadFile(bannerFile, 'banners').then(url => finalBannerUrl = url));
+                uploadPromises.push(
+                    uploadFile(bannerFile, 'banners')
+                        .then(url => {
+                            finalBannerUrl = url;
+                        })
+                        .finally(() => setUploadingBanner(false))
+                );
             }
 
             if (uploadPromises.length > 0) {
@@ -179,11 +348,11 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             const { error } = await supabase
                 .from("profiles")
                 .update({
-                    display_name: displayName,
-                    bio: bio,
+                    display_name: trimmedDisplayName,
+                    bio: bio.trim(),
                     avatar_url: finalAvatarUrl,
                     banner_url: finalBannerUrl,
-                    social_links: socialLinks,
+                    social_links: normalizedSocialLinks,
                     fav_song: favSong,
                     updated_at: getNow().toISOString(),
                 })
@@ -199,16 +368,19 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             toast.error("Something went wrong while updating your identity. Please try again.");
         } finally {
             setSubmitting(false);
+            setUploadingAvatar(false);
+            setUploadingBanner(false);
         }
     };
 
     const searchSongs = async () => {
         if (!songQuery.trim()) return;
         setSearching(true);
+        setHasSearchedSongs(true);
         try {
             const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(songQuery)}&entity=song&limit=20`);
             const data = await response.json();
-            setSearchResults(data.results || []);
+            setSearchResults((data.results || []).filter((song: any) => song?.trackId));
         } catch (error) {
             console.error("Error searching songs:", error);
             toast.error("Failed to search songs");
@@ -217,7 +389,11 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
         }
     };
 
-    const togglePreview = (previewUrl: string) => {
+    const togglePreview = (previewUrl?: string) => {
+        if (!previewUrl) {
+            toast.error("No preview available for this song.");
+            return;
+        }
         if (playingPreview === previewUrl) {
             previewAttemptIdRef.current += 1;
             audioRef.current?.pause();
@@ -255,7 +431,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <button className="gum-btn border-2 border-foreground flex items-center gap-1.5 xs:gap-2 text-xs xs:text-sm !px-3 !py-2 xs:!px-5 xs:!py-2.5 whitespace-nowrap">
                     <Edit3 size={15} className="xs:w-4 xs:h-4" /> Edit Profile
@@ -268,7 +444,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                     <div className="flex items-center justify-between p-4 border-b-2 border-foreground bg-secondary shrink-0 z-10">
                         <button
                             type="button"
-                            onClick={() => setOpen(false)}
+                            onClick={() => handleOpenChange(false)}
                             className="text-sm font-bold hover:underline px-4 py-2"
                         >
                             Cancel
@@ -276,8 +452,8 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                         <DialogTitle className="text-lg font-bold">Edit Profile</DialogTitle>
                         <button
                             type="submit"
-                            disabled={submitting}
-                            className="bg-primary text-primary-foreground px-4 sm:px-8 py-2 rounded-[3px] font-bold border-2 border-foreground hover:bg-primary/90 transition-all flex items-center gap-2"
+                            disabled={!canSubmit}
+                            className="bg-primary text-primary-foreground px-4 sm:px-8 py-2 rounded-[3px] font-bold border-2 border-foreground hover:bg-primary/90 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {submitting ? <FrogLoader className="" size={16} /> : "Save"}
                         </button>
@@ -386,22 +562,37 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                             {/* Right Column: Profile Info */}
                             <div className="space-y-8 lg:sticky lg:top-0 h-fit">
                                 <div className="space-y-4">
-                                    <Label htmlFor="displayName" className="font-bold text-lg block">Display Name</Label>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <Label htmlFor="displayName" className="font-bold text-lg block">Display Name</Label>
+                                        <span className="text-[11px] font-bold text-muted-foreground">
+                                            {displayNameCount}/{MAX_DISPLAY_NAME}
+                                        </span>
+                                    </div>
                                     <Input
                                         id="displayName"
                                         value={displayName}
                                         onChange={(e) => setDisplayName(e.target.value)}
-                                        className="gum-border focus-visible:ring-primary text-lg p-4 sm:p-7 bg-background"
+                                        maxLength={MAX_DISPLAY_NAME}
+                                        className="gum-border focus-visible:ring-primary text-base h-12 sm:h-14 px-4 bg-background"
                                         placeholder="What should we call you?"
                                     />
+                                    <p className="text-xs text-muted-foreground">
+                                        Keep it short and recognizable.
+                                    </p>
                                 </div>
                                 <div className="space-y-4">
-                                    <Label htmlFor="bio" className="font-bold text-lg block">Bio</Label>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <Label htmlFor="bio" className="font-bold text-lg block">Bio</Label>
+                                        <span className="text-[11px] font-bold text-muted-foreground">
+                                            {bioCount}/{MAX_BIO}
+                                        </span>
+                                    </div>
                                     <Textarea
                                         id="bio"
                                         value={bio}
                                         onChange={(e) => setBio(e.target.value)}
-                                        className="gum-border focus-visible:ring-primary min-h-[180px] text-lg p-4 sm:p-5 bg-background resize-none"
+                                        maxLength={MAX_BIO}
+                                        className="gum-border focus-visible:ring-primary min-h-[160px] text-base p-4 bg-background resize-none"
                                         placeholder="Write something about yourself..."
                                     />
                                 </div>
@@ -422,12 +613,10 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
 
                                     {showSocials && (
                                         <div className="mt-4 space-y-4 p-6 bg-secondary/5 rounded-[3px] gum-border animate-in slide-in-from-top-4 duration-300">
-                                            {[
-                                                { id: 'github', label: 'GitHub', placeholder: 'github.com/username' },
-                                                { id: 'twitter', label: 'Twitter / X', placeholder: 'twitter.com/username' },
-                                                { id: 'facebook', label: 'Facebook', placeholder: 'facebook.com/username' },
-                                                { id: 'website', label: 'Website', placeholder: 'yourwebsite.com' }
-                                            ].map((platform) => (
+                                            <p className="text-[11px] text-muted-foreground">
+                                                Paste full links. If you omit protocol, <code>https://</code> will be added automatically.
+                                            </p>
+                                            {SOCIAL_PLATFORMS.map((platform) => (
                                                 <div key={platform.id} className="space-y-2">
                                                     <Label htmlFor={platform.id} className="text-[10px] font-black uppercase tracking-wider opacity-60">
                                                         {platform.label} link</Label>
@@ -438,6 +627,9 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                                         className="h-11 text-sm gum-border focus-visible:ring-primary bg-background"
                                                         placeholder={platform.placeholder}
                                                     />
+                                                    {socialLinkErrors[platform.id] && (
+                                                        <p className="text-[11px] text-destructive">{socialLinkErrors[platform.id]}</p>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
@@ -499,6 +691,11 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                             </div>
 
                                             <div className="space-y-2 mt-4">
+                                                {hasSearchedSongs && !searching && searchResults.length === 0 && (
+                                                    <p className="text-xs text-muted-foreground">
+                                                        No songs found. Try another keyword.
+                                                    </p>
+                                                )}
                                                 {searchResults.map((song) => (
                                                     <div
                                                         key={song.trackId}
@@ -513,7 +710,8 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                                                     e.stopPropagation();
                                                                     togglePreview(song.previewUrl);
                                                                 }}
-                                                                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity rounded-[3px]"
+                                                                disabled={!song.previewUrl}
+                                                                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity rounded-[3px] disabled:opacity-60 disabled:cursor-not-allowed"
                                                             >
                                                                 {playingPreview === song.previewUrl ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
                                                             </button>
@@ -548,6 +746,9 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
 
                                     {showUrls && (
                                         <div className="mt-4 space-y-6 p-6 bg-secondary/5 rounded-[3px] gum-border animate-in slide-in-from-top-4 duration-300">
+                                            <p className="text-[11px] text-muted-foreground">
+                                                You can paste direct image links. If protocol is missing, <code>https://</code> will be added automatically.
+                                            </p>
                                             <div className="space-y-3">
                                                 <Label htmlFor="avatarUrl" className="text-xs font-bold uppercase tracking-wider opacity-60">Custom Avatar URL</Label>
                                                 <Input
@@ -557,6 +758,9 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                                     className="h-12 text-sm gum-border focus-visible:ring-primary bg-background"
                                                     placeholder="https://example.com/avatar.png"
                                                 />
+                                                {avatarUrlError && (
+                                                    <p className="text-[11px] text-destructive">{avatarUrlError}</p>
+                                                )}
                                             </div>
                                             <div className="space-y-3">
                                                 <Label htmlFor="bannerUrl" className="text-xs font-bold uppercase tracking-wider opacity-60">Custom Banner URL</Label>
@@ -567,6 +771,9 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                                     className="h-12 text-sm gum-border focus-visible:ring-primary bg-background"
                                                     placeholder="https://example.com/banner.png"
                                                 />
+                                                {bannerUrlError && (
+                                                    <p className="text-[11px] text-destructive">{bannerUrlError}</p>
+                                                )}
                                             </div>
                                         </div>
                                     )}
