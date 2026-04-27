@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import DataSaverImage from "@/components/DataSaverImage";
 
 interface EditPostDialogProps {
   open: boolean;
@@ -292,7 +293,7 @@ export default function EditPostDialog({ open, onOpenChange, post, onEdited }: E
 
             {currentMediaPreview ? (
               <div className="relative rounded-[3px] gum-border overflow-hidden max-h-[280px]">
-                <img src={currentMediaPreview} alt="Preview" className="w-full h-full object-cover" />
+                <DataSaverImage src={currentMediaPreview} alt="Preview" className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => {

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
 import { extractFirstHttpUrl } from "@/lib/linkPreview";
+import DataSaverImage from "@/components/DataSaverImage";
 
 interface LinkPreviewPayload {
   url: string;
@@ -99,14 +100,14 @@ export default function WhisperLinkPreview({ content, isMe }: WhisperLinkPreview
     >
       {data.image ? (
         <div className="w-full h-32 sm:h-36 bg-secondary/40">
-          <img src={data.image} alt={title} className="w-full h-full object-cover" loading="lazy" />
+          <DataSaverImage src={data.image} alt={title} className="w-full h-full object-cover" loading="lazy" />
         </div>
       ) : null}
 
       <div className="px-3 py-2.5">
         <div className="flex items-center gap-1.5 mb-1">
           {data.favicon ? (
-            <img src={data.favicon} alt="" className="w-3.5 h-3.5 rounded-[2px]" loading="lazy" />
+            <DataSaverImage src={data.favicon} alt="" className="w-3.5 h-3.5 rounded-[2px]" loading="lazy" />
           ) : null}
           <p className={`text-[10px] uppercase tracking-wide ${isMe ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
             {data.siteName || host}

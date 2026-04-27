@@ -12,6 +12,7 @@ import { Helmet } from "react-helmet-async";
 import { linkify } from "@/lib/linkify";
 import WhisperLinkPreview from "@/components/WhisperLinkPreview";
 import { ImagePreviewDialog } from "@/components/ImagePreviewDialog";
+import DataSaverImage from "@/components/DataSaverImage";
 
 const ChatPage = () => {
     const { username } = useParams<{ username: string }>();
@@ -316,7 +317,7 @@ const ChatPage = () => {
                                             className={`block w-full rounded-[3px] overflow-hidden border border-border/40 cursor-zoom-in ${hasText ? "mt-2" : ""}`}
                                             aria-label="Open whisper image"
                                         >
-                                            <img
+                                            <DataSaverImage
                                                 src={whisper.media_url}
                                                 alt="Whisper image"
                                                 className="w-full max-h-72 object-cover"
@@ -392,7 +393,7 @@ const ChatPage = () => {
                     ) : null}
                     {selectedImagePreviewUrl ? (
                         <div className="relative w-24 h-24 rounded-[3px] overflow-hidden border-2 border-border">
-                            <img src={selectedImagePreviewUrl} alt="Selected whisper upload" className="w-full h-full object-cover" />
+                            <DataSaverImage src={selectedImagePreviewUrl} alt="Selected whisper upload" className="w-full h-full object-cover" />
                             <button
                                 type="button"
                                 onClick={clearSelectedImage}

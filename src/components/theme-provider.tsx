@@ -72,6 +72,7 @@ type ThemeProviderState = {
     emojiPack: EmojiPack;
     animateColor: boolean;
     cursorTrail: boolean;
+    dataSaver: boolean;
     soundEnabled: boolean;
     shadowWalk: boolean;
     setTheme: (theme: Theme) => void;
@@ -84,6 +85,7 @@ type ThemeProviderState = {
     setEmojiPack: (emojiPack: EmojiPack) => void;
     setAnimateColor: (v: boolean) => void;
     setCursorTrail: (v: boolean) => void;
+    setDataSaver: (v: boolean) => void;
     setSoundEnabled: (v: boolean) => void;
     setShadowWalk: (v: boolean) => void;
 };
@@ -99,6 +101,7 @@ const initialState: ThemeProviderState = {
     emojiPack: "twemoji",
     animateColor: false,
     cursorTrail: false,
+    dataSaver: false,
     soundEnabled: false,
     shadowWalk: false,
     setTheme: () => null,
@@ -111,6 +114,7 @@ const initialState: ThemeProviderState = {
     setEmojiPack: () => null,
     setAnimateColor: () => null,
     setCursorTrail: () => null,
+    setDataSaver: () => null,
     setSoundEnabled: () => null,
     setShadowWalk: () => null,
 };
@@ -163,6 +167,9 @@ export function ThemeProvider({
     const [cursorTrail, setCursorTrailState] = useState<boolean>(() => {
         return localStorage.getItem(`${storageKey}-cursorTrail`) === "true";
     });
+    const [dataSaver, setDataSaverState] = useState<boolean>(() => {
+        return localStorage.getItem(`${storageKey}-dataSaver`) === "true";
+    });
     const [soundEnabled, setSoundEnabledState] = useState<boolean>(() => {
         return localStorage.getItem(`${storageKey}-soundEnabled`) === "true";
     });
@@ -183,6 +190,7 @@ export function ThemeProvider({
     const setEmojiPack = (val: EmojiPack) => { localStorage.setItem(`${storageKey}-emojiPack`, val); setEmojiPackState(val); };
     const setAnimateColor = (val: boolean) => { localStorage.setItem(`${storageKey}-animateColor`, String(val)); setAnimateColorState(val); };
     const setCursorTrail = (val: boolean) => { localStorage.setItem(`${storageKey}-cursorTrail`, String(val)); setCursorTrailState(val); };
+    const setDataSaver = (val: boolean) => { localStorage.setItem(`${storageKey}-dataSaver`, String(val)); setDataSaverState(val); };
     const setSoundEnabled = (val: boolean) => { localStorage.setItem(`${storageKey}-soundEnabled`, String(val)); setSoundEnabledState(val); };
     const setShadowWalk = (val: boolean) => { localStorage.setItem(`${storageKey}-shadowWalk`, String(val)); setShadowWalkState(val); document.documentElement.setAttribute('data-shadow-walk', String(val)); };
 
@@ -199,6 +207,7 @@ export function ThemeProvider({
         root.setAttribute("data-theme-preset", preset);
         root.setAttribute("data-grid", grid);
         root.setAttribute("data-emoji-pack", emojiPack);
+        root.setAttribute("data-data-saver", String(dataSaver));
         root.setAttribute("data-shadow-walk", String(shadowWalk));
 
         // Only apply static color when animation is off
@@ -222,7 +231,7 @@ export function ThemeProvider({
 
         // Apply Radius
         document.documentElement.style.setProperty('--radius', radiusPresets[radius]);
-    }, [theme, preset, color, customColor, radius, emojiPack, animateColor, grid, shadowWalk]);
+    }, [theme, preset, color, customColor, radius, emojiPack, animateColor, grid, dataSaver, shadowWalk]);
 
     // Animated color loop — smooth 60fps hue cycling via requestAnimationFrame
     useEffect(() => {
@@ -273,8 +282,8 @@ export function ThemeProvider({
     }, [font]);
 
     const value = {
-        theme, preset, color, customColor, font, grid, radius, emojiPack, animateColor, cursorTrail, soundEnabled, shadowWalk,
-        setTheme, setPreset, setColor, setCustomColor, setFont, setGrid, setRadius, setEmojiPack, setAnimateColor, setCursorTrail, setSoundEnabled, setShadowWalk
+        theme, preset, color, customColor, font, grid, radius, emojiPack, animateColor, cursorTrail, dataSaver, soundEnabled, shadowWalk,
+        setTheme, setPreset, setColor, setCustomColor, setFont, setGrid, setRadius, setEmojiPack, setAnimateColor, setCursorTrail, setDataSaver, setSoundEnabled, setShadowWalk
     };
 
     return (

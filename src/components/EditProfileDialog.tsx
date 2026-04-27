@@ -14,6 +14,7 @@ import { FrogLoader } from "@/components/ui/FrogLoader";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getNow } from "@/lib/utils";
+import DataSaverImage from "@/components/DataSaverImage";
 
 interface EditProfileDialogProps {
     currentProfile: {
@@ -654,7 +655,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                         <div className="mt-4 space-y-4 p-6 bg-secondary/5 rounded-[3px] gum-border animate-in slide-in-from-top-4 duration-300">
                                             {favSong && (
                                                 <div className="flex items-center gap-4 p-4 bg-background rounded-[3px] gum-border mb-4">
-                                                    <img src={favSong.artworkUrl100} className="w-12 h-12 rounded-[3px] object-cover" alt="" />
+                                                    <DataSaverImage src={favSong.artworkUrl100} className="w-12 h-12 rounded-[3px] object-cover" alt="" />
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-bold text-sm truncate">{favSong.trackName}</p>
                                                         <p className="text-xs text-muted-foreground truncate">{favSong.artistName}</p>
@@ -703,7 +704,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                                         onClick={() => setFavSong(song)}
                                                     >
                                                         <div className="relative w-10 h-10 shrink-0">
-                                                            <img src={song.artworkUrl100} className="w-full h-full rounded-[3px] object-cover" alt="" />
+                                                            <DataSaverImage src={song.artworkUrl100} className="w-full h-full rounded-[3px] object-cover" alt="" />
                                                             <button
                                                                 type="button"
                                                                 onClick={(e) => {

@@ -22,6 +22,7 @@ import { useTheme } from "@/components/theme-provider";
 import { ImagePreviewDialog } from "@/components/ImagePreviewDialog";
 import EditPostDialog from "@/components/EditPostDialog";
 import PostLikesDialog from "@/components/PostLikesDialog";
+import DataSaverImage from "@/components/DataSaverImage";
 
 interface PostCardProps {
   post: PostWithProfile;
@@ -400,7 +401,7 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete, onPostEdited }: Pos
                 onClick={() => setIsImagePreviewOpen(true)}
                 className="mt-3 w-full rounded-[3px] gum-border overflow-hidden bg-muted cursor-pointer hover:opacity-95 transition-opacity"
               >
-                <img
+                <DataSaverImage
                   src={post.media_url}
                   alt="Post content"
                   className="w-full h-auto max-h-[500px] object-contain mx-auto"

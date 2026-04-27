@@ -17,6 +17,7 @@ import FollowsList from "@/components/FollowsList";
 import { PostSkeleton } from "@/components/ui/skeleton";
 import { getNow } from "@/lib/utils";
 import { ImagePreviewDialog } from "@/components/ImagePreviewDialog";
+import DataSaverImage from "@/components/DataSaverImage";
 
 import { useFollow } from "@/hooks/useFollow";
 import { usePostActions } from "@/hooks/usePostActions";
@@ -783,7 +784,7 @@ const ProfilePage = () => {
                                             <div className="mt-6">
                                                 <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-background border-2 border-foreground rounded-[3px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-in fade-in slide-in-from-top-4 duration-500">
                                                     <div className="relative group shrink-0">
-                                                        <img
+                                                        <DataSaverImage
                                                             src={profile.fav_song.artworkUrl100}
                                                             className="w-10 h-10 rounded-[3px] object-cover border-2 border-foreground animate-spin-slow"
                                                             style={{ animationPlayState: isPlaying ? 'running' : 'paused' }}
@@ -896,7 +897,7 @@ const ProfilePage = () => {
                                                             className="w-full aspect-square rounded-[3px] overflow-hidden gum-border bg-secondary hover:opacity-90 transition-opacity"
                                                             title="Open photo"
                                                         >
-                                                            <img
+                                                            <DataSaverImage
                                                                 src={photo.photo_url}
                                                                 alt={`${profile.display_name} album photo`}
                                                                 className="w-full h-full object-cover"

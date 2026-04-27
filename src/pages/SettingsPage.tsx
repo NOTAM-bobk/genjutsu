@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
-import { LogOut, ArrowLeft, Shield, Settings, Check, AtSign, Globe, Palette, Moon, Sun, Monitor, Pipette, WandSparkles, Music, Volume2, VolumeX, Clock, Lock, Eye, EyeOff, KeyRound, Layout, Type, Square, Grid, Bell, BellOff, Smile } from "lucide-react";
+import { LogOut, ArrowLeft, Shield, Settings, Check, AtSign, Globe, Palette, Moon, Sun, Monitor, Pipette, WandSparkles, Music, Volume2, VolumeX, Clock, Lock, Eye, EyeOff, ImageOff, KeyRound, Layout, Type, Square, Grid, Bell, BellOff, Smile } from "lucide-react";
 import { FrogLoader } from "@/components/ui/FrogLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -56,7 +56,7 @@ const SettingsPage = () => {
     const { profile, changeUsername, getNextUsernameChangeDate, deleteAccount } = useProfile();
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
-    const { theme, preset, color, customColor, font, radius, emojiPack, animateColor, cursorTrail, grid, soundEnabled, shadowWalk, setTheme, setPreset, setColor, setCustomColor, setFont, setRadius, setEmojiPack, setAnimateColor, setCursorTrail, setGrid, setSoundEnabled, setShadowWalk } = useTheme();
+    const { theme, preset, color, customColor, font, radius, emojiPack, animateColor, cursorTrail, grid, dataSaver, soundEnabled, shadowWalk, setTheme, setPreset, setColor, setCustomColor, setFont, setRadius, setEmojiPack, setAnimateColor, setCursorTrail, setGrid, setDataSaver, setSoundEnabled, setShadowWalk } = useTheme();
     const pushNotifications = usePushNotifications();
     const [mfaStatusLoading, setMfaStatusLoading] = useState(false);
     const [mfaStatusReady, setMfaStatusReady] = useState(false);
@@ -70,7 +70,7 @@ const SettingsPage = () => {
     const [newUsername, setNewUsername] = useState("");
     const [usernameError, setUsernameError] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [activeTab, setActiveTab] = useState<"general" | "language" | "appearance" | "audio" | "security" | "notifications" | "danger">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "language" | "appearance" | "data" | "audio" | "security" | "notifications" | "danger">("general");
     const [deleteConfirmation, setDeleteConfirmation] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -458,6 +458,16 @@ const SettingsPage = () => {
                             >
                                 <Palette size={18} />
                                 {t("settings.appearance", "Appearance")}
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("data")}
+                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-[3px] text-sm transition-all ${activeTab === "data"
+                                    ? "bg-primary text-primary-foreground font-bold gum-shadow-sm"
+                                    : "hover:bg-secondary text-muted-foreground hover:text-foreground font-medium"
+                                    }`}
+                            >
+                                <ImageOff size={18} />
+                                Data Saving
                             </button>
                             <button
                                 onClick={() => setActiveTab("audio")}
@@ -924,6 +934,40 @@ const SettingsPage = () => {
                                                         {shadowWalk ? '🥷 Active' : 'Disabled'}
                                                     </button>
                                                 </div>
+                                            </div>
+                                        </section>
+                                    </motion.div>
+                                )}
+
+                                {activeTab === "data" && (
+                                    <motion.div
+                                        key="data"
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 10 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="space-y-6"
+                                    >
+                                        <section className="gum-card p-6 space-y-6">
+                                            <div>
+                                                <h2 className="text-xl font-bold flex items-center gap-2 mb-2">
+                                                    <ImageOff className={dataSaver ? "text-primary" : "text-muted-foreground"} />
+                                                    Data Saving
+                                                </h2>
+                                                <p className="text-sm text-muted-foreground">Control how media loads to reduce data usage.</p>
+                                            </div>
+
+                                            <div className="flex items-start justify-between gap-4 rounded-[3px] border border-border bg-secondary/30 p-4">
+                                                <div className="pr-0 sm:pr-4">
+                                                    <h3 className="font-bold mb-1">Manual Image Loading</h3>
+                                                    <p className="text-sm text-muted-foreground">Blocks auto-loading for remote images. Tap each image to load it manually. Avatars and profile banners are always allowed.</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => setDataSaver(!dataSaver)}
+                                                    className={`gum-btn px-4 py-2 text-sm font-bold shrink-0 transition-all ${dataSaver ? 'bg-primary text-primary-foreground gum-shadow-sm' : 'bg-background hover:bg-secondary text-foreground border-2 border-border'}`}
+                                                >
+                                                    {dataSaver ? 'Enabled' : 'Disabled'}
+                                                </button>
                                             </div>
                                         </section>
                                     </motion.div>
