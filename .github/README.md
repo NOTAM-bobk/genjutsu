@@ -36,6 +36,16 @@ every post, comment, and message automatically deletes after 24 hours. this mean
 <br />
 
 
+## genjutsu feed api
+
+want to use public genjutsu feed posts in your own app or website?
+
+visit the docs site: [https://genjutsu-social.vercel.app/api-docs](https://genjutsu-social.vercel.app/api-docs)
+
+for a quick reference file in this repo, see [genjutsu-feed-api.md](./genjutsu-feed-api.md).
+
+<br />
+
 ## contributing
 
 want to contribute? see [CONTRIBUTING.md](CONTRIBUTING.md) for setup and guidelines.
