@@ -1,18 +1,25 @@
-@import url("https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-  --radius: 2.5px;
-  --bg: #faf9fc;
+  --radius: 8px;
+  --radius-sm: 4px;
+  --bg: #f8f7fc;
+  --bg-dark: #f0eefc;
   --panel: #ffffff;
-  --panel-2: #ffffff;
-  --text: #0d0d0d;
-  --muted: #656565;
-  --border: #0d0d0d;
+  --panel-2: #faf9fc;
+  --text: #1a1a2e;
+  --text-light: #4a4a6a;
+  --muted: #7a7a9a;
+  --border: #e8e6f0;
   --accent: #8b5cf6;
   --accent-2: #7c4be6;
-  --ok: #178a45;
-  --shadow-gum: 4px 4px 0px #0d0d0d;
-  --shadow-gum-sm: 2px 2px 0px #0d0d0d;
+  --accent-light: #c4b5fd;
+  --ok: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 4px 12px 0 rgba(139, 92, 246, 0.15);
+  --shadow-lg: 0 10px 25px 0 rgba(139, 92, 246, 0.2);
 }
 
 * {
@@ -24,8 +31,10 @@ html, body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: "Reddit Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   width: 100%;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
 code, pre {
@@ -33,52 +42,76 @@ code, pre {
   max-width: 100%;
 }
 
+body {
+  scroll-behavior: smooth;
+}
+
 .container {
-  width: min(1100px, 100%);
-  padding-inline: 10px;
+  width: min(1200px, 100%);
+  padding-inline: 20px;
   margin: 0 auto;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding-inline: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding-inline: 12px;
+  }
+}
+
 .hero {
-  padding: 48px 0 28px;
-  border-bottom: 2px solid var(--border);
-  background:
-    linear-gradient(rgba(139, 92, 246, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 92, 246, 0.06) 1px, transparent 1px);
-  background-size: 40px 40px;
+  padding: 60px 0 40px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(124, 75, 230, 0.04) 100%);
 }
 
 .kicker {
-  margin: 0 0 8px;
-  color: var(--accent-2);
-  letter-spacing: 0.12em;
+  margin: 0 0 12px;
+  color: var(--accent);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 11px;
+  display: inline-block;
+  background: rgba(139, 92, 246, 0.1);
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(28px, 5vw, 44px);
+  font-size: clamp(32px, 6vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--text) 0%, var(--text-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .subtitle {
-  margin-top: 10px;
-  color: var(--muted);
-  max-width: 800px;
+  margin-top: 12px;
+  color: var(--text-light);
+  max-width: 700px;
+  font-size: 16px;
 }
 
 .endpoint {
-  margin-top: 18px;
+  margin-top: 24px;
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   background: var(--panel);
-  border: 2px solid var(--border);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 10px 14px;
-  box-shadow: var(--shadow-gum-sm);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-sm);
   max-width: 100%;
   min-width: 0;
 }
@@ -86,86 +119,153 @@ h1 {
 .endpoint code {
   overflow-wrap: anywhere;
   word-break: break-word;
+  color: var(--accent);
+  font-weight: 500;
 }
 
 .method {
   display: inline-block;
-  background: rgba(23, 138, 69, 0.12);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.06));
   color: var(--ok);
-  border: 2px solid rgba(23, 138, 69, 0.35);
-  border-radius: var(--radius);
-  font-size: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  padding: 2px 8px;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
 }
 
 .content {
-  padding: 26px 0 40px;
+  padding: 40px 0 60px;
   display: grid;
-  gap: 16px;
+  gap: 20px;
   min-width: 0;
 }
 
 .card {
-  background: linear-gradient(180deg, var(--panel), var(--panel-2));
-  border: 2px solid var(--border);
+  background: var(--panel);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 18px;
-  box-shadow: var(--shadow-gum);
+  padding: 28px;
+  box-shadow: var(--shadow);
   min-width: 0;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent-light);
+  transform: translateY(-2px);
 }
 
 .card h2 {
-  margin: 0 0 10px;
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  position: relative;
+  padding-left: 0;
+}
+
+.card h2::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover h2::before {
+  opacity: 1;
 }
 
 .card p {
-  margin: 10px 0;
+  margin: 12px 0;
+  color: var(--text-light);
+  line-height: 1.7;
 }
 
-.card ul {
-  margin: 10px 0;
-  padding-left: 18px;
+.card ul, .card ol {
+  margin: 14px 0;
+  padding-left: 24px;
+  color: var(--text-light);
+}
+
+.card li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.card li code {
+  background: var(--bg-dark);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--accent);
+  font-weight: 500;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   max-width: 100%;
 }
 
 thead th {
   text-align: left;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   border-bottom: 2px solid var(--border);
-  padding: 8px 10px;
+  padding: 12px 10px;
+  background: var(--bg-dark);
   overflow-wrap: anywhere;
 }
 
 tbody td {
-  border-bottom: 2px solid rgba(13, 13, 13, 0.18);
-  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  padding: 14px 10px;
   font-size: 14px;
+  color: var(--text-light);
   min-width: 0;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-pre {
-  margin: 10px 0 0;
-  background: #f3f0fa;
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px;
-  overflow: auto;
+tbody tr:hover {
+  background: var(--bg-dark);
+  transition: background 0.2s ease;
+}
+
+tbody td code {
+  background: rgba(139, 92, 246, 0.08);
+  color: var(--accent);
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-weight: 500;
   font-size: 13px;
-  line-height: 1.5;
-  box-shadow: var(--shadow-gum-sm);
+}
+
+pre {
+  margin: 14px 0 0;
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.6;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
   max-width: 100%;
 }
 
@@ -173,13 +273,15 @@ pre code {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
+  color: var(--text);
+  font-weight: 500;
 }
 
 .playground-controls {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-  margin: 8px 0 10px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin: 18px 0 16px;
   min-width: 0;
 }
 
@@ -190,49 +292,71 @@ label {
   font-size: 12px;
   color: var(--muted);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 input {
-  background: #ffffff;
-  border: 2px solid var(--border);
+  background: var(--panel);
+  border: 1.5px solid var(--border);
   color: var(--text);
   border-radius: var(--radius);
-  height: 38px;
-  padding: 0 10px;
+  height: 42px;
+  padding: 0 12px;
   width: 100%;
   min-width: 0;
   outline: none;
-  box-shadow: var(--shadow-gum-sm);
+  box-shadow: var(--shadow-sm);
+  font-family: "Reddit Mono", monospace;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+input::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
 }
 
 input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  background: var(--panel);
+}
+
+input:hover {
+  border-color: var(--accent-light);
 }
 
 button {
-  height: 38px;
-  border: 2px solid var(--border);
+  height: 42px;
+  border: 1.5px solid transparent;
   border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: white;
-  font-weight: 700;
-  padding: 0 14px;
+  font-weight: 600;
+  padding: 0 24px;
   cursor: pointer;
   align-self: end;
-  box-shadow: var(--shadow-gum);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  box-shadow: var(--shadow);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
+  letter-spacing: 0.5px;
 }
 
 button:hover {
-  filter: brightness(1.03);
-  transform: translate(2px, 2px);
-  box-shadow: var(--shadow-gum-sm);
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 button:active {
-  transform: translate(4px, 4px);
-  box-shadow: 0 0 0 transparent;
+  transform: translateY(0);
+  box-shadow: var(--shadow);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .hint {
@@ -240,15 +364,31 @@ button:active {
   color: var(--muted);
   margin: 0;
   word-break: break-all;
+  font-family: "Reddit Mono", monospace;
+  padding: 8px 0;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .hero {
-    padding-top: 34px;
+    padding: 48px 0 32px;
+  }
+
+  .kicker {
+    font-size: 10px;
+    padding: 3px 10px;
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 40px);
   }
 
   .card {
-    padding: 14px;
+    padding: 20px;
+  }
+
+  .card h2 {
+    font-size: 18px;
+    margin-bottom: 14px;
   }
 
   .playground-controls {
@@ -257,5 +397,123 @@ button:active {
 
   button {
     width: 100%;
+  }
+
+  table {
+    font-size: 13px;
+  }
+
+  thead th {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+
+  tbody td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  pre {
+    padding: 12px;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 40px 0 24px;
+  }
+
+  h1 {
+    font-size: clamp(24px, 4vw, 32px);
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .endpoint {
+    padding: 10px 12px;
+    gap: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .endpoint code {
+    font-size: 12px;
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 6px;
+  }
+
+  .card h2 {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .card h2::before {
+    left: -8px;
+    height: 20px;
+  }
+
+  .content {
+    gap: 14px;
+    padding: 32px 0 48px;
+  }
+
+  label {
+    font-size: 11px;
+  }
+
+  input {
+    height: 40px;
+    font-size: 13px;
+  }
+
+  button {
+    height: 40px;
+    padding: 0 16px;
+    font-size: 13px;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  thead th {
+    padding: 8px 6px;
+    font-size: 10px;
+  }
+
+  tbody td {
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+
+  .hint {
+    font-size: 11px;
+  }
+
+  pre {
+    padding: 10px;
+    font-size: 10px;
+    line-height: 1.4;
+    border-radius: 6px;
+  }
+
+  .playground-controls {
+    gap: 10px;
+  }
+
+  .card ul, .card ol {
+    padding-left: 20px;
+  }
+
+  .card p {
+    font-size: 14px;
+    margin: 10px 0;
   }
 }
