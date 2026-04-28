@@ -84,3 +84,29 @@ async function fetchPreview(event) {
 }
 
 form.addEventListener("submit", fetchPreview);
+
+// ── Dark mode toggle ──
+const toggle = document.getElementById('theme-toggle');
+const moonIcon = toggle.querySelector('.moon-icon');
+const sunIcon = toggle.querySelector('.sun-icon');
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  if (theme === 'dark') {
+    moonIcon.style.display = 'none';
+    sunIcon.style.display = 'block';
+  } else {
+    moonIcon.style.display = 'block';
+    sunIcon.style.display = 'none';
+  }
+}
+
+const saved = localStorage.getItem('theme') || 'light';
+applyTheme(saved);
+
+toggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', next);
+  applyTheme(next);
+});
