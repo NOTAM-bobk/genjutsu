@@ -227,7 +227,7 @@ const SettingsPage = () => {
         }
     };
 
-    const handlePresetChange = (nextPreset: "default" | "minecraft" | "win95" | "papyrus") => {
+    const handlePresetChange = (nextPreset: "default" | "minecraft" | "win95" | "papyrus" | "hackernews" | "winxp" | "vicecity") => {
         setPreset(nextPreset);
         setAnimateColor(false);
 
@@ -259,6 +259,30 @@ const SettingsPage = () => {
         if (nextPreset === "papyrus") {
             setColor("custom");
             setCustomColor("#7c2d12");
+            setRadius("none");
+            setGrid("none");
+            return;
+        }
+
+        if (nextPreset === "hackernews") {
+            setColor("custom");
+            setCustomColor("#ff6600");
+            setRadius("none");
+            setGrid("none");
+            return;
+        }
+
+        if (nextPreset === "winxp") {
+            setColor("custom");
+            setCustomColor("#0055e5");
+            setRadius("md");
+            setGrid("none");
+            return;
+        }
+
+        if (nextPreset === "vicecity") {
+            setColor("custom");
+            setCustomColor("#ff00ff");
             setRadius("none");
             setGrid("none");
         }
@@ -755,6 +779,27 @@ const SettingsPage = () => {
                                                     >
                                                         <p className="font-bold text-sm">Papyrus/Ink</p>
                                                         <p className={`text-xs mt-1 ${preset === "papyrus" ? "text-primary-foreground/80" : "text-muted-foreground"}`}>Old manuscript with parchment texture</p>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handlePresetChange("hackernews")}
+                                                        className={`gum-btn text-left px-4 py-3 transition-all ${preset === "hackernews" ? "bg-primary text-primary-foreground gum-shadow-sm" : "bg-background hover:bg-secondary text-foreground"}`}
+                                                    >
+                                                        <p className="font-bold text-sm">Hacker News</p>
+                                                        <p className={`text-xs mt-1 ${preset === "hackernews" ? "text-primary-foreground/80" : "text-muted-foreground"}`}>Classic orange accents on stark backgrounds</p>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handlePresetChange("winxp")}
+                                                        className={`gum-btn text-left px-4 py-3 transition-all ${preset === "winxp" ? "bg-primary text-primary-foreground gum-shadow-sm" : "bg-background hover:bg-secondary text-foreground"}`}
+                                                    >
+                                                        <p className="font-bold text-sm">Windows XP</p>
+                                                        <p className={`text-xs mt-1 ${preset === "winxp" ? "text-primary-foreground/80" : "text-muted-foreground"}`}>The legendary Luna aesthetic with blue gradients</p>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handlePresetChange("vicecity")}
+                                                        className={`gum-btn text-left px-4 py-3 transition-all ${preset === "vicecity" ? "bg-primary text-primary-foreground gum-shadow-sm" : "bg-background hover:bg-secondary text-foreground"}`}
+                                                    >
+                                                        <p className="font-bold text-sm">Vice City</p>
+                                                        <p className={`text-xs mt-1 ${preset === "vicecity" ? "text-primary-foreground/80" : "text-muted-foreground"}`}>80s Miami neon with hot pink and cyan</p>
                                                     </button>
                                                 </div>
                                             </div>

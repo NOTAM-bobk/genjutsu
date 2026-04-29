@@ -419,7 +419,7 @@ const PostCard = memo(({ post, onLike, onBookmark, onDelete, onPostEdited }: Pos
                   <MoreHorizontal size={16} className="text-muted-foreground" />
                 </button>
                 {showMenu && (
-                  <div className="absolute right-0 top-8 gum-card p-1 z-10 min-w-[120px]">
+                  <div className="absolute right-0 top-8 gum-card p-1 z-50 min-w-[120px] shadow-xl animate-in fade-in slide-in-from-top-2">
                     <button
                       onClick={() => {
                         setIsEditDialogOpen(true);

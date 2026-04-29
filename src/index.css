@@ -788,3 +788,265 @@ html[data-theme-preset="papyrus"] .text-primary {
   color: hsl(var(--primary)) !important;
   font-weight: 700 !important;
 }
+
+/* --- Hacker News Preset --- */
+html[data-theme-preset="hackernews"] {
+}
+
+html.dark[data-theme-preset="hackernews"] {
+}
+
+:root[data-theme-preset="hackernews"] {
+  --background: 60 23% 95%; /* #f6f6ef */
+  --foreground: 0 0% 0%; /* #000000 */
+  --primary: 24 100% 50%; /* #ff6600 */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 60 23% 90%; 
+  --secondary-foreground: 0 0% 0%;
+  --muted: 60 23% 90%;
+  --muted-foreground: 0 0% 51%; /* #828282 */
+  --border: 24 100% 50%;
+  --card: 60 23% 95%;
+  --card-foreground: 0 0% 0%;
+  --accent: 24 100% 50%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 24 100% 50%;
+}
+
+:root.dark[data-theme-preset="hackernews"] {
+  --background: 0 0% 10%;
+  --foreground: 0 0% 85%;
+  --primary: 24 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 15%;
+  --secondary-foreground: 0 0% 85%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 51%;
+  --border: 24 100% 50%;
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 85%;
+  --accent: 24 100% 50%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 24 100% 50%;
+}
+
+/* Disable grid backgrounds */
+html[data-theme-preset="hackernews"] body::before {
+  display: none !important;
+}
+
+/* Remove 3D shadows and rounded corners */
+html[data-theme-preset="hackernews"] .gum-card {
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  border: 1px solid hsl(var(--border) / 0.2) !important;
+}
+
+html[data-theme-preset="hackernews"] .gum-card::after {
+  display: none !important;
+}
+
+html[data-theme-preset="hackernews"] .gum-btn {
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  border: 1px solid hsl(var(--border) / 0.3) !important;
+}
+
+html[data-theme-preset="hackernews"] .gum-btn::after {
+  display: none !important;
+}
+
+html[data-theme-preset="hackernews"] .gum-btn:active {
+  transform: none !important;
+}
+
+html[data-theme-preset="hackernews"] input,
+html[data-theme-preset="hackernews"] textarea {
+  border-radius: 0 !important;
+  border: 1px solid hsl(var(--border) / 0.3) !important;
+}
+
+/* --- Windows XP (Luna) Preset --- */
+:root[data-theme-preset="winxp"] {
+  --background: 210 100% 98%; /* Light blueish white */
+  --foreground: 220 50% 10%;
+  --primary: 218 81% 45%; /* Classic Luna Blue */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 140 46% 44%; /* Start Button Green */
+  --secondary-foreground: 0 0% 100%;
+  --muted: 210 50% 92%;
+  --muted-foreground: 210 20% 40%;
+  --border: 218 81% 45%;
+  --ring: 218 81% 45%;
+  --radius: 8px;
+  --card: 0 0% 100%;
+  --card-foreground: 220 50% 10%;
+  --input: 210 50% 98%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 50% 10%;
+}
+
+:root.dark[data-theme-preset="winxp"] {
+  --background: 220 40% 8%; /* Deep night blue */
+  --foreground: 210 100% 98%;
+  --primary: 218 81% 55%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 140 46% 50%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 220 40% 15%;
+  --muted-foreground: 210 20% 60%;
+  --border: 218 81% 55%;
+  --ring: 218 81% 55%;
+  --card: 220 40% 12%;
+  --card-foreground: 210 100% 98%;
+  --input: 220 40% 15%;
+}
+
+html[data-theme-preset="winxp"] body::before {
+  background: linear-gradient(to bottom, #74b9ff, #81ecec) !important; /* Sky-like gradient */
+  opacity: 0.1 !important;
+}
+
+html[data-theme-preset="winxp"] .gum-card {
+  border-radius: 6px !important;
+  border: 2px solid #0055e5 !important;
+  border-top-width: 4px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  position: relative !important;
+  background-color: hsl(var(--card)) !important;
+}
+
+/* Only larger container cards get the full "XP Window" title bar effect */
+html[data-theme-preset="winxp"] .gum-card:not(button):not(.p-1):not(.p-2) {
+  border-top-width: 26px !important;
+  border-radius: 8px 8px 4px 4px !important;
+}
+
+/* Add the title text only to those larger windows */
+html[data-theme-preset="winxp"] .gum-card:not(button):not(.p-1):not(.p-2)::before {
+  content: "genjutsu.exe" !important;
+  position: absolute !important;
+  top: -24px !important;
+  left: 10px !important;
+  color: white !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.5) !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+html[data-theme-preset="winxp"] .gum-btn {
+  background: linear-gradient(to bottom, #ffffff, #ebebeb, #dcdcdc) !important;
+  border: 1px solid #003bb3 !important;
+  border-radius: 3px !important;
+  color: #333 !important;
+  font-weight: 600 !important;
+  box-shadow: inset 0 1px 0 white, 0 1px 2px rgba(0,0,0,0.1) !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+html[data-theme-preset="winxp"] .gum-btn:hover {
+  background: linear-gradient(to bottom, #e5f1fb, #a8d5ff) !important;
+  border-color: #005499 !important;
+}
+
+html[data-theme-preset="winxp"] .gum-btn.bg-primary {
+  background: linear-gradient(to bottom, #5cb85c, #449d44) !important; /* Green Start button style */
+  border-color: #398439 !important;
+  color: white !important;
+}
+
+html[data-theme-preset="winxp"] input,
+html[data-theme-preset="winxp"] textarea {
+  border-radius: 2px !important;
+  border: 1px solid #7a9eb5 !important;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1) !important;
+}
+
+/* --- Vice City (Synthwave) Preset --- */
+:root[data-theme-preset="vicecity"] {
+  --background: 300 20% 98%; /* Subtle off-white with pink hint */
+  --foreground: 300 50% 10%;
+  --primary: 320 100% 50%; /* Hot Pink */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 190 100% 45%; /* Deep Cyan */
+  --secondary-foreground: 0 0% 100%;
+  --muted: 300 20% 92%;
+  --muted-foreground: 300 10% 40%;
+  --border: 320 100% 50%;
+  --ring: 320 100% 50%;
+  --card: 0 0% 100%;
+  --card-foreground: 300 50% 10%;
+  --radius: 0px;
+  --btn-shadow: #2d004d;
+}
+
+:root.dark[data-theme-preset="vicecity"] {
+  --background: 280 40% 6%; /* Deep Midnight */
+  --foreground: 300 100% 95%;
+  --primary: 320 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 190 100% 50%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 280 40% 12%;
+  --muted-foreground: 300 20% 60%;
+  --border: 320 100% 50%;
+  --ring: 320 100% 50%;
+  --card: 280 40% 10%;
+  --card-foreground: 300 100% 95%;
+  --btn-shadow: #000000;
+}
+
+html[data-theme-preset="vicecity"] body::before {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--secondary) / 0.1)) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme-preset="vicecity"] .gum-card {
+  border-radius: 2px !important;
+  border: 1px solid hsl(var(--primary) / 0.4) !important;
+  box-shadow: 4px 4px 0px hsl(var(--secondary) / 0.1) !important;
+  background-color: hsl(var(--card)) !important;
+}
+
+html[data-theme-preset="vicecity"] .gum-btn {
+  background: linear-gradient(45deg, #ff00ff, #00ffff) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 0 !important;
+  text-transform: uppercase !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px !important;
+  box-shadow: 4px 4px 0px var(--btn-shadow) !important;
+  transition: all 0.1s ease !important;
+}
+
+html[data-theme-preset="vicecity"] .gum-btn:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0px var(--btn-shadow) !important;
+}
+
+html[data-theme-preset="vicecity"] .gum-btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 0px 0px 0px var(--btn-shadow) !important;
+}
+
+html[data-theme-preset="vicecity"] input,
+html[data-theme-preset="vicecity"] textarea {
+  border-radius: 0 !important;
+  border: 1px solid hsl(var(--secondary) / 0.5) !important;
+  background-color: hsl(var(--background)) !important;
+  color: inherit !important;
+  padding: 10px !important;
+}
+
+html[data-theme-preset="vicecity"] .text-primary {
+  color: hsl(var(--primary)) !important;
+  text-shadow: 0 0 2px hsl(var(--primary) / 0.3) !important;
+}
+
+html[data-theme-preset="vicecity"] .bg-primary {
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary))) !important;
+}
