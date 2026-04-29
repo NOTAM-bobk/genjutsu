@@ -10,7 +10,7 @@ import { Helmet } from "react-helmet-async";
 import { toast } from "sonner";
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "@/components/theme-provider";
+import { useTheme, type ThemePreset } from "@/components/theme-provider";
 import TwemojiText from "@/components/TwemojiText";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { hashPin, verifyPin, APP_LOCK_HASH_KEY, APP_LOCK_SESSION_KEY, APP_LOCK_Q1_KEY, APP_LOCK_Q2_KEY, APP_LOCK_A1_HASH_KEY, APP_LOCK_A2_HASH_KEY, PREDEFINED_QUESTIONS, formatAnswer } from "@/lib/pin";
@@ -227,7 +227,7 @@ const SettingsPage = () => {
         }
     };
 
-    const handlePresetChange = (nextPreset: "default" | "minecraft" | "win95" | "papyrus" | "hackernews" | "winxp" | "vicecity") => {
+    const handlePresetChange = (nextPreset: ThemePreset) => {
         setPreset(nextPreset);
         setAnimateColor(false);
 
@@ -285,6 +285,31 @@ const SettingsPage = () => {
             setCustomColor("#ff00ff");
             setRadius("none");
             setGrid("none");
+            return;
+        }
+
+        if (nextPreset === "gameboy") {
+            setColor("custom");
+            setCustomColor("#306230");
+            setRadius("none");
+            setGrid("none");
+            return;
+        }
+
+        if (nextPreset === "nord") {
+            setColor("custom");
+            setCustomColor("#88c0d0");
+            setRadius("md");
+            setGrid("none");
+            return;
+        }
+
+        if (nextPreset === "terminal") {
+            setColor("custom");
+            setCustomColor("#00ff41");
+            setRadius("none");
+            setGrid("scanlines");
+            setFont("Reddit Mono");
         }
     };
 
@@ -800,6 +825,27 @@ const SettingsPage = () => {
                                                     >
                                                         <p className="font-bold text-sm">Vice City</p>
                                                         <p className={`text-xs mt-1 ${preset === "vicecity" ? "text-primary-foreground/80" : "text-muted-foreground"}`}>80s Miami neon with hot pink and cyan</p>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handlePresetChange("gameboy")}
+                                                        className={`gum-btn text-left px-4 py-3 transition-all ${preset === "gameboy" ? "bg-primary text-primary-foreground gum-shadow-sm" : "bg-background hover:bg-secondary text-foreground"}`}
+                                                    >
+                                                        <p className="font-bold text-sm">GameBoy</p>
+                                                        <p className={`text-xs mt-1 ${preset === "gameboy" ? "text-primary-foreground/80" : "text-muted-foreground"}`}>Retro 4-shade green dot matrix aesthetic</p>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handlePresetChange("nord")}
+                                                        className={`gum-btn text-left px-4 py-3 transition-all ${preset === "nord" ? "bg-primary text-primary-foreground gum-shadow-sm" : "bg-background hover:bg-secondary text-foreground"}`}
+                                                    >
+                                                        <p className="font-bold text-sm">Nord</p>
+                                                        <p className={`text-xs mt-1 ${preset === "nord" ? "text-primary-foreground/80" : "text-muted-foreground"}`}>Arctic blue and slate grey for calm focus</p>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handlePresetChange("terminal")}
+                                                        className={`gum-btn text-left px-4 py-3 transition-all ${preset === "terminal" ? "bg-primary text-primary-foreground gum-shadow-sm" : "bg-background hover:bg-secondary text-foreground"}`}
+                                                    >
+                                                        <p className="font-bold text-sm">Terminal</p>
+                                                        <p className={`text-xs mt-1 ${preset === "terminal" ? "text-primary-foreground/80" : "text-muted-foreground"}`}>Neon green matrix aesthetic with scanlines</p>
                                                     </button>
                                                 </div>
                                             </div>

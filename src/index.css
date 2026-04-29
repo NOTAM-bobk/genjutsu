@@ -1050,3 +1050,288 @@ html[data-theme-preset="vicecity"] .text-primary {
 html[data-theme-preset="vicecity"] .bg-primary {
   background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary))) !important;
 }
+
+/* --- GameBoy (Dot Matrix) Preset --- */
+:root[data-theme-preset="gameboy"] {
+  --background: 71 85% 40%; /* #9bbc0f */
+  --foreground: 120 58% 14%; /* #0f380f */
+  --primary: 120 33% 29%; /* #306230 */
+  --primary-foreground: 71 85% 40%;
+  --secondary: 71 85% 36%; /* #8bac0f */
+  --secondary-foreground: 120 58% 14%;
+  --muted: 71 85% 36%;
+  --muted-foreground: 120 58% 20%;
+  --border: 120 58% 14%;
+  --ring: 120 58% 14%;
+  --card: 71 85% 40%;
+  --card-foreground: 120 58% 14%;
+  --radius: 0px;
+}
+
+/* No dark mode for GameBoy (it's a fixed-color LCD) */
+:root.dark[data-theme-preset="gameboy"] {
+  --background: 71 85% 40%;
+  --foreground: 120 58% 14%;
+  --primary: 120 33% 29%;
+  --primary-foreground: 71 85% 40%;
+  --secondary: 71 85% 36%;
+  --secondary-foreground: 120 58% 14%;
+  --border: 120 58% 14%;
+  --ring: 120 58% 14%;
+  --card: 71 85% 40%;
+  --card-foreground: 120 58% 14%;
+}
+
+html[data-theme-preset="gameboy"] body::before {
+  background-image: 
+    linear-gradient(rgba(15, 56, 15, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 56, 15, 0.05) 1px, transparent 1px) !important;
+  background-size: 3px 3px !important;
+  opacity: 1 !important;
+  background-color: transparent !important;
+}
+
+html[data-theme-preset="gameboy"] .gum-card {
+  border-radius: 0 !important;
+  border: 3px solid #0f380f !important;
+  box-shadow: 6px 6px 0px #306230 !important;
+  background-color: #9bbc0f !important;
+}
+
+html[data-theme-preset="gameboy"] .gum-btn {
+  background-color: #8bac0f !important;
+  border: 3px solid #0f380f !important;
+  color: #0f380f !important;
+  border-radius: 0 !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  box-shadow: 4px 4px 0px #306230 !important;
+}
+
+html[data-theme-preset="gameboy"] .gum-btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px #306230 !important;
+}
+
+html[data-theme-preset="gameboy"] .gum-btn.bg-primary {
+  background-color: #306230 !important;
+  color: #9bbc0f !important;
+}
+
+html[data-theme-preset="gameboy"] input,
+html[data-theme-preset="gameboy"] textarea {
+  border-radius: 0 !important;
+  border: 2px solid #0f380f !important;
+  background-color: #8bac0f !important;
+  color: #0f380f !important;
+}
+
+html[data-theme-preset="gameboy"] .text-primary {
+  color: #0f380f !important;
+  font-weight: 900 !important;
+}
+
+html[data-theme-preset="gameboy"] ::selection {
+  background-color: #0f380f !important;
+  color: #9bbc0f !important;
+}
+
+/* --- Nord (Arctic) Preset --- */
+:root[data-theme-preset="nord"] {
+  --background: 210 20% 97%; 
+  --foreground: 220 16% 22%;
+  --primary: 193 43% 67%; /* #88c0d0 Frost */
+  --primary-foreground: 220 16% 22%;
+  --secondary: 210 34% 63%; /* #81a1c1 Frost 2 */
+  --secondary-foreground: 220 16% 22%;
+  --muted: 210 20% 94%;
+  --muted-foreground: 220 10% 40%;
+  --border: 214 20% 89%;
+  --ring: 193 43% 67%;
+  --card: 214 20% 92%;
+  --card-foreground: 220 16% 22%;
+  --radius: 8px;
+}
+
+:root.dark[data-theme-preset="nord"] {
+  --background: 220 16% 22%; /* #2e3440 Polar Night */
+  --foreground: 218 27% 88%; /* #d8dee9 Snow Storm */
+  --primary: 193 43% 67%;
+  --primary-foreground: 220 16% 22%;
+  --secondary: 210 34% 63%;
+  --secondary-foreground: 218 27% 88%;
+  --muted: 222 16% 28%;
+  --muted-foreground: 218 10% 60%;
+  --border: 220 16% 32%;
+  --ring: 193 43% 67%;
+  --card: 222 16% 28%;
+  --card-foreground: 218 27% 88%;
+}
+
+html[data-theme-preset="nord"] body::before {
+  background: radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.05) 0%, transparent 70%) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme-preset="nord"] .gum-card {
+  border: 1px solid hsl(var(--border)) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+  background-color: hsl(var(--card)) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+html[data-theme-preset="nord"] .gum-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+
+html[data-theme-preset="nord"] .gum-btn {
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: 1px solid transparent !important;
+}
+
+html[data-theme-preset="nord"] .gum-btn:hover {
+  transform: translateY(-1px) !important;
+  filter: brightness(1.05) !important;
+}
+
+html[data-theme-preset="nord"] .gum-btn.bg-primary {
+  background-color: hsl(var(--primary)) !important;
+  color: #2e3440 !important;
+}
+
+html[data-theme-preset="nord"] input,
+html[data-theme-preset="nord"] textarea {
+  background-color: hsl(var(--background)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  transition: border-color 0.2s ease !important;
+}
+
+html[data-theme-preset="nord"] input:focus,
+html[data-theme-preset="nord"] textarea:focus {
+  border-color: hsl(var(--primary)) !important;
+}
+
+html[data-theme-preset="nord"] .text-primary {
+  color: #88c0d0 !important;
+}
+
+html[data-theme-preset="nord"] .bg-primary {
+  background-color: #88c0d0 !important;
+}
+
+html[data-theme-preset="nord"] ::selection {
+  background-color: #88c0d0 !important;
+  color: #2e3440 !important;
+}
+
+/* --- Terminal (The Matrix) Preset --- */
+:root[data-theme-preset="terminal"] {
+  --background: 0 0% 0%; 
+  --foreground: 135 100% 50%; /* #00ff41 Matrix Green */
+  --primary: 135 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 120 100% 12%; /* #003b00 */
+  --secondary-foreground: 135 100% 50%;
+  --muted: 120 100% 5%;
+  --muted-foreground: 135 100% 40%;
+  --border: 135 100% 50%;
+  --ring: 135 100% 50%;
+  --card: 0 0% 0%;
+  --card-foreground: 135 100% 50%;
+  --radius: 0px;
+}
+
+/* Forced dark for Terminal */
+:root.dark[data-theme-preset="terminal"],
+:root[data-theme-preset="terminal"] {
+  --background: 0 0% 0%; 
+  --foreground: 135 100% 50%;
+  --primary: 135 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 120 100% 12%;
+  --secondary-foreground: 135 100% 50%;
+  --card: 0 0% 0%;
+  --card-foreground: 135 100% 50%;
+}
+
+@keyframes terminal-flicker {
+  0% { opacity: 0.99; }
+  50% { opacity: 1; }
+  100% { opacity: 0.99; }
+}
+
+html[data-theme-preset="terminal"] body::before {
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)) !important;
+  background-size: 100% 4px, 3px 100% !important;
+  opacity: 0.1 !important;
+  pointer-events: none !important;
+  z-index: 40 !important; /* Below modals (z-50) but above cards */
+  position: fixed !important;
+  inset: 0 !important;
+}
+
+html[data-theme-preset="terminal"] .gum-card {
+  border: 1px solid #00ff41 !important;
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.15) !important;
+  border-radius: 0 !important;
+  background-color: #000 !important;
+  position: relative !important;
+}
+
+html[data-theme-preset="terminal"] .gum-card::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0; left: 0; right: 0; bottom: 0 !important;
+  background: linear-gradient(transparent 50%, rgba(0, 255, 65, 0.02) 50%) !important;
+  background-size: 100% 4px !important;
+  pointer-events: none !important;
+}
+
+html[data-theme-preset="terminal"] .gum-btn {
+  background-color: transparent !important;
+  border: 1px solid #00ff41 !important;
+  color: #00ff41 !important;
+  border-radius: 0 !important;
+  text-transform: uppercase !important;
+  font-family: monospace !important;
+  text-shadow: 0 0 5px #00ff41 !important;
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.2) !important;
+  animation: terminal-flicker 0.1s infinite alternate !important;
+}
+
+html[data-theme-preset="terminal"] .gum-btn:hover {
+  background-color: rgba(0, 255, 65, 0.1) !important;
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.4) !important;
+}
+
+html[data-theme-preset="terminal"] .gum-btn.bg-primary {
+  background-color: #00ff41 !important;
+  color: #000 !important;
+  text-shadow: none !important;
+}
+
+html[data-theme-preset="terminal"] input,
+html[data-theme-preset="terminal"] textarea {
+  background-color: #000 !important;
+  border: 1px solid #00ff41 !important;
+  color: #00ff41 !important;
+  font-family: monospace !important;
+  border-radius: 0 !important;
+}
+
+html[data-theme-preset="terminal"] .text-primary {
+  color: #00ff41 !important;
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.6) !important;
+}
+
+html[data-theme-preset="terminal"] .bg-primary {
+  background-color: #00ff41 !important;
+}
+
+html[data-theme-preset="terminal"] ::selection {
+  background-color: #00ff41 !important;
+  color: #000 !important;
+}
